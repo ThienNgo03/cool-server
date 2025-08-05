@@ -37,7 +37,7 @@ public class Test
         Assert.NotNull(result.Data);
         Assert.NotNull(result.Data.Items);
         Assert.True(result.Data.Items.Count > 0, "Expected at least one exercise in result.");
-
+        Assert.True(result.Data.Items.Any(e => e.Name == "Push Up"), "Expected to find 'Push Up' exercise in the result.");
     }
 
     #endregion

@@ -3,7 +3,7 @@
 namespace Journal.Exercises
 {
     [ApiController]
-    [Route("Exercises")]
+    [Route("api/exercises")]
     public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;

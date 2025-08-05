@@ -24,6 +24,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	 </PackageReference>
 	  <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="4.5.1" />
+	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.18" />
   </ItemGroup>
 
 </Project>
