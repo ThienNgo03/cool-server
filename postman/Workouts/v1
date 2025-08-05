@@ -1,0 +1,123 @@
+{
+	"info": {
+		"_postman_id": "540ab8b1-09cb-49ad-b840-d5366e776e64",
+		"name": "Workouts",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-540ab8b1-09cb-49ad-b840-d5366e776e64?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": "GetWorkouts",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "https://localhost:7011/Workouts",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"Workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostWorkout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"Push Up\",\r\n    \"exerciseId\": \"abcde\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/Workouts",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"Workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PutWorkout",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"9858ae46-e924-4810-e7c4-08ddc6e978d6\",\r\n    \"userId\": \"Pull Up\",\r\n    \"exerciseId\": \"abcde\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/Workouts",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"Workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteWorkout",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "https://localhost:7011/Workouts",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"Workouts"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "eb9eaf49-61e1-4005-dddb-08ddc6e94421",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

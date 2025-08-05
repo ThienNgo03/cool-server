@@ -1,0 +1,123 @@
+{
+	"info": {
+		"_postman_id": "fe746c85-63b6-4120-9acd-896177793e34",
+		"name": "WorkoutLogs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-fe746c85-63b6-4120-9acd-896177793e34?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": "GetWorkoutLogs",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "https://localhost:7011/WorkoutLogs",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"WorkoutLogs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostWorkoutLog",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"workoutId\": \"12345\",\r\n  \"rep\": 10,\r\n  \"holdingTime\": 45,\r\n  \"set\": 3,\r\n  \"workoutDate\": \"2025-07-26\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/WorkoutLogs",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"WorkoutLogs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PutWorkoutLog",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"9858ae46-e924-4810-e7c4-08ddc6e978d6\",\r\n  \"WorkoutId\": \"12345\",\r\n  \"Rep\": 10,\r\n  \"HoldingTime\": 45,\r\n  \"Set\": 3,\r\n  \"WorkoutDate\": \"2025-07-26\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/WorkoutLogs",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"WorkoutLogs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteWorkoutLog",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "https://localhost:7011/WorkoutLogs",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"WorkoutLogs"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "eb9eaf49-61e1-4005-dddb-08ddc6e94421",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

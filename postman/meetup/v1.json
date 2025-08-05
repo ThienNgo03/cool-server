@@ -1,0 +1,119 @@
+{
+	"info": {
+		"_postman_id": "a8afe7d9-39dc-4e32-bd6f-c27d64157e35",
+		"name": "Journal",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29660279"
+	},
+	"item": [
+		{
+			"name": "MeetUp",
+			"item": [
+				{
+					"name": "get meet up",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:44393/MeetUps",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "44393",
+							"path": [
+								"MeetUps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create meet up",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ParticipantIds\": \"abc\",\r\n    \"Title\": \"Pushup\",\r\n    \"DateTime\": \"2025-07-30\",\r\n    \"Location\": \"S10.02\",\r\n    \"CoverImage\": \"image.png\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:44393/MeetUps",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "44393",
+							"path": [
+								"MeetUps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update meet up",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"2a794553-56d3-40b4-9c56-f279609df5dc\",\r\n    \"ParticipantIds\": \"xyz\",\r\n    \"Title\": \"Pullup\",\r\n    \"DateTime\": \"2025-07-28\",\r\n    \"Location\": \"S9.02\",\r\n    \"CoverImage\": \"image1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:44393/MeetUps",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "44393",
+							"path": [
+								"MeetUps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete meet up",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ParticipantIds\": \"\",\r\n    \"Title\": \"\",\r\n    \"DateTime\": \"\",\r\n    \"Location\": \"\",\r\n    \"CoverImage\": \"\"\r\n}"
+						},
+						"url": {
+							"raw": "https://localhost:44393/MeetUps?id=2a794553-56d3-40b4-9c56-f279609df5dc",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "44393",
+							"path": [
+								"MeetUps"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2a794553-56d3-40b4-9c56-f279609df5dc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

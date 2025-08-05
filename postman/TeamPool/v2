@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "e4b157e7-6930-47de-8943-2a092676180a",
+		"name": "TeamPool",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45820846",
+		"_collection_link": "https://khoa-1795379.postman.co/workspace/Khoa's-Workspace~d4375f99-864e-4da0-8918-d551f8b836e1/collection/45820846-e4b157e7-6930-47de-8943-2a092676180a?action=share&source=collection_link&creator=45820846"
+	},
+	"item": [
+		{
+			"name": "TeamPool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/TeamPools",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"TeamPools"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TeamPool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"position\": \"1\",\r\n    \"participantId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"competitionId\": \"c061777e-04d1-4a6c-8b58-b725a65147a8\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/TeamPools",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"TeamPools"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TeamPool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\":\"\",\r\n    \"position\": \"1\",\r\n    \"participantId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"competitionId\": \"c061777e-04d1-4a6c-8b58-b725a65147a8\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/TeamPools",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"TeamPools"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TeamPool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/TeamPools",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"TeamPools"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
