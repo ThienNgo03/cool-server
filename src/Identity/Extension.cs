@@ -3,13 +3,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 
-namespace Journal.Middleware.JWT;
+namespace Journal.Identity;
 
 public static class Extension
 {
-    public static IServiceCollection AddJwtMiddleware(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<Implementation.V1>();
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -26,7 +25,7 @@ public static class Extension
         ValidIssuer = configuration["JWT:Issuer"],
         ValidAudience = configuration["JWT:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(configuration["JWT:Key"])),
+            Encoding.UTF8.GetBytes(configuration["JWT:Key"]!)),
         RoleClaimType = ClaimTypes.Role
     };
 });
