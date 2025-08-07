@@ -1,0 +1,74 @@
+{
+	"info": {
+		"_postman_id": "0861a127-93dd-427b-9d53-09018a47c794",
+		"name": "Identity",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45820846",
+		"_collection_link": "https://khoa-1795379.postman.co/workspace/Khoa's-Workspace~d4375f99-864e-4da0-8918-d551f8b836e1/collection/45820846-0861a127-93dd-427b-9d53-09018a47c794?action=share&source=collection_link&creator=45820846"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"accountName\": \"NewName\",\r\n    \"accountEmail\": \"NewEmail@gmail.com\",\r\n    \"password\": \"NewPassword@1\",\r\n    \"confirmPassword\": \"NewPassword@1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/identity/register",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"identity",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signin",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"accountEmail\": \"NewEmail@gmail.com\",\r\n    \"password\": \"NewPassword@1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/identity/login",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"identity",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
