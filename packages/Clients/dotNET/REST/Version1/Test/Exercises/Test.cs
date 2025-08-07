@@ -31,6 +31,7 @@ public class Test
         {
             PageIndex = 0,
             PageSize = 10,
+            Name = "Pull up"
         });
 
         Assert.NotNull(result);

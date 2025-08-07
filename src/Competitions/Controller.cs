@@ -1,4 +1,5 @@
 ﻿using Journal.Competitions.Post;
+using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Journal.Competitions
@@ -66,9 +67,16 @@ namespace Journal.Competitions
                 query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
             }
 
-            var queryList = await query.AsNoTracking().ToListAsync();
+            var result = await query.AsNoTracking().ToListAsync();
 
-            return Ok(query);
+            var paginationResults = new Builder<Databases.Journal.Tables.Competition.Table>()
+                .WithIndex(parameters.PageIndex)
+                .WithSize(parameters.PageSize)
+                .WithTotal(result.Count)
+                .WithItems(result)
+                .Build();
+
+            return Ok(paginationResults);
         }
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Payload competition)

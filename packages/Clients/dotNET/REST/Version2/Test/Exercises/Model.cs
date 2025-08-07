@@ -1,6 +1,6 @@
-﻿namespace Journal.Databases.Journal.Tables.Excercise;
+﻿namespace Test.Exercises;
 
-public class Table
+public class Model
 {
     public Guid Id { get; set; }
 
@@ -11,5 +11,4 @@ public class Table
     public DateTime CreatedDate { get; set; }
 
     public DateTime LastUpdated { get; set; }
-
 }
