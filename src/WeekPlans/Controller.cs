@@ -1,7 +1,7 @@
 ﻿namespace Journal.WeekPlans
 {
     [ApiController]
-    [Route("WeekPlans")]
+    [Route("api/weekPlans")]
     public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;

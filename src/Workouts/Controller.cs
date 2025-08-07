@@ -1,7 +1,7 @@
 ﻿namespace Journal.Workouts
 {
     [ApiController]
-    [Route("Workouts")]
+    [Route("api/workouts")]
     public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;

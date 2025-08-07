@@ -1,7 +1,7 @@
 ﻿namespace Journal.Gadgets;
 
 [ApiController]
-[Route("Gadgets")]
+[Route("api/gadgets")]
 
 public class Controller:ControllerBase
 {

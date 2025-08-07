@@ -1,7 +1,7 @@
 ﻿namespace Journal.Users;
 
 [ApiController]
-[Route("Users")]
+[Route("api/users")]
 public class Controller : ControllerBase
 {
     private readonly IMessageBus _messageBus;

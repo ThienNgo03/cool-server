@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Journal.Competitions
 {
-    [Route("api/Competitions")]
+    [Route("api/competitions")]
     [ApiController]
     public class Controller : ControllerBase
     {

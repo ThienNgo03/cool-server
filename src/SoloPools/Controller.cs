@@ -1,6 +1,6 @@
 ﻿namespace Journal.SoloPools;
 
-[Route("api/SoloPools")]
+[Route("api/soloPools")]
 [ApiController]
 public class Controller : ControllerBase
 {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Journal.TeamPools;
 
-[Route("api/TeamPools")]
+[Route("api/teamPools")]
 [ApiController]
 public class Controller : ControllerBase
 {
