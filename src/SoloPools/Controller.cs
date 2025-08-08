@@ -1,4 +1,6 @@
-﻿namespace Journal.SoloPools;
+﻿using Journal.Models.PaginationResults;
+
+namespace Journal.SoloPools;
 
 [Route("api/soloPools")]
 [ApiController]
@@ -50,8 +52,15 @@ public class Controller : ControllerBase
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
         }
         var result = await query.AsNoTracking().ToListAsync();
-        
-        return Ok(result);
+
+        var paginationResults = new Builder<Databases.Journal.Tables.SoloPool.Table>()
+                .WithIndex(parameters.PageIndex)
+                .WithSize(parameters.PageSize)
+                .WithTotal(result.Count)
+                .WithItems(result)
+                .Build();
+
+        return Ok(paginationResults);
     }
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)

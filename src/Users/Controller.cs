@@ -1,4 +1,6 @@
-﻿namespace Journal.Users;
+﻿using Journal.Models.PaginationResults;
+
+namespace Journal.Users;
 
 [ApiController]
 [Route("api/users")]
@@ -39,7 +41,15 @@ public class Controller : ControllerBase
             query = query.Skip(parameters.pageIndex.Value * parameters.pageSize.Value).Take(parameters.pageSize.Value);
 
         var result = await query.AsNoTracking().ToListAsync();
-        return Ok(result);
+
+        var paginationResults = new Builder<Databases.Journal.Tables.User.Table>()
+                .WithIndex(parameters.pageIndex)
+                .WithSize(parameters.pageSize)
+                .WithTotal(result.Count)
+                .WithItems(result)
+                .Build();
+
+        return Ok(paginationResults);
 
     }
 

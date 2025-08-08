@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Journal.Models.PaginationResults;
+using Microsoft.Extensions.Hosting;
 using Wolverine.Persistence;
 
 namespace Journal.MeetUps
@@ -45,7 +46,15 @@ namespace Journal.MeetUps
                 query = query.Skip(parameters.PageSize.Value * parameters.PageIndex.Value).Take(parameters.PageSize.Value);
 
             var result = await query.AsNoTracking().ToListAsync();
-            return Ok(result);
+
+            var paginationResults = new Builder<Databases.Journal.Tables.MeetUp.Table>()
+                .WithIndex(parameters.PageIndex)
+                .WithSize(parameters.PageSize)
+                .WithTotal(result.Count)
+                .WithItems(result)
+                .Build();
+
+            return Ok(paginationResults);
         }
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)

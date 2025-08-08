@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Journal.TeamPools;
@@ -45,7 +46,15 @@ public class Controller : ControllerBase
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
         }
         var result = await query.AsNoTracking().ToListAsync();
-        return Ok(query);
+
+        var paginationResults = new Builder<Databases.Journal.Tables.TeamPool.Table>()
+                .WithIndex(parameters.PageIndex)
+                .WithSize(parameters.PageSize)
+                .WithTotal(result.Count)
+                .WithItems(result)
+                .Build();
+
+        return Ok(paginationResults);
     }
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
