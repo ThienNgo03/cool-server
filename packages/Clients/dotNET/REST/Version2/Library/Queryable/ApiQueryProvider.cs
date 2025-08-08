@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 
 namespace Library.Queryable;
 
+
 public class ApiQueryProvider : IQueryProvider
 {
     private readonly HttpClient _httpClient;
@@ -82,7 +83,7 @@ public class ApiQueryProvider : IQueryProvider
                 var apiResponse = JsonConvert.DeserializeObject(response, apiResponseType);
 
                 // Get the Data property
-                var dataProperty = apiResponseType.GetProperty("Data");
+                var dataProperty = apiResponseType.GetProperty("Items");
                 var data = dataProperty?.GetValue(apiResponse);
 
                 Console.WriteLine($"📦 Extracted data from ApiResponse: {data?.GetType().Name}");

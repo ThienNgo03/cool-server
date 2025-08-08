@@ -17,6 +17,7 @@ public class JournalContext : ApiContext
 
     public IApiSet<Exercises.Model> Exercises { get; private set; } = null!;
     public IApiSet<Competitions.Model> Competitions { get; private set; } = null!;
+    public IApiSet<Gadgets.Model> Gadgets { get; private set; } = null!;
 
     protected override void OnEndpointRegistering()
     {
@@ -26,6 +27,10 @@ public class JournalContext : ApiContext
 
         Competitions = RegisterEndpoint<Competitions.Model>()
             .WithEndpoint("/competitions")
+            .Build();
+
+        Gadgets = RegisterEndpoint<Gadgets.Model>()
+            .WithEndpoint("/gadgets")
             .Build();
     }
 }

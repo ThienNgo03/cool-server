@@ -5,7 +5,7 @@ using Wolverine.Persistence;
 namespace Journal.MeetUps
 {
     [ApiController]
-    [Route("api/meetUps")]
+    [Route("api/meet-ups")]
     public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;
