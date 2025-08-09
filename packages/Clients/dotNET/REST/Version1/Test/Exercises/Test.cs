@@ -67,14 +67,28 @@ public class Test
 
     public async Task POST()
     {
+        var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
+        // Ensure the database is clean before the test
+        string pushUp="Push Up ver 1";
+        dbContext.Exercises.RemoveRange(dbContext.Exercises.Where(x=>x.Name==pushUp));
+        await dbContext.SaveChangesAsync();
+        // Create a new exercise
         var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
         var payload = new Library.Exercises.Create.Payload
         {
-            Name = "Push Up",
+            Name = "Push Up ver 1",
             Description = "A basic exercise for upper body strength.",
         };
         await exercisesEndpoint.CreateAsync(payload);
          //Verify that the exercise was created
+         var createdExercise = await dbContext.Exercises.FirstOrDefaultAsync(e => e.Name == "Push Up ver 1");
+        Guid exerciseId = createdExercise?.Id ?? Guid.Empty;
+        Assert.NotNull(createdExercise);
+        Assert.Equal("Push Up ver 1", createdExercise.Name);
+        Assert.Equal("A basic exercise for upper body strength.", createdExercise.Description);
+        //Clean up the created exercise
+        dbContext.Exercises.Remove(createdExercise);
+        await dbContext.SaveChangesAsync();
     }
     #endregion
 }

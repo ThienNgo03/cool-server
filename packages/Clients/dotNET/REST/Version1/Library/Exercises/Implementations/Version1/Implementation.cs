@@ -123,9 +123,26 @@ public class Implementation : Interface
         }
     }
 
-    public Task CreateAsync(Payload payload)
+    public async Task CreateAsync(Payload payload)
     {
-        throw new NotImplementedException();
+        /*Stopwatch stopwatch = Stopwatch.StartNew();*/
+        try
+        {
+            var refitPayload = new Models.Refit.POST.Payload
+            {
+                Name = payload.Name,
+                Description = payload.Description
+            };
+
+            var response = await this.refitInterface.POST(refitPayload);
+
+            /*stopwatch.Stop();
+            var duration = stopwatch.ElapsedMilliseconds;*/
+        }
+        catch (ApiException ex)
+        {
+            throw new NotImplementedException();
+        }
     }
     #endregion
 }
