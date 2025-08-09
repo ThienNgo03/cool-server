@@ -8,7 +8,7 @@ using System.Text;
 namespace Journal.Identity;
 
 [ApiController]
-[Route("api/identity")]
+[Route("api/authentication")]
 public class Controller:ControllerBase
 {
     private readonly ILogger<Controller> _logger;
