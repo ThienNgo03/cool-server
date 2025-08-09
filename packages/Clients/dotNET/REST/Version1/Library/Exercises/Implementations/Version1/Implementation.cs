@@ -1,4 +1,5 @@
 ﻿using Library.Exercises.All;
+using Library.Exercises.Create;
 using Refit;
 using System.Diagnostics;
 
@@ -120,6 +121,11 @@ public class Implementation : Interface
 
             throw new NotImplementedException();
         }
+    }
+
+    public Task CreateAsync(Payload payload)
+    {
+        throw new NotImplementedException();
     }
     #endregion
 }
