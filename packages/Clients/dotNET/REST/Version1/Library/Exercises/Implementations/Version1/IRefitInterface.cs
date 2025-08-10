@@ -9,4 +9,10 @@ public interface IRefitInterface
 
     [Post("/api/exercises")]
     Task<ApiResponse<object>> POST([Body] Models.Refit.POST.Payload payload);
+
+    [Put("/api/exercises")]
+    Task<ApiResponse<object>> PUT([Body] Models.Refit.PUT.Payload payload);
+
+    [Delete("/api/exercises")]
+    Task<ApiResponse<object>> DELETE([Query] Models.Refit.DELETE.Parameters parameters);
 }

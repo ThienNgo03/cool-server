@@ -67,28 +67,92 @@ public class Test
 
     public async Task POST()
     {
+        string pushUp = "Push Up";
+        string description = "A basic exercise for upper body strength.";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        // Ensure the database is clean before the test
-        string pushUp="Push Up ver 1";
-        dbContext.Exercises.RemoveRange(dbContext.Exercises.Where(x=>x.Name==pushUp));
+        dbContext.Exercises.RemoveRange(
+            dbContext.Exercises.Where(e => e.Name == pushUp && e.Description == description).ToList());
         await dbContext.SaveChangesAsync();
-        // Create a new exercise
         var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
+
         var payload = new Library.Exercises.Create.Payload
         {
-            Name = "Push Up ver 1",
-            Description = "A basic exercise for upper body strength.",
+            Name = pushUp,
+            Description = description
         };
         await exercisesEndpoint.CreateAsync(payload);
-         //Verify that the exercise was created
-         var createdExercise = await dbContext.Exercises.FirstOrDefaultAsync(e => e.Name == "Push Up ver 1");
-        Guid exerciseId = createdExercise?.Id ?? Guid.Empty;
-        Assert.NotNull(createdExercise);
-        Assert.Equal("Push Up ver 1", createdExercise.Name);
-        Assert.Equal("A basic exercise for upper body strength.", createdExercise.Description);
-        //Clean up the created exercise
-        dbContext.Exercises.Remove(createdExercise);
+
+        var expected = await dbContext.Exercises
+            .FirstOrDefaultAsync(e => e.Name == pushUp && e.Description == description);
+        Assert.NotNull(expected);
+        Assert.Equal(pushUp, expected.Name);
+        Assert.Equal(description, expected.Description);
+        Assert.True(expected.CreatedDate > DateTime.MinValue);
+    }
+
+    [Fact]
+
+    public async Task PUT()
+    {
+        string pushUp = "Push Up";
+        string description = "A basic exercise for upper body strength.";
+        var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
+        var id = Guid.NewGuid();
+        var existingExercise = new Databases.Journal.Tables.Excercise.Table
+        {
+            Id = id,
+            Name = pushUp,
+            Description = description,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        dbContext.Exercises.Add(existingExercise);
         await dbContext.SaveChangesAsync();
+        var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
+        var payload = new Library.Exercises.Update.Payload
+        {
+            Id = id,
+            Name = "Updated Push Up",
+            Description = "An updated description for the push up exercise."
+        };
+        await exercisesEndpoint.UpdateAsync(payload);
+
+        await dbContext.Entry(existingExercise).ReloadAsync();
+        var updatedExercise = existingExercise;
+
+        Assert.NotNull(updatedExercise);
+        Assert.Equal("Updated Push Up", updatedExercise.Name);
+        Assert.Equal("An updated description for the push up exercise.", updatedExercise.Description);
+
+        dbContext.Exercises.Remove(updatedExercise);
+        await dbContext.SaveChangesAsync();
+    }
+
+    [Fact]
+
+    public async Task DELETE()
+    {
+        string pushUp = "Push Up";
+        string description = "A basic exercise for upper body strength.";
+        var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
+        var id = Guid.NewGuid();
+        var existingExercise = new Databases.Journal.Tables.Excercise.Table
+        {
+            Id = id,
+            Name = pushUp,
+            Description = description,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        dbContext.Exercises.Add(existingExercise);
+        await dbContext.SaveChangesAsync();
+        var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
+        await exercisesEndpoint.DeleteAsync(new Library.Exercises.Delete.Parameters { Id = id });
+
+        await dbContext.Entry(existingExercise).ReloadAsync();
+        var deletedExercise = await dbContext.Exercises.FindAsync(existingExercise.Id);
+
+        Assert.Null(deletedExercise);
     }
     #endregion
 }

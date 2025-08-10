@@ -144,5 +144,41 @@ public class Implementation : Interface
             throw new NotImplementedException();
         }
     }
+
+    public async Task UpdateAsync(Update.Payload payload)
+    {
+        try
+        {
+            var refitPayload = new Models.Refit.PUT.Payload
+            {
+                Id = payload.Id,
+                Name = payload.Name,
+                Description = payload.Description
+            };
+
+            var response = await this.refitInterface.PUT(refitPayload);
+        }
+        catch (ApiException ex)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public async Task DeleteAsync(Delete.Parameters parameters)
+    {
+        try
+        {
+            var refitParameters = new Models.Refit.DELETE.Parameters
+            {
+                Id = parameters.Id
+            };
+
+            var response = await this.refitInterface.DELETE(refitParameters);
+        }
+        catch (ApiException ex)
+        {
+            throw new NotImplementedException();
+        }
+    }
     #endregion
 }
