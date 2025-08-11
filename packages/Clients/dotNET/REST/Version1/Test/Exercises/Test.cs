@@ -67,7 +67,8 @@ public class Test
 
     public async Task POST()
     {
-        string pushUp = "Push Up";
+        Guid Id = Guid.NewGuid();
+        string pushUp = $"Push Up {Id}";
         string description = "A basic exercise for upper body strength.";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.Exercises.RemoveRange(
@@ -83,7 +84,7 @@ public class Test
         await exercisesEndpoint.CreateAsync(payload);
 
         var expected = await dbContext.Exercises
-            .FirstOrDefaultAsync(e => e.Name == pushUp && e.Description == description);
+            .FirstOrDefaultAsync(e => e.Name == pushUp);
         Assert.NotNull(expected);
         Assert.Equal(pushUp, expected.Name);
         Assert.Equal(description, expected.Description);
