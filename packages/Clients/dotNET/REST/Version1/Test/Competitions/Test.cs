@@ -1,6 +1,7 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Test.Constant;
 using Test.Databases.Journal;
 
 namespace Test.Competitions;
@@ -21,7 +22,7 @@ public class Test
         services.AddEndpoints(isLocal: true);
 
         services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer("Server=localhost;Database=JournalTest;Trusted_Connection=True;TrustServerCertificate=True;"));
+           options.UseSqlServer(Config.ConnectionString));
 
         serviceProvider = services.BuildServiceProvider();
     }
