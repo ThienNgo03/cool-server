@@ -1,6 +1,9 @@
-﻿using Library.Exercises;
+﻿using Library.Competitions;
+using Library.Exercises;
 using Library.WeekPlans;
 using Library.Workouts;
+using Library.SoloPools;
+using Library.TeamPools;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Library;
@@ -12,6 +15,9 @@ public static class Extensions
         services.RegisterExercises(isLocal);
         services.RegisterWorkouts(isLocal);
         services.RegisterWeekPlans(isLocal);
+        services.RegisterCompetitions(isLocal);
+        services.RegisterSoloPools(isLocal);
+        services.RegisterTeamPools(isLocal);
         return services;
     }
 }
