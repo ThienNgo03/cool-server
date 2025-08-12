@@ -54,10 +54,10 @@ namespace Journal.Competitions
             {
                 query = query.Where(c => c.Type.ToLower().Trim() == parameters.Type.ToLower().Trim());
             }
-            if (parameters.ParticipantIds != null && parameters.ParticipantIds.Count != 0)
+            /*if (parameters.ParticipantIds != null && parameters.ParticipantIds.Count != 0)
             {
                 query = query.Where(c => c.ParticipantIds.Any(id => parameters.ParticipantIds.Contains(id)));
-            }
+            }*/
             if( parameters.ExerciseId.HasValue)
             {
                 query = query.Where(c => c.ExerciseId == parameters.ExerciseId.Value);

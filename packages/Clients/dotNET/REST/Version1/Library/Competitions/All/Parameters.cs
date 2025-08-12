@@ -1,4 +1,4 @@
-﻿namespace Journal.Competitions.Get;
+﻿namespace Library.Competitions.All;
 
 public class Parameters
 {
