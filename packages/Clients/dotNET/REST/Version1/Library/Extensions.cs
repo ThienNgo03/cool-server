@@ -1,4 +1,5 @@
 ﻿using Library.Exercises;
+using Library.WeekPlans;
 using Library.Workouts;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ public static class Extensions
     {
         services.RegisterExercises(isLocal);
         services.RegisterWorkouts(isLocal);
+        services.RegisterWeekPlans(isLocal);
         return services;
     }
 }

@@ -80,8 +80,6 @@ public class Test
 
         var workout = await dbContext.Workouts.FirstOrDefaultAsync(w => w.UserId == userId && w.ExerciseId == exerciseId);
         Assert.NotNull(workout);
-        Assert.Equal(exerciseId, workout.ExerciseId);
-        Assert.Equal(userId, workout.UserId);
 
         dbContext.Workouts.Remove(workout);
         await dbContext.SaveChangesAsync();
