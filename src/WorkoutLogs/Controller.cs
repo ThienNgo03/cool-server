@@ -1,4 +1,5 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Journal.WorkoutLogs
 {
@@ -9,8 +10,9 @@ namespace Journal.WorkoutLogs
         private readonly IMessageBus _messageBus;
         private readonly ILogger<Controller> _logger;
         private readonly JournalDbContext _context;
+        private readonly IHubContext<Hub> _hubContext;
         
-        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context)
+        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
         {
             _messageBus = messageBus;
             _logger = logger;
@@ -74,6 +76,7 @@ namespace Journal.WorkoutLogs
             _context.WorkoutLogs.Add(workoutLog);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Post.Messager.Message(workoutLog.Id));
+            await _hubContext.Clients.All.SendAsync("workout-log-created", workoutLog.Id);
             return CreatedAtAction(nameof(Get), workoutLog.Id);
         }
 
@@ -96,6 +99,7 @@ namespace Journal.WorkoutLogs
             _context.WorkoutLogs.Update(workoutLog);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+            await _hubContext.Clients.All.SendAsync("workout-log-updated", payload.Id);
             return NoContent();
         }
 
@@ -112,6 +116,7 @@ namespace Journal.WorkoutLogs
             _context.WorkoutLogs.Remove(workoutLog);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+            await _hubContext.Clients.All.SendAsync("workout-log-deleted", parameters.Id);
             return NoContent();
         }
     }

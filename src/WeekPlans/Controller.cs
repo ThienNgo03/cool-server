@@ -1,4 +1,5 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Journal.WeekPlans
 {
@@ -9,12 +10,14 @@ namespace Journal.WeekPlans
         private readonly IMessageBus _messageBus;
         private readonly ILogger<Controller> _logger;
         private readonly JournalDbContext _context;
+        private readonly IHubContext<Hub> _hubContext;
 
-        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context)
+        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
         {
             _messageBus = messageBus;
             _logger = logger;
             _context = context;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -78,6 +81,7 @@ namespace Journal.WeekPlans
             _context.WeekPlans.Add(weekPlan);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Post.Messager.Message(weekPlan.Id));
+            await _hubContext.Clients.All.SendAsync("week-plans-created", weekPlan.Id);
             return CreatedAtAction(nameof(Get), weekPlan.Id);
         }
 
@@ -102,6 +106,7 @@ namespace Journal.WeekPlans
             _context.WeekPlans.Update(weekPlan);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+            await _hubContext.Clients.All.SendAsync("week-plans-updated", payload.Id);
             return NoContent();
         }
 
@@ -118,6 +123,7 @@ namespace Journal.WeekPlans
             _context.WeekPlans.Remove(weekPlan);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+            await _hubContext.Clients.All.SendAsync("week-plans-deleted", parameters.Id);
             return NoContent();
         }
     }

@@ -28,4 +28,12 @@ app.MapControllers();
 
 app.MapHub<Journal.Competitions.Hub>("competitions-hub");
 
+app.MapHub<Journal.Exercises.Hub>("exercises-hub");
+
+app.MapHub<Journal.Workouts.Hub>("workouts-hub");
+
+app.MapHub<Journal.WorkoutLogs.Hub>("workout-logs-hub");
+
+app.MapHub<Journal.WeekPlans.Hub>("week-plans-hub");
+
 app.Run();
