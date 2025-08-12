@@ -22,7 +22,7 @@ public class Test
         services.AddEndpoints(isLocal: true);
 
         services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer("Server=localhost;Database=JOURNAL;Trusted_Connection=True;TrustServerCertificate=True;"));
+           options.UseSqlServer("Server=localhost;Database=JOURNAL_Test;Trusted_Connection=True;TrustServerCertificate=True;"));
 
         serviceProvider = services.BuildServiceProvider();
     }
