@@ -1,4 +1,4 @@
-﻿namespace Library.Exercises;
+﻿namespace Library.Workouts;
 
 public interface Interface
 {

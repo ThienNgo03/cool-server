@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Journal.Databases.Journal.Migrations
+namespace Journal.Migrations
 {
     /// <inheritdoc />
-    public partial class Intial : Migration
+    public partial class JournalTest : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -9,18 +9,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Journal.Databases.Journal.Migrations
+namespace Journal.Migrations
 {
     [DbContext(typeof(JournalDbContext))]
-    [Migration("20250805151244_Intial")]
-    partial class Intial
+    [Migration("20250811145544_JournalTest")]
+    partial class JournalTest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.17")
+                .HasAnnotation("ProductVersion", "8.0.18")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

@@ -3,7 +3,7 @@
 namespace Journal.WorkoutLogs
 {
     [ApiController]
-    [Route("api/workoutLogs")]
+    [Route("api/workout-logs")]
     public class Controller: ControllerBase
     {
         private readonly IMessageBus _messageBus;

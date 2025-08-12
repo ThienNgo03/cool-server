@@ -1,12 +1,13 @@
-﻿using Library.Exercises.All;
-using Library.Exercises.Create;
+﻿using Library.Workouts.All;
+using Library.Workouts.Create;
 using Refit;
 using System.Diagnostics;
 
-namespace Library.Exercises.Implementations.Version1;
+namespace Library.Workouts.Implementations.Version1;
 
 public class Implementation : Interface
 {
+
     #region [ Fields ]
 
     private readonly IRefitInterface refitInterface;
@@ -21,20 +22,18 @@ public class Implementation : Interface
     #endregion
 
     #region [ Methods ]
-
     public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(Parameters parameters)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-
         Models.Refit.GET.Parameters refitParameters = new()
         {
             Id = parameters.Id,
             PageIndex = parameters.PageIndex,
             PageSize = parameters.PageSize,
-            Name = parameters.Name,
-            Description = parameters.Description,
+            ExerciseId = parameters.ExerciseId,
+            UserId = parameters.UserId,
             CreatedDate = parameters.CreatedDate,
-            LastUpdated = parameters.LastUpdated,
+            LastUpdated = parameters.LastUpdated
         };
 
         try
@@ -44,7 +43,7 @@ public class Implementation : Interface
             stopwatch.Stop();
             var duration = stopwatch.ElapsedMilliseconds;
 
-            if(response is null || response.Content is null)
+            if (response is null || response.Content is null)
             {
                 return new()
                 {
@@ -61,7 +60,7 @@ public class Implementation : Interface
             {
                 return new()
                 {
-                    Title =$"Error: {response.StatusCode}",
+                    Title = $"Error: {response.StatusCode}",
                     Detail = response.Error.Message,
                     Data = null,
                     Duration = duration,
@@ -69,15 +68,15 @@ public class Implementation : Interface
                 };
             }
 
-            List<Model> items = new(); 
+            List<Model> items = new();
             var data = response.Content.Items;
-            if(data is null || !data.Any())
+            if (data is null || !data.Any())
             {
 
                 return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
                 {
                     Title = "Success",
-                    Detail = $"Successfully fetched {items.Count} exercise(s)",
+                    Detail = $"Successfully fetched {items.Count} workout(s)",
                     Duration = duration,
                     IsSuccess = true,
                     Data = new Library.Models.PaginationResults.Model<Model>
@@ -95,8 +94,8 @@ public class Implementation : Interface
                 items.Add(new()
                 {
                     Id = item.Id,
-                    Name = item.Name,
-                    Description = item.Description,
+                    ExerciseId = item.ExerciseId,
+                    UserId = item.UserId,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
                 });
@@ -105,7 +104,7 @@ public class Implementation : Interface
             return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
             {
                 Title = "Success",
-                Detail = $"Successfully fetched {items.Count} exercise(s)",
+                Detail = $"Successfully fetched {items.Count} workout(s)",
                 Duration = duration,
                 IsSuccess = true,
                 Data = new Library.Models.PaginationResults.Model<Model>
@@ -126,20 +125,18 @@ public class Implementation : Interface
 
     public async Task CreateAsync(Payload payload)
     {
-        /*Stopwatch stopwatch = Stopwatch.StartNew();*/
         try
         {
+
             var refitPayload = new Models.Refit.POST.Payload
             {
-                Name = payload.Name,
-                Description = payload.Description
+                ExerciseId = payload.ExerciseId,
+                UserId = payload.UserId
             };
 
             var response = await this.refitInterface.POST(refitPayload);
-
-            /*stopwatch.Stop();
-            var duration = stopwatch.ElapsedMilliseconds;*/
         }
+
         catch (ApiException ex)
         {
             throw new NotImplementedException();
@@ -153,11 +150,12 @@ public class Implementation : Interface
             var refitPayload = new Models.Refit.PUT.Payload
             {
                 Id = payload.Id,
-                Name = payload.Name,
-                Description = payload.Description
+                ExerciseId = payload.ExerciseId,
+                UserId = payload.UserId
             };
 
             var response = await this.refitInterface.PUT(refitPayload);
+
         }
         catch (ApiException ex)
         {
@@ -176,6 +174,7 @@ public class Implementation : Interface
 
             var response = await this.refitInterface.DELETE(refitParameters);
         }
+
         catch (ApiException ex)
         {
             throw new NotImplementedException();

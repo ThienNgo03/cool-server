@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Journal.Databases.Journal.Migrations
+namespace Journal.Migrations
 {
     [DbContext(typeof(JournalDbContext))]
     partial class JournalDbContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace Journal.Databases.Journal.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.17")
+                .HasAnnotation("ProductVersion", "8.0.18")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
