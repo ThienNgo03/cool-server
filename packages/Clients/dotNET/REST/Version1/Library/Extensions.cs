@@ -4,6 +4,7 @@ using Library.WeekPlans;
 using Library.Workouts;
 using Library.SoloPools;
 using Library.TeamPools;
+using Library.WorkoutLogs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Library;
@@ -18,6 +19,7 @@ public static class Extensions
         services.RegisterCompetitions(isLocal);
         services.RegisterSoloPools(isLocal);
         services.RegisterTeamPools(isLocal);
+        services.RegisterWorkoutLogs(isLocal);
         return services;
     }
 }

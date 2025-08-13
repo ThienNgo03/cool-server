@@ -12,11 +12,15 @@ namespace Journal.WorkoutLogs
         private readonly JournalDbContext _context;
         private readonly IHubContext<Hub> _hubContext;
         
-        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
+        public Controller(IMessageBus messageBus, 
+                          ILogger<Controller> logger, 
+                          JournalDbContext context, 
+                          IHubContext<Hub> hubContext)
         {
             _messageBus = messageBus;
             _logger = logger;
             _context = context;
+            _hubContext = hubContext;
         }
 
         [HttpGet]

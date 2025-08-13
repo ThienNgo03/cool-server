@@ -1,17 +1,17 @@
-﻿using Library.WeekPlans.All;
-using Library.WeekPlans.Create;
+﻿using Library.WorkoutLogs.All;
+using Library.WorkoutLogs.Create;
 using Refit;
 using System.Diagnostics;
-namespace Library.WeekPlans.Implementations.Version1;
+
+namespace Library.WorkoutLogs.Implementations.Version1;
 
 public class Implementation : Interface
 {
-    #region [Fields]
+    #region [ Fields ]
     private readonly IRefitInterface refitInterface;
-
     #endregion
 
-    #region [CTors]
+    #region [ CTors ]
     public Implementation(IRefitInterface refitInterface)
     {
         this.refitInterface = refitInterface;
@@ -28,8 +28,7 @@ public class Implementation : Interface
             PageIndex = parameters.PageIndex,
             PageSize = parameters.PageSize,
             WorkoutId = parameters.WorkoutId,
-            DateOfWeek = parameters.DateOfWeek,
-            Time = parameters.Time,
+            WorkoutDate = parameters.WorkoutDate,
             Rep = parameters.Rep,
             Set = parameters.Set,
             HoldingTime = parameters.HoldingTime,
@@ -77,7 +76,7 @@ public class Implementation : Interface
                 return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
                 {
                     Title = "Success",
-                    Detail = $"Successfully fetched {items.Count} week plan(s)",
+                    Detail = $"Successfully fetched {items.Count} workout log(s)",
                     Duration = duration,
                     IsSuccess = true,
                     Data = new Library.Models.PaginationResults.Model<Model>
@@ -96,10 +95,9 @@ public class Implementation : Interface
                 {
                     Id = item.Id,
                     WorkoutId = item.WorkoutId,
-                    DateOfWeek = item.DateOfWeek,
                     HoldingTime = item.HoldingTime,
                     Rep = item.Rep,
-                    Time = item.Time,
+                    WorkoutDate = item.WorkoutDate,
                     Set = item.Set,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
@@ -109,7 +107,7 @@ public class Implementation : Interface
             return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
             {
                 Title = "Success",
-                Detail = $"Successfully fetched {items.Count} week plan(s)",
+                Detail = $"Successfully fetched {items.Count} workout log(s)",
                 Duration = duration,
                 IsSuccess = true,
                 Data = new Library.Models.PaginationResults.Model<Model>
@@ -135,8 +133,7 @@ public class Implementation : Interface
             var refitPayload = new Models.Refit.POST.Payload
             {
                 WorkoutId = payload.WorkoutId,
-                DateOfWeek = payload.DateOfWeek,
-                Time = payload.Time,
+                WorkoutDate = payload.WorkoutDate,
                 Rep = payload.Rep,
                 HoldingTime = payload.HoldingTime,
                 Set = payload.Set
@@ -158,8 +155,7 @@ public class Implementation : Interface
             {
                 Id = payload.Id,
                 WorkoutId = payload.WorkoutId,
-                DateOfWeek = payload.DateOfWeek,
-                Time = payload.Time,
+                WorkoutDate = payload.WorkoutDate,
                 Rep = payload.Rep,
                 HoldingTime = payload.HoldingTime,
                 Set = payload.Set
