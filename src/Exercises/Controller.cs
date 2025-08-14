@@ -41,7 +41,7 @@ namespace Journal.Exercises
 
             var result = await query.AsNoTracking().ToListAsync();
 
-            var paginationResults = new Builder<Databases.Journal.Tables.Excercise.Table>()
+            var paginationResults = new Builder<Databases.Journal.Tables.Exercise.Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -55,7 +55,7 @@ namespace Journal.Exercises
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
-            var exercise = new Databases.Journal.Tables.Excercise.Table
+            var exercise = new Databases.Journal.Tables.Exercise.Table
             {
                 Id = Guid.NewGuid(),
                 Name = payload.Name,

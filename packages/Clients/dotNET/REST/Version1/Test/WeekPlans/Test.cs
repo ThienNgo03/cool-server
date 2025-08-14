@@ -69,14 +69,28 @@ public class Test
     public async Task POST()
     {
         var id = Guid.NewGuid();
+        var workoutId = Guid.NewGuid();
         var dateOfWeek = $"Monday{id}";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.WeekPlans.RemoveRange(dbContext.WeekPlans.
             Where(x => x.DateOfWeek == dateOfWeek));
 
+        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        {
+            Id = workoutId,
+            ExerciseId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        dbContext.Workouts.Add(existingWorkout);
+
+        await dbContext.SaveChangesAsync();
+
+
         var payload = new Library.WeekPlans.Create.Payload()
         {
-            WorkoutId = Guid.NewGuid(),
+            WorkoutId = workoutId,
             Rep = 10,
             Set = 3,
             HoldingTime = TimeSpan.FromSeconds(30),
@@ -88,8 +102,14 @@ public class Test
 
         var expected = await dbContext.WeekPlans.FirstOrDefaultAsync(x => x.DateOfWeek == dateOfWeek);
         Assert.NotNull(expected);
-        Assert.True(expected.WorkoutId == payload.WorkoutId);
-        
+        Assert.True(expected.WorkoutId == workoutId);
+        Assert.Equal(expected.Rep, payload.Rep);
+        Assert.Equal(expected.Set, payload.Set);
+        Assert.Equal(expected.HoldingTime, payload.HoldingTime);
+        Assert.Equal(expected.DateOfWeek, payload.DateOfWeek);
+        Assert.Equal(expected.Time.Date, payload.Time.Date);
+
+        dbContext.Workouts.Remove(existingWorkout);
         dbContext.WeekPlans.Remove(expected);
         await dbContext.SaveChangesAsync();
     }
@@ -99,6 +119,7 @@ public class Test
     public async Task PUT()
     {
         var id = Guid.NewGuid();
+        var updatedWorkoutId = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var existingWeekPlan = new Databases.Journal.Tables.WeekPlan.Table()
         {
@@ -111,6 +132,15 @@ public class Test
             Time = DateTime.UtcNow
         };
         dbContext.WeekPlans.Add(existingWeekPlan);
+        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        {
+            Id = updatedWorkoutId,
+            ExerciseId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        dbContext.Workouts.Add(existingWorkout);
         await dbContext.SaveChangesAsync();
 
         var weekPlansEndpoint = serviceProvider!.GetRequiredService<Library.WeekPlans.Interface>();
@@ -121,7 +151,7 @@ public class Test
         var payload = new Library.WeekPlans.Update.Payload
         {
             Id = id,
-            WorkoutId = Guid.NewGuid(),
+            WorkoutId = updatedWorkoutId,
             Rep = updatedRep,
             Set = updatedSet,
             HoldingTime = updatedHoldingTime,
@@ -133,11 +163,14 @@ public class Test
         await dbContext.Entry(existingWeekPlan).ReloadAsync();
         var updatedWeekPlan = existingWeekPlan;
         Assert.NotNull(updatedWeekPlan);
+        Assert.Equal(updatedWeekPlan.WorkoutId, updatedWorkoutId);
         Assert.Equal(updatedWeekPlan.Rep, updatedRep);
         Assert.Equal(updatedWeekPlan.DateOfWeek, updatedDateOfWeek);
         Assert.Equal(updatedWeekPlan.Set, updatedSet);
         Assert.Equal(updatedWeekPlan.HoldingTime, updatedHoldingTime);
+        Assert.Equal(updatedWeekPlan.Time.Date, payload.Time.Date);
 
+        dbContext.Workouts.Remove(existingWorkout);
         dbContext.WeekPlans.Remove(updatedWeekPlan);
         await dbContext.SaveChangesAsync();
     }

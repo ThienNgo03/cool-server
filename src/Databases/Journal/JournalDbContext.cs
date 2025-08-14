@@ -13,7 +13,7 @@
         public DbSet<Tables.JourneyUsers.Table> JourneyUsers { get; set; }
         public DbSet<Tables.Gadget.Table> Gadgets { get; set; }
         public DbSet<Tables.JourneyGadgets.Table> JourneyGadgets { get; set; }
-        public DbSet<Tables.Excercise.Table> Exercises { get; set; }
+        public DbSet<Tables.Exercise.Table> Exercises { get; set; }
         public DbSet<Tables.WorkoutLog.Table> WorkoutLogs { get; set; }
         public DbSet<Tables.Workout.Table> Workouts { get; set; }
         public DbSet<Tables.WeekPlan.Table> WeekPlans { get; set; }

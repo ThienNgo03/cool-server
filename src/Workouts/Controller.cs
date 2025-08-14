@@ -56,6 +56,16 @@ namespace Journal.Workouts
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
+            var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
+            if (existingExercise == null)
+            {
+                return NotFound();
+            }
+            var existingUser = await _context.Users.FindAsync(payload.UserId);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
             var workout = new Databases.Journal.Tables.Workout.Table
             {
                 Id = Guid.NewGuid(),
@@ -78,6 +88,16 @@ namespace Journal.Workouts
         {
             var workout = await _context.Workouts.FindAsync(payload.Id);
             if (workout == null)
+            {
+                return NotFound();
+            }
+            var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
+            if (existingExercise == null)
+            {
+                return NotFound();
+            }
+            var existingUser = await _context.Users.FindAsync(payload.UserId);
+            if (existingUser == null)
             {
                 return NotFound();
             }

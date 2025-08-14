@@ -1,4 +1,4 @@
-﻿namespace Journal.Databases.Journal.Tables.Excercise;
+﻿namespace Test.Databases.Journal.Tables.Exercise;
 
 public class Table
 {

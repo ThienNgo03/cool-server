@@ -64,12 +64,17 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
+            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
+            if (existingWorkout == null)
+            {
+                return NotFound();
+            }
+
             var weekPlan = new Databases.Journal.Tables.WeekPlan.Table
             {
                 Id = Guid.NewGuid(),
                 WorkoutId = payload.WorkoutId,
                 DateOfWeek = payload.DateOfWeek,
-                //DateOfWeek = DateTime.UtcNow.DayOfWeek,
                 Time = payload.Time,
                 Rep = payload.Rep,
                 HoldingTime = payload.HoldingTime,
@@ -95,9 +100,14 @@ namespace Journal.WeekPlans
                 return NotFound();
             }
 
+            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
+            if (existingWorkout == null)
+            {
+                return NotFound();
+            }
+
             weekPlan.WorkoutId = payload.WorkoutId;
             weekPlan.DateOfWeek = payload.DateOfWeek;
-            //weekPlan.DateOfWeek = DateTime.UtcNow.DayOfWeek;
             weekPlan.Time = payload.Time;
             weekPlan.Rep = payload.Rep;
             weekPlan.HoldingTime = payload.HoldingTime;

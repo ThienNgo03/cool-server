@@ -65,6 +65,12 @@ namespace Journal.WorkoutLogs
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
+            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
+            if (existingWorkout == null)
+            {
+                return NotFound();
+            }
+
             var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table
             {
                 Id = Guid.NewGuid(),
@@ -90,6 +96,11 @@ namespace Journal.WorkoutLogs
         {
             var workoutLog = await _context.WorkoutLogs.FindAsync(payload.Id);
             if (workoutLog == null)
+            {
+                return NotFound();
+            }
+            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
+            if (existingWorkout == null)
             {
                 return NotFound();
             }

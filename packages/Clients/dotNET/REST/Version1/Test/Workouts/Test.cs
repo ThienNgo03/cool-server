@@ -1,5 +1,6 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using Test.Constant;
@@ -69,6 +70,24 @@ public class Test
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.Workouts.RemoveRange(dbContext.Workouts.
             Where(x => x.ExerciseId == exerciseId && x.UserId == userId));
+        var existingExercise = new Databases.Journal.Tables.Exercise.Table()
+        {
+            Id = exerciseId,
+            Name = "Push Up",
+            Description = "A basic exercise for upper body strength.",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        dbContext.Exercises.Add(existingExercise);
+
+        var existingUser = new Databases.Journal.Tables.User.Table()
+        {
+            Id = userId,
+            Name = "Push Up",
+            Email = "abc@gmail.com",
+            PhoneNumber = "1234567890",
+        };
+        dbContext.Users.Add(existingUser);
         await dbContext.SaveChangesAsync();
 
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
@@ -79,10 +98,12 @@ public class Test
         };
         await workoutsEndpoint.CreateAsync(payload);
 
-        var workout = await dbContext.Workouts.FirstOrDefaultAsync(w => w.UserId == userId && w.ExerciseId == exerciseId);
-        Assert.NotNull(workout);
+        var expected = await dbContext.Workouts.FirstOrDefaultAsync(w => w.UserId == userId && w.ExerciseId == exerciseId);
+        Assert.NotNull(expected);
 
-        dbContext.Workouts.Remove(workout);
+        dbContext.Workouts.Remove(expected);
+        dbContext.Exercises.Remove(existingExercise);
+        dbContext.Users.Remove(existingUser);
         await dbContext.SaveChangesAsync();
     }
 
@@ -90,8 +111,10 @@ public class Test
 
     public async Task PUT()
     {
-        var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
+        var updatedExerciseId = Guid.NewGuid();
+        var updatedUserId = Guid.NewGuid();
+        var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var existingWorkout = new Databases.Journal.Tables.Workout.Table()
         {
             Id = id,
@@ -101,10 +124,28 @@ public class Test
             LastUpdated = DateTime.UtcNow
         };
         dbContext.Workouts.Add(existingWorkout);
+
+        var existingExercise = new Databases.Journal.Tables.Exercise.Table()
+        {
+            Id = updatedExerciseId,
+            Name = "Push Up",
+            Description = "A basic exercise for upper body strength.",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        dbContext.Exercises.Add(existingExercise);
+
+        var existingUser = new Databases.Journal.Tables.User.Table()
+        {
+            Id = updatedUserId,
+            Name = "Push Up",
+            Email = "abc@gmail.com",
+            PhoneNumber = "1234567890",
+        };
+        dbContext.Users.Add(existingUser);
+
         await dbContext.SaveChangesAsync();
 
-        var updatedExerciseId = Guid.NewGuid();
-        var updatedUserId = Guid.NewGuid();
         var payload = new Library.Workouts.Update.Payload
         {
             Id = id,
@@ -120,6 +161,8 @@ public class Test
         Assert.Equal(updatedExerciseId, updatedWorkout.ExerciseId);
         Assert.Equal(updatedUserId, updatedWorkout.UserId);
 
+        dbContext.Exercises.Remove(existingExercise);
+        dbContext.Users.Remove(existingUser);
         dbContext.Workouts.Remove(updatedWorkout);
         await dbContext.SaveChangesAsync();
     }
