@@ -1,4 +1,5 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Wolverine.Persistence;
 
@@ -11,12 +12,15 @@ namespace Journal.MeetUps
         private readonly IMessageBus _messageBus;
         private readonly ILogger<Controller> _logger;
         private readonly JournalDbContext _context;
+        private readonly IHubContext<Hub> _hubContext;
 
-        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context)
+
+        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
         {
             _messageBus = messageBus;
             _logger = logger;
             _context = context;
+            _hubContext = hubContext;
         }
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
@@ -74,6 +78,7 @@ namespace Journal.MeetUps
             _context.MeetUps.Add(meetUp);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Post.Messager.Message(meetUp.Id));
+            await _hubContext.Clients.All.SendAsync("meet-up-created", meetUp.Id);
             return CreatedAtAction(nameof(Get), meetUp.Id);
         }
         [HttpPut]
@@ -94,6 +99,7 @@ namespace Journal.MeetUps
             _context.MeetUps.Update(meetUp);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+            await _hubContext.Clients.All.SendAsync("meet-up-updated", payload.Id);
             return NoContent();
         }
 
@@ -110,6 +116,7 @@ namespace Journal.MeetUps
             _context.MeetUps.Remove(meetUp);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+            await _hubContext.Clients.All.SendAsync("meet-up-deleted", parameters.Id);
             return NoContent();
         }
     }
