@@ -6,6 +6,7 @@ using Library.SoloPools;
 using Library.TeamPools;
 using Library.WorkoutLogs;
 using Microsoft.Extensions.DependencyInjection;
+using Library.MeetUps;
 
 namespace Library;
 
@@ -20,6 +21,7 @@ public static class Extensions
         services.RegisterSoloPools(isLocal);
         services.RegisterTeamPools(isLocal);
         services.RegisterWorkoutLogs(isLocal);
+        services.RegisterMeetUps(isLocal);
         return services;
     }
 }

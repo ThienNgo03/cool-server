@@ -36,4 +36,7 @@ app.MapHub<Journal.WorkoutLogs.Hub>("workout-logs-hub");
 
 app.MapHub<Journal.WeekPlans.Hub>("week-plans-hub");
 
+app.MapHub<Journal.MeetUps.Hub>("meet-ups-hub");
+
+
 app.Run();
