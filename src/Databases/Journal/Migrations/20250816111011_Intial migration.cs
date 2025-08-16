@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Journal.Migrations
+namespace Journal.Databases.Journal.Migrations
 {
     /// <inheritdoc />
-    public partial class JournalTest : Migration
+    public partial class Intialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,6 +37,7 @@ namespace Journal.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MusclesWorked = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -204,7 +205,7 @@ namespace Journal.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     WorkoutId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Rep = table.Column<int>(type: "int", nullable: false),
-                    HoldingTime = table.Column<int>(type: "int", nullable: false),
+                    HoldingTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     Set = table.Column<int>(type: "int", nullable: false),
                     WorkoutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
