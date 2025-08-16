@@ -81,26 +81,31 @@ public class Test
     {
         int position = 1;
         Guid participantId = Guid.NewGuid();
-        string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
-        Guid convertCompetitionId = Guid.Parse(competitionId);
+        Guid competitionId = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.TeamPools.RemoveRange(
-            dbContext.TeamPools.Where(e => e.CompetitionId == convertCompetitionId).ToList());
+            dbContext.TeamPools.Where(e => e.CompetitionId == competitionId).ToList());
+        dbContext.Competitions.Add(new()
+        {
+            Id = competitionId,
+            Title = "Test Competition",
+            CreatedDate = DateTime.UtcNow
+        });
         await dbContext.SaveChangesAsync();
         var teamPoolsEndpoint = serviceProvider!.GetRequiredService<Library.TeamPools.Interface>();
 
         var payload = new Library.TeamPools.Create.Payload
         {
-            CompetitionId = convertCompetitionId,
+            CompetitionId = competitionId,
             ParticipantId= participantId,
             Position = position
         };
         await teamPoolsEndpoint.CreateAsync(payload);
 
         var expected = await dbContext.TeamPools
-            .FirstOrDefaultAsync(e => e.CompetitionId == convertCompetitionId);
+            .FirstOrDefaultAsync(e => e.CompetitionId == competitionId);
         Assert.NotNull(expected);
-        Assert.Equal(convertCompetitionId, expected.CompetitionId);
+        Assert.Equal(competitionId, expected.CompetitionId);
         Assert.Equal(participantId, expected.ParticipantId);
         Assert.Equal(position, expected.Position);
         Assert.True(expected.CreatedDate > DateTime.MinValue);
@@ -114,14 +119,18 @@ public class Test
         var id = Guid.NewGuid();
         int position = 1;
         Guid participantId = Guid.NewGuid();
-        string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
-        Guid convertCompetitionId = Guid.Parse(competitionId);
-        string newCompetitionId = "2E1D1F19-0CEC-4FAC-997C-05DF512E2039";
-        Guid convertNewCompetitionId = Guid.Parse(newCompetitionId);
+        Guid competitionId = Guid.NewGuid();
+        var competition = new Databases.Journal.Tables.Competition.Table()
+        {
+            Id = competitionId,
+            Title = "Test Competition",
+            CreatedDate = DateTime.UtcNow
+        };
+        dbContext.Competitions.Add(competition);
         var teamPool = new Databases.Journal.Tables.TeamPool.Table()
         {
             Id = id,
-            CompetitionId = convertCompetitionId,
+            CompetitionId = competitionId,
             ParticipantId = participantId,
             Position = position,
             CreatedDate = DateTime.UtcNow,
@@ -130,10 +139,13 @@ public class Test
         dbContext.TeamPools.Add(teamPool);
         await dbContext.SaveChangesAsync();
         var teamPoolsEndpoint = serviceProvider!.GetRequiredService<Library.TeamPools.Interface>();
+        int newPosition = 2;
         var payload = new Library.TeamPools.Update.Payload
         {
             Id = id,
-            CompetitionId = convertNewCompetitionId,    
+            ParticipantId = participantId,
+            Position = newPosition,
+            CompetitionId = competitionId,    
         };
         await teamPoolsEndpoint.UpdateAsync(payload);
 
@@ -141,7 +153,7 @@ public class Test
         var updatedTeamPool = teamPool;
 
         Assert.NotNull(updatedTeamPool);
-        Assert.Equal(convertNewCompetitionId, updatedTeamPool.CompetitionId);
+        Assert.Equal(newPosition, updatedTeamPool.Position);
 
         dbContext.TeamPools.Remove(updatedTeamPool);
         await dbContext.SaveChangesAsync();
