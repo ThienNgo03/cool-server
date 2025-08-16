@@ -1,4 +1,4 @@
-﻿namespace Library.MeetUps.Implementations.Version1;
+﻿namespace Library.Exercises.Implementations.Version1;
 
 public class RefitHttpClientHandler : HttpClientHandler
 {
