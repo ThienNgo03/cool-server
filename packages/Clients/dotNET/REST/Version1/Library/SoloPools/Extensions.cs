@@ -7,6 +7,7 @@ public static class Extensions
 {
     public static void RegisterSoloPools(this IServiceCollection services, bool isLocal)
     {
+        services.AddTransient<Implementations.Version1.RefitHttpClientHandler>();
         services.AddTransient<Interface, Implementations.Version1.Implementation>();
 
         string baseUrl = isLocal
@@ -14,6 +15,7 @@ public static class Extensions
             : "";
 
         services.AddRefitClient<Implementations.Version1.IRefitInterface>()
+                .ConfigurePrimaryHttpMessageHandler<Implementations.Version1.RefitHttpClientHandler>()
                 .ConfigureHttpClient(x => x.BaseAddress = new Uri(baseUrl));
     }
 }

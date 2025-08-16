@@ -8,6 +8,8 @@ public class Table
 
     public string Description { get; set; }
 
+    public string MusclesWorked { get; set; }
+
     public DateTime CreatedDate { get; set; }
 
     public DateTime LastUpdated { get; set; }

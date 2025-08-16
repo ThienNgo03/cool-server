@@ -33,6 +33,7 @@ public class Implementation : Interface
             PageSize = parameters.PageSize,
             Name = parameters.Name,
             Description = parameters.Description,
+            MusclesWorked = parameters.MusclesWorked,
             CreatedDate = parameters.CreatedDate,
             LastUpdated = parameters.LastUpdated,
         };
@@ -97,6 +98,7 @@ public class Implementation : Interface
                     Id = item.Id,
                     Name = item.Name,
                     Description = item.Description,
+                    MusclesWorked = item.MusclesWorked,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
                 });
@@ -132,7 +134,8 @@ public class Implementation : Interface
             var refitPayload = new Models.Refit.POST.Payload
             {
                 Name = payload.Name,
-                Description = payload.Description
+                Description = payload.Description,
+                MusclesWorked = payload.MusclesWorked
             };
 
             var response = await this.refitInterface.POST(refitPayload);
@@ -154,7 +157,8 @@ public class Implementation : Interface
             {
                 Id = payload.Id,
                 Name = payload.Name,
-                Description = payload.Description
+                Description = payload.Description,
+                MusclesWorked = payload.MusclesWorked
             };
 
             var response = await this.refitInterface.PUT(refitPayload);

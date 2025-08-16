@@ -53,6 +53,7 @@ public class Controller:ControllerBase
 
         return NoContent();
     }
+
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> LoginAsync([FromBody] Identity.Signin.Payload payload)
@@ -79,6 +80,7 @@ public class Controller:ControllerBase
         };
         return CreatedAtAction(nameof(Get), response);
     }
+
     private string GenerateToken(string email)
     {
         var key = Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!);

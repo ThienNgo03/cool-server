@@ -1,9 +1,11 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Journal.WeekPlans
 {
     [ApiController]
+    [Authorize]
     [Route("api/week-plans")]
     public class Controller : ControllerBase
     {

@@ -1,9 +1,11 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Journal.Users;
 
 [ApiController]
 [Route("api/users")]
+[Authorize]
 public class Controller : ControllerBase
 {
     private readonly IMessageBus _messageBus;

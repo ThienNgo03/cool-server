@@ -2,6 +2,8 @@
 using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text;
+using System.Text.Json;
 using Test.Constant;
 using Test.Databases.Journal;
 
@@ -19,8 +21,12 @@ public class Test
 
     public Test()
     {
+        string? token = GetBearerToken();
+        if(string.IsNullOrEmpty(token))
+            throw new InvalidOperationException("Failed to retrieve authentication token.");
+        
         var services = new ServiceCollection();
-        services.AddEndpoints(isLocal: true);
+        services.AddEndpoints(isLocal: true, token);
 
         services.AddDbContext<JournalDbContext>(options =>
            options.UseSqlServer(Config.ConnectionString));
@@ -41,6 +47,7 @@ public class Test
             Id = id,
             Name = "Push Up",
             Description = "A basic exercise for upper body strength.",
+            MusclesWorked = "Chest, Triceps, Shoulders",
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
@@ -71,6 +78,7 @@ public class Test
         Guid Id = Guid.NewGuid();
         string pushUp = $"Push Up {Id}";
         string description = "A basic exercise for upper body strength.";
+        string musclesWorked = "Chest, Triceps, Shoulders";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.Exercises.RemoveRange(
             dbContext.Exercises.Where(e => e.Name == pushUp && e.Description == description).ToList());
@@ -80,7 +88,8 @@ public class Test
         var payload = new Library.Exercises.Create.Payload
         {
             Name = pushUp,
-            Description = description
+            Description = description,
+            MusclesWorked = musclesWorked
         };
         await exercisesEndpoint.CreateAsync(payload);
 
@@ -89,6 +98,8 @@ public class Test
         Assert.NotNull(expected);
         Assert.Equal(pushUp, expected.Name);
         Assert.Equal(description, expected.Description);
+        Assert.Equal(musclesWorked, expected.MusclesWorked);
+
         Assert.True(expected.CreatedDate > DateTime.MinValue);
     }
 
@@ -98,6 +109,7 @@ public class Test
     {
         string pushUp = "Push Up";
         string description = "A basic exercise for upper body strength.";
+        string musclesWorked = "Chest, Triceps, Shoulders";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
         var existingExercise = new Databases.Journal.Tables.Exercise.Table
@@ -105,6 +117,7 @@ public class Test
             Id = id,
             Name = pushUp,
             Description = description,
+            MusclesWorked = musclesWorked,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
@@ -114,8 +127,9 @@ public class Test
         var payload = new Library.Exercises.Update.Payload
         {
             Id = id,
-            Name = "Updated Push Up",
-            Description = "An updated description for the push up exercise."
+            Name = "Pull Up",
+            Description = "An updated description for the push up exercise.",
+            MusclesWorked = "Back, Biceps"
         };
         await exercisesEndpoint.UpdateAsync(payload);
 
@@ -123,8 +137,9 @@ public class Test
         var updatedExercise = existingExercise;
 
         Assert.NotNull(updatedExercise);
-        Assert.Equal("Updated Push Up", updatedExercise.Name);
+        Assert.Equal("Pull Up", updatedExercise.Name);
         Assert.Equal("An updated description for the push up exercise.", updatedExercise.Description);
+        Assert.Equal("Back, Biceps", updatedExercise.MusclesWorked);
 
         dbContext.Exercises.Remove(updatedExercise);
         await dbContext.SaveChangesAsync();
@@ -143,6 +158,7 @@ public class Test
             Id = id,
             Name = pushUp,
             Description = description,
+            MusclesWorked = "Chest, Triceps, Shoulders",
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
@@ -155,6 +171,32 @@ public class Test
         var deletedExercise = await dbContext.Exercises.FindAsync(existingExercise.Id);
 
         Assert.Null(deletedExercise);
+    }
+    #endregion
+
+    #region [ Authentication ]
+
+    private string? GetBearerToken()
+    {
+        var client = new HttpClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
+
+        var jsonPayload = @"{
+            ""accountEmail"": ""systemtester@journal.com"",
+            ""password"": ""NewPassword@1""
+        }";
+
+        request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        var response = client.Send(request);
+        response.EnsureSuccessStatusCode();
+
+        var responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+        using var document = JsonDocument.Parse(responseBody);
+        var token = document.RootElement.GetProperty("token").GetString();
+
+        return token;
     }
     #endregion
 }
