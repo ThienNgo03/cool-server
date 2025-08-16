@@ -2,6 +2,8 @@
 using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text;
+using System.Text.Json;
 using Test.Constant;
 using Test.Databases.Journal;
 
@@ -19,8 +21,12 @@ public class Test
 
     public Test()
     {
+        string? token = GetBearerToken();
+        if (string.IsNullOrEmpty(token))
+            throw new InvalidOperationException("Failed to retrieve authentication token.");
+
         var services = new ServiceCollection();
-        services.AddEndpoints(isLocal: true);
+        services.AddEndpoints(isLocal: true, token);
 
         services.AddDbContext<JournalDbContext>(options =>
            options.UseSqlServer(Config.ConnectionString));
@@ -145,41 +151,65 @@ public class Test
 
     public async Task PUT()
     {
+        #region [ Prepare ]
+
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
         Guid winnerId = Guid.NewGuid();
         Guid loserId = Guid.NewGuid();
-        string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
-        Guid convertCompetitionId = Guid.Parse(competitionId);
-        string newCompetitionId = "2E1D1F19-0CEC-4FAC-997C-05DF512E2039";
-        Guid convertNewCompetitionId = Guid.Parse(newCompetitionId);
+        Guid competitionId = Guid.NewGuid();
+
+        var competition = new Databases.Journal.Tables.Competition.Table()
+        {
+            Id = competitionId,
+            Title = "Test Competition",
+            CreatedDate = DateTime.UtcNow
+        };
+        dbContext.Competitions.Add(competition);
+
         var soloPool = new Databases.Journal.Tables.SoloPool.Table()
         {
             Id = id,
-            CompetitionId = convertCompetitionId,
+            CompetitionId = competitionId,
             WinnerId = winnerId,
             LoserId = loserId,
             CreatedDate = DateTime.UtcNow,
-
         };
         dbContext.SoloPools.Add(soloPool);
         await dbContext.SaveChangesAsync();
+        #endregion
+
+        #region [ Test ]
+
         var soloPoolsEndpoint = serviceProvider!.GetRequiredService<Library.SoloPools.Interface>();
+        Guid updatedWinnerGuid = Guid.NewGuid();
+        Guid updatedLoserGuid = Guid.NewGuid();
         var payload = new Library.SoloPools.Update.Payload
         {
             Id = id,
-            CompetitionId = convertNewCompetitionId,    
+            CompetitionId = competitionId,
+            WinnerId = updatedWinnerGuid,
+            LoserId = updatedLoserGuid
         };
         await soloPoolsEndpoint.UpdateAsync(payload);
+        #endregion
+
+        #region [ Check ]
 
         await dbContext.Entry(soloPool).ReloadAsync();
         var updatedSoloPool = soloPool;
-
         Assert.NotNull(updatedSoloPool);
-        Assert.Equal(convertNewCompetitionId, updatedSoloPool.CompetitionId);
+        Assert.Equal(id, updatedSoloPool.Id);
+        Assert.Equal(competitionId, updatedSoloPool.CompetitionId);
+        Assert.Equal(updatedWinnerGuid, updatedSoloPool.WinnerId);
+        Assert.Equal(updatedLoserGuid, updatedSoloPool.LoserId);
+        #endregion
+
+        #region [ Clean up ]
 
         dbContext.SoloPools.Remove(updatedSoloPool);
         await dbContext.SaveChangesAsync();
+        #endregion
     }
 
     [Fact]
@@ -210,6 +240,33 @@ public class Test
         var deletedExercise = await dbContext.Exercises.FindAsync(soloPool.Id);
 
         Assert.Null(deletedExercise);
+    }
+    #endregion
+
+
+    #region [ Authentication ]
+
+    private string? GetBearerToken()
+    {
+        var client = new HttpClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
+
+        var jsonPayload = @"{
+            ""accountEmail"": ""systemtester@journal.com"",
+            ""password"": ""NewPassword@1""
+        }";
+
+        request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        var response = client.Send(request);
+        response.EnsureSuccessStatusCode();
+
+        var responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+        using var document = JsonDocument.Parse(responseBody);
+        var token = document.RootElement.GetProperty("token").GetString();
+
+        return token;
     }
     #endregion
 }

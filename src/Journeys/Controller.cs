@@ -1,6 +1,9 @@
-﻿namespace Journal.Journeys
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace Journal.Journeys
 {
     [ApiController]
+    [Authorize]
     [Route("api/journeys")]
     public class Controller : ControllerBase
     {

@@ -8,4 +8,6 @@ public class Payload
 
     public string Description { get; set; } = string.Empty;
 
+    public string MusclesWorked { get; set; } = string.Empty;
+
 }

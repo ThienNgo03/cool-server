@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Journal.Migrations
+namespace Journal.Databases.Journal.Migrations
 {
     [DbContext(typeof(JournalDbContext))]
-    [Migration("20250811145544_JournalTest")]
-    partial class JournalTest
+    [Migration("20250816111011_Intial migration")]
+    partial class Intialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,7 +65,7 @@ namespace Journal.Migrations
                     b.ToTable("Competitions");
                 });
 
-            modelBuilder.Entity("Journal.Databases.Journal.Tables.Excercise.Table", b =>
+            modelBuilder.Entity("Journal.Databases.Journal.Tables.Exercise.Table", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,6 +80,10 @@ namespace Journal.Migrations
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("MusclesWorked")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -372,8 +376,8 @@ namespace Journal.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("HoldingTime")
-                        .HasColumnType("int");
+                    b.Property<TimeSpan>("HoldingTime")
+                        .HasColumnType("time");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");

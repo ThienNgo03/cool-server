@@ -1,4 +1,5 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,7 @@ namespace Journal.TeamPools;
 
 [Route("api/team-pools")]
 [ApiController]
+[Authorize]
 public class Controller : ControllerBase
 {
     private readonly JournalDbContext _dbContext;

@@ -12,8 +12,11 @@ namespace Library;
 
 public static class Extensions
 {
-    public static IServiceCollection AddEndpoints(this IServiceCollection services, bool isLocal)
+    public static IServiceCollection AddEndpoints(this IServiceCollection services, bool isLocal, string token)
     {
+        Models.Authentication.Model authentication = new() { BearerToken = token };
+        services.AddSingleton(authentication);
+
         services.RegisterExercises(isLocal);
         services.RegisterWorkouts(isLocal);
         services.RegisterWeekPlans(isLocal);

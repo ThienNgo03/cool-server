@@ -1,9 +1,11 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Journal.Workouts
 {
     [ApiController]
+    [Authorize]
     [Route("api/workouts")]
     public class Controller : ControllerBase
     {

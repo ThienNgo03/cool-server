@@ -1,8 +1,10 @@
 ﻿using Journal.Models.PaginationResults;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Journal.SoloPools;
 
 [Route("api/solo-pools")]
+[Authorize]
 [ApiController]
 public class Controller : ControllerBase
 {
