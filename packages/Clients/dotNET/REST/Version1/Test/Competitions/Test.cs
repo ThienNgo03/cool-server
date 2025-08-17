@@ -62,7 +62,7 @@ public class Test
         var competitionEndpoint = serviceProvider!.GetRequiredService<Library.Competitions.Interface>();
         var result = await competitionEndpoint.AllAsync(new() 
         {
-            PageIndex = 1,
+            PageIndex = 0,
             PageSize = 1,
             Title = "Push Up"
         });
