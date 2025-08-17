@@ -56,11 +56,25 @@ public class Controller : ControllerBase
         {
             query = query.Where(c => c.Type.ToLower().Trim() == parameters.Type.ToLower().Trim());
         }
-        /*if (parameters.ParticipantIds != null && parameters.ParticipantIds.Count != 0)
+        if (!string.IsNullOrEmpty(parameters.ParticipantIds))
         {
-            query = query.Where(c => c.ParticipantIds.Any(id => parameters.ParticipantIds.Contains(id)));
-        }*/
-        if( parameters.ExerciseId.HasValue)
+            var idStrings = parameters.ParticipantIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (idStrings.Length == 0)
+                return BadRequest("ParticipantIds parameter is provided but contains no valid IDs.");
+
+            var guidList = new List<Guid>(idStrings.Length);
+            foreach (var idStr in idStrings)
+            {
+                if (!Guid.TryParse(idStr, out var guid))
+                    return BadRequest($"Invalid GUID in ParticipantIds: '{idStr}'");
+                guidList.Add(guid);
+            }
+
+            query = query.Where(c => c.ParticipantIds.Any(id => guidList.Contains(id)));
+        }
+        if(parameters.ExerciseId.HasValue)
         {
             query = query.Where(c => c.ExerciseId == parameters.ExerciseId.Value);
         }
@@ -69,13 +83,77 @@ public class Controller : ControllerBase
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
         }
 
-        var result = await query.AsNoTracking().ToListAsync();
+        var queryResult = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.Competition.Table>()
+        List<Get.Response> response = new();
+        foreach (var item in queryResult) {
+            Get.Response competitionResponse = new()
+            {
+                Id = item.Id,
+                Title = item.Title,
+                Description = item.Description,
+                ParticipantIds = item.ParticipantIds,
+                ExerciseId = item.ExerciseId,
+                Location = item.Location,
+                DateTime = item.DateTime,
+                CreatedDate = item.CreatedDate,
+                Type = item.Type
+            };
+            response.Add(competitionResponse);
+        }
+
+        if (parameters.IsIncludeSoloPool)
+        {
+            var soloPool = await _dbContext.SoloPools
+                .FirstOrDefaultAsync(x => x.CompetitionId == parameters.Id);
+
+            foreach (var competition in response)
+            {
+                if (soloPool is null)
+                    continue;
+
+                if(competition.Id != soloPool.CompetitionId)
+                    continue;
+
+                competition.SoloPool = new Get.SoloPool
+                {
+                    Id = soloPool.Id,
+                    WinnerId = soloPool.WinnerId,
+                    LoserId = soloPool.LoserId,
+                    CompetitionId = soloPool.CompetitionId,
+                    CreatedDate = soloPool.CreatedDate
+                };
+            }
+        }
+
+        if(parameters.IsIncludeTeamPools)
+        {
+            var teamPools = await _dbContext.TeamPools
+                .Where(x => x.CompetitionId == parameters.Id)
+                .ToListAsync();
+
+            foreach (var competition in response)
+            {                 
+                if (teamPools is null || teamPools.Count == 0)
+                    continue;
+                if(competition.Id != parameters.Id)
+                    continue;
+                competition.TeamPools = teamPools.Select(tp => new Get.TeamPool
+                {
+                    Id = tp.Id,
+                    ParticipantId = tp.ParticipantId,
+                    Position = tp.Position,
+                    CompetitionId = tp.CompetitionId,
+                    CreatedDate = tp.CreatedDate
+                }).ToList();
+            }
+        }
+
+        var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
-            .WithTotal(result.Count)
-            .WithItems(result)
+            .WithTotal(response.Count)
+            .WithItems(response)
             .Build();
 
         return Ok(paginationResults);
@@ -99,6 +177,21 @@ public class Controller : ControllerBase
             Type = competition.Type,
             ExerciseId = competition.ExerciseId 
         };
+        if(!string.IsNullOrEmpty(competition.ParticipantIds))
+        {
+            var idStrings = competition.ParticipantIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (idStrings.Length == 0)
+                return BadRequest("ParticipantIds parameter is provided but contains no valid IDs.");
+            var guidList = new List<Guid>(idStrings.Length);
+            foreach (var idStr in idStrings)
+            {
+                if (!Guid.TryParse(idStr, out var guid))
+                    return BadRequest($"Invalid GUID in ParticipantIds: '{idStr}'");
+                guidList.Add(guid);
+            }
+            newCompetition.ParticipantIds = guidList;
+        }
         _dbContext.Competitions.Add(newCompetition);
         await _dbContext.SaveChangesAsync();
         await _messageBus.PublishAsync(new Post.Messager.Message(newCompetition.Id));
@@ -140,6 +233,27 @@ public class Controller : ControllerBase
         existingCompetition.DateTime = competition.DateTime;
         existingCompetition.ExerciseId = competition.ExerciseId;
         existingCompetition.Type = competition.Type;
+
+        if (string.IsNullOrEmpty(competition.ParticipantIds))
+            existingCompetition.ParticipantIds = new List<Guid>();
+        else
+        {
+            var idStrings = competition.ParticipantIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (idStrings.Length == 0)
+                return BadRequest("ParticipantIds parameter is provided but contains no valid IDs.");
+
+            var guidList = new List<Guid>(idStrings.Length);
+            foreach (var idStr in idStrings)
+            {
+                if (!Guid.TryParse(idStr, out var guid))
+                    return BadRequest($"Invalid GUID in ParticipantIds: '{idStr}'");
+                guidList.Add(guid);
+            }
+            existingCompetition.ParticipantIds = guidList;
+        }
+
         _dbContext.Competitions.Update(existingCompetition);
         await _dbContext.SaveChangesAsync();
         await _messageBus.PublishAsync(new Put.Messager.Message(existingCompetition.Id));

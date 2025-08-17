@@ -10,7 +10,9 @@ public class Payload
     public string Description { get; set; } = string.Empty;
     
     public string Location { get; set; } = string.Empty;
-    
+
+    public string? ParticipantIds { get; set; }
+
     public Guid ExerciseId { get; set; }
     
     public DateTime DateTime { get; set; }

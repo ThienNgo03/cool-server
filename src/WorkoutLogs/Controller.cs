@@ -36,11 +36,11 @@ namespace Journal.WorkoutLogs
             if (parameters.WorkoutId.HasValue)
                 query = query.Where(x => x.WorkoutId == parameters.WorkoutId);
             if (parameters.Rep.HasValue)
-                query = query.Where(x => x.Rep == parameters.Rep);
-            if (parameters.HoldingTime.HasValue)
-                query = query.Where(x => x.HoldingTime == parameters.HoldingTime);
-            if (parameters.Set.HasValue)
-                query = query.Where(x => x.Set == parameters.Set);
+            //    query = query.Where(x => x.Rep == parameters.Rep);
+            //if (parameters.HoldingTime.HasValue)
+            //    query = query.Where(x => x.HoldingTime == parameters.HoldingTime);
+            //if (parameters.Set.HasValue)
+            //    query = query.Where(x => x.Set == parameters.Set);
             if (parameters.WorkoutDate.HasValue)
                 query = query.Where(x => x.WorkoutDate == parameters.WorkoutDate);
             if (parameters.CreatedDate.HasValue)
@@ -77,9 +77,9 @@ namespace Journal.WorkoutLogs
             {
                 Id = Guid.NewGuid(),
                 WorkoutId = payload.WorkoutId,
-                Rep = payload.Rep,
-                HoldingTime = payload.HoldingTime,
-                Set = payload.Set,
+                //Rep = payload.Rep,
+                //HoldingTime = payload.HoldingTime,
+                //Set = payload.Set,
                 WorkoutDate = payload.WorkoutDate,
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
@@ -108,9 +108,9 @@ namespace Journal.WorkoutLogs
             }
 
             workoutLog.WorkoutId = payload.WorkoutId;
-            workoutLog.Rep = payload.Rep;
-            workoutLog.HoldingTime = payload.HoldingTime;
-            workoutLog.Set = payload.Set;
+            //workoutLog.Rep = payload.Rep;
+            //workoutLog.HoldingTime = payload.HoldingTime;
+            //workoutLog.Set = payload.Set;
             workoutLog.WorkoutDate = payload.WorkoutDate;
             workoutLog.LastUpdated = DateTime.UtcNow;
             _context.WorkoutLogs.Update(workoutLog);
