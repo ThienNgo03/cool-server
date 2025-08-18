@@ -42,13 +42,44 @@ namespace Journal.Workouts
             if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex.Value >= 0)
                 query = query.Skip(parameters.PageSize.Value * parameters.PageIndex.Value).Take(parameters.PageSize.Value);
 
-            var result = await query.AsNoTracking().ToListAsync();
-
-            var paginationResults = new Builder<Databases.Journal.Tables.Workout.Table>()
+            var QueryResult = await query.AsNoTracking().ToListAsync();
+            List<Get.Response> responses = new();
+            foreach (var item in QueryResult)
+            {
+                var response = new Get.Response
+                {
+                    Id = item.Id,
+                    ExerciseId = item.ExerciseId,
+                    UserId = item.UserId,
+                    CreatedDate = item.CreatedDate,
+                    LastUpdated = item.LastUpdated
+                };
+                var exercise = await _context.Exercises.FindAsync(item.ExerciseId);
+                if (exercise != null)
+                {
+                    response.Exercise = new Get.Exercise
+                    {
+                        Id = exercise.Id,
+                        Name = exercise.Name,
+                        Description = exercise.Description
+                    };
+                }
+                var weekPlans = await _context.WeekPlans.Where(wp => wp.WorkoutId == item.Id).ToListAsync();
+                var weekPlanSets = await _context.WeekPlanSets
+                    .Where(wps => weekPlans.Select(wp => wp.Id).Contains(wps.WeekPlanId))
+                    .ToListAsync();
+                response.WeekPlans = weekPlans.Select(wp => new Get.WeekPlan
+                {
+                    Id = wp.Id,
+                }).ToList();
+                response.WeekPlans.Select(wp => wp.WeekPlanSets?.Select(wps=>weekPlanSets)).ToList();
+                responses.Add(response);
+            }
+            var paginationResults = new Builder<Get.Response>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
-                .WithTotal(result.Count)
-                .WithItems(result)
+                .WithTotal(responses.Count)
+                .WithItems(responses)
                 .Build();
 
             return Ok(paginationResults);

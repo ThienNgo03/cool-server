@@ -15,8 +15,10 @@ public class Payload
     
     
     public string Location { get; set; } = string.Empty;
-    
-    
+
+    public string? ParticipantIds { get; set; }
+
+
     public Guid ExerciseId { get; set; }
     
     

@@ -40,15 +40,6 @@ namespace Journal.WeekPlans
             if (parameters.Time.HasValue)
                 query = query.Where(x => x.Time == parameters.Time);
 
-            //if (parameters.Rep.HasValue)
-            //    query = query.Where(x => x.Rep == parameters.Rep);
-
-            //if (parameters.HoldingTime.HasValue)
-            //    query = query.Where(x => x.HoldingTime == parameters.HoldingTime);
-
-            //if (parameters.Set.HasValue)
-            //    query = query.Where(x => x.Set == parameters.Set);
-
             if (parameters.CreatedDate.HasValue)
                 query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
 
@@ -116,9 +107,6 @@ namespace Journal.WeekPlans
             weekPlan.WorkoutId = payload.WorkoutId;
             weekPlan.DateOfWeek = payload.DateOfWeek;
             weekPlan.Time = payload.Time;
-            //weekPlan.Rep = payload.Rep;
-            //weekPlan.HoldingTime = payload.HoldingTime;
-            //weekPlan.Set = payload.Set;
             weekPlan.LastUpdated = DateTime.UtcNow;
             _context.WeekPlans.Update(weekPlan);
             await _context.SaveChangesAsync();
