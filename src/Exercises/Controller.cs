@@ -29,14 +29,25 @@ public class Controller : ControllerBase
 
         if (parameters.Id.HasValue)
             query = query.Where(x => x.Id == parameters.Id);
+
         if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(x => x.Name.Contains(parameters.Name));
+
         if (!string.IsNullOrEmpty(parameters.Description))
             query = query.Where(x => x.Description.Contains(parameters.Description));
+
+        if (!string.IsNullOrEmpty(parameters.MusclesWorked))
+            query = query.Where(x => x.MusclesWorked.Contains(parameters.MusclesWorked));
+
+        if (!string.IsNullOrEmpty(parameters.Type))
+            query = query.Where(x => x.Type.Contains(parameters.Type));
+
         if (parameters.CreatedDate.HasValue)
             query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
-        if(parameters.LastUpdated.HasValue)
+
+        if (parameters.LastUpdated.HasValue)
             query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
+
         if (!string.IsNullOrEmpty(parameters.MusclesWorked))
             query = query.Where(x => x.MusclesWorked.Contains(parameters.MusclesWorked));
 
@@ -64,6 +75,7 @@ public class Controller : ControllerBase
             Name = payload.Name,
             Description = payload.Description,
             MusclesWorked = payload.MusclesWorked,
+            Type = payload.Type,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
@@ -79,7 +91,7 @@ public class Controller : ControllerBase
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
         var exercise = await _context.Exercises.FindAsync(payload.Id);
-        if(exercise == null)
+        if (exercise == null)
         {
             return NotFound();
         }
@@ -87,6 +99,7 @@ public class Controller : ControllerBase
         exercise.Name = payload.Name;
         exercise.Description = payload.Description;
         exercise.MusclesWorked = payload.MusclesWorked;
+        exercise.Type = payload.Type;
         exercise.LastUpdated = DateTime.UtcNow;
         _context.Exercises.Update(exercise);
         await _context.SaveChangesAsync();

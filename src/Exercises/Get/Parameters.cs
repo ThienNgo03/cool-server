@@ -10,6 +10,8 @@
 
         public string? MusclesWorked { get; set; }
 
+        public string? Type { get; set; }
+
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? LastUpdated { get; set; }

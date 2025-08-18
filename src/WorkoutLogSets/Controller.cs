@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Journal.WorkoutLogs
+namespace Journal.WorkoutLogSets
 {
     [ApiController]
     [Authorize]
-    [Route("api/workout-logs")]
+    [Route("api/workout-log-sets")]
     public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;
@@ -29,16 +29,16 @@ namespace Journal.WorkoutLogs
 
         public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
         {
-            var query = _context.WorkoutLogs.AsQueryable();
+            var query = _context.WorkoutLogSets.AsQueryable();
 
             if (parameters.Id.HasValue)
                 query = query.Where(x => x.Id == parameters.Id);
 
-            if (parameters.WorkoutId.HasValue)
-                query = query.Where(x => x.WorkoutId == parameters.WorkoutId);
+            if (parameters.WorkoutLogId.HasValue)
+                query = query.Where(x => x.WorkoutLogId == parameters.WorkoutLogId);
 
-            if (parameters.WorkoutDate.HasValue)
-                query = query.Where(x => x.WorkoutDate == parameters.WorkoutDate);
+            if (parameters.Value.HasValue)
+                query = query.Where(x => x.Value == parameters.Value);
 
             if (parameters.CreatedDate.HasValue)
                 query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
@@ -51,7 +51,7 @@ namespace Journal.WorkoutLogs
 
             var result = await query.AsNoTracking().ToListAsync();
 
-            var paginationResults = new Builder<Databases.Journal.Tables.WorkoutLog.Table>()
+            var paginationResults = new Builder<Databases.Journal.Tables.WorkoutLogSet.Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -65,50 +65,50 @@ namespace Journal.WorkoutLogs
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
-            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
-            if (existingWorkout == null)
+            var existingWorkoutLog = await _context.WorkoutLogs.FindAsync(payload.WorkoutLogId);
+            if (existingWorkoutLog == null)
             {
                 return NotFound();
             }
 
-            var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table
+            var workoutLogSet = new Databases.Journal.Tables.WorkoutLogSet.Table
             {
                 Id = Guid.NewGuid(),
-                WorkoutId = payload.WorkoutId,
-                WorkoutDate = payload.WorkoutDate,
+                WorkoutLogId = payload.WorkoutLogId,
+                Value = payload.Value,
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
             };
 
-            _context.WorkoutLogs.Add(workoutLog);
+            _context.WorkoutLogSets.Add(workoutLogSet);
             await _context.SaveChangesAsync();
-            await _messageBus.PublishAsync(new Post.Messager.Message(workoutLog.Id));
-            await _hubContext.Clients.All.SendAsync("workout-log-created", workoutLog.Id);
-            return CreatedAtAction(nameof(Get), workoutLog.Id);
+            await _messageBus.PublishAsync(new Post.Messager.Message(workoutLogSet.Id));
+            await _hubContext.Clients.All.SendAsync("workout-log-set-created", workoutLogSet.Id);
+            return CreatedAtAction(nameof(Get), workoutLogSet.Id);
         }
 
         [HttpPut]
 
         public async Task<IActionResult> Put([FromBody] Update.Payload payload)
         {
-            var workoutLog = await _context.WorkoutLogs.FindAsync(payload.Id);
-            if (workoutLog == null)
+            var workoutLogSet = await _context.WorkoutLogSets.FindAsync(payload.Id);
+            if (workoutLogSet == null)
             {
                 return NotFound();
             }
-            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
-            if (existingWorkout == null)
+            var existingWorkoutLog = await _context.WorkoutLogs.FindAsync(payload.WorkoutLogId);
+            if (existingWorkoutLog == null)
             {
                 return NotFound();
             }
 
-            workoutLog.WorkoutId = payload.WorkoutId;
-            workoutLog.WorkoutDate = payload.WorkoutDate;
-            workoutLog.LastUpdated = DateTime.UtcNow;
-            _context.WorkoutLogs.Update(workoutLog);
+            workoutLogSet.WorkoutLogId = payload.WorkoutLogId;
+            workoutLogSet.Value = payload.Value;
+            workoutLogSet.LastUpdated = DateTime.UtcNow;
+            _context.WorkoutLogSets.Update(workoutLogSet);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
-            await _hubContext.Clients.All.SendAsync("workout-log-updated", payload.Id);
+            await _hubContext.Clients.All.SendAsync("workout-log-set-updated", payload.Id);
             return NoContent();
         }
 
@@ -116,16 +116,16 @@ namespace Journal.WorkoutLogs
 
         public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
         {
-            var workoutLog = await _context.WorkoutLogs.FindAsync(parameters.Id);
-            if (workoutLog == null)
+            var workoutLogSet = await _context.WorkoutLogSets.FindAsync(parameters.Id);
+            if (workoutLogSet == null)
             {
                 return NotFound();
             }
 
-            _context.WorkoutLogs.Remove(workoutLog);
+            _context.WorkoutLogSets.Remove(workoutLogSet);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
-            await _hubContext.Clients.All.SendAsync("workout-log-deleted", parameters.Id);
+            await _hubContext.Clients.All.SendAsync("workout-log-set-deleted", parameters.Id);
             return NoContent();
         }
     }

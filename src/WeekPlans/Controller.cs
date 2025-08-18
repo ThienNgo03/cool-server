@@ -30,20 +30,19 @@ namespace Journal.WeekPlans
 
             if (parameters.Id.HasValue)
                 query = query.Where(x => x.Id == parameters.Id);
+
             if (parameters.WorkoutId.HasValue)
                 query = query.Where(x => x.WorkoutId == parameters.WorkoutId);
+
             if (!string.IsNullOrEmpty(parameters.DateOfWeek))
                 query = query.Where(x => x.DateOfWeek == parameters.DateOfWeek);
+
             if (parameters.Time.HasValue)
                 query = query.Where(x => x.Time == parameters.Time);
-            //if (parameters.Rep.HasValue)
-            //    query = query.Where(x => x.Rep == parameters.Rep);
-            //if (parameters.HoldingTime.HasValue)
-            //    query = query.Where(x => x.HoldingTime == parameters.HoldingTime);
-            //if (parameters.Set.HasValue)
-            //    query = query.Where(x => x.Set == parameters.Set);
+
             if (parameters.CreatedDate.HasValue)
                 query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
+
             if (parameters.LastUpdated.HasValue)
                 query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
 
@@ -78,9 +77,6 @@ namespace Journal.WeekPlans
                 WorkoutId = payload.WorkoutId,
                 DateOfWeek = payload.DateOfWeek,
                 Time = payload.Time,
-                //Rep = payload.Rep,
-                //HoldingTime = payload.HoldingTime,
-                //Set = payload.Set,
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
             };
@@ -111,9 +107,6 @@ namespace Journal.WeekPlans
             weekPlan.WorkoutId = payload.WorkoutId;
             weekPlan.DateOfWeek = payload.DateOfWeek;
             weekPlan.Time = payload.Time;
-            //weekPlan.Rep = payload.Rep;
-            //weekPlan.HoldingTime = payload.HoldingTime;
-            //weekPlan.Set = payload.Set;
             weekPlan.LastUpdated = DateTime.UtcNow;
             _context.WeekPlans.Update(weekPlan);
             await _context.SaveChangesAsync();
