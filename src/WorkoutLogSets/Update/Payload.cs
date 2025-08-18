@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Journal.WorkoutLogs.Update
+namespace Journal.WorkoutLogSets.Update
 {
     public class Payload
     {
@@ -8,9 +8,9 @@ namespace Journal.WorkoutLogs.Update
         public Guid Id { get; set; }
 
         [Required]
-        public Guid WorkoutId { get; set; }
+        public Guid WorkoutLogId { get; set; }
 
-        public DateTime WorkoutDate { get; set; }
+        public int Value { get; set; }
 
     }
 }

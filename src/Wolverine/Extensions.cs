@@ -50,6 +50,14 @@ public static class Extensions
             options.PublishMessage<Journal.SoloPools.Post.Messager.Message>().ToLocalQueue("campaign-member-post");
             options.PublishMessage<Journal.SoloPools.Put.Messager.Message>().ToLocalQueue("campaign-member-update");
 
+            options.PublishMessage<Journal.WeekPlanSets.Delete.Messager.Message>().ToLocalQueue("weekplanset-delete");
+            options.PublishMessage<Journal.WeekPlanSets.Post.Messager.Message>().ToLocalQueue("weekplanset-post");
+            options.PublishMessage<Journal.WeekPlanSets.Update.Messager.Message>().ToLocalQueue("weekplanset-update");
+
+            options.PublishMessage<Journal.WorkoutLogSets.Delete.Messager.Message>().ToLocalQueue("workoutlogset-delete");
+            options.PublishMessage<Journal.WorkoutLogSets.Post.Messager.Message>().ToLocalQueue("workoutlogset-post");
+            options.PublishMessage<Journal.WorkoutLogSets.Update.Messager.Message>().ToLocalQueue("workoutlogset-update");
+
         });
         return services;
 

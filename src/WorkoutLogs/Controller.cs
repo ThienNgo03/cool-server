@@ -7,16 +7,16 @@ namespace Journal.WorkoutLogs
     [ApiController]
     [Authorize]
     [Route("api/workout-logs")]
-    public class Controller: ControllerBase
+    public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;
         private readonly ILogger<Controller> _logger;
         private readonly JournalDbContext _context;
         private readonly IHubContext<Hub> _hubContext;
-        
-        public Controller(IMessageBus messageBus, 
-                          ILogger<Controller> logger, 
-                          JournalDbContext context, 
+
+        public Controller(IMessageBus messageBus,
+                          ILogger<Controller> logger,
+                          JournalDbContext context,
                           IHubContext<Hub> hubContext)
         {
             _messageBus = messageBus;
@@ -33,18 +33,16 @@ namespace Journal.WorkoutLogs
 
             if (parameters.Id.HasValue)
                 query = query.Where(x => x.Id == parameters.Id);
+
             if (parameters.WorkoutId.HasValue)
                 query = query.Where(x => x.WorkoutId == parameters.WorkoutId);
-            if (parameters.Rep.HasValue)
-                query = query.Where(x => x.Rep == parameters.Rep);
-            if (parameters.HoldingTime.HasValue)
-                query = query.Where(x => x.HoldingTime == parameters.HoldingTime);
-            if (parameters.Set.HasValue)
-                query = query.Where(x => x.Set == parameters.Set);
+
             if (parameters.WorkoutDate.HasValue)
                 query = query.Where(x => x.WorkoutDate == parameters.WorkoutDate);
+
             if (parameters.CreatedDate.HasValue)
                 query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
+
             if (parameters.LastUpdated.HasValue)
                 query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
 
@@ -77,9 +75,6 @@ namespace Journal.WorkoutLogs
             {
                 Id = Guid.NewGuid(),
                 WorkoutId = payload.WorkoutId,
-                Rep = payload.Rep,
-                HoldingTime = payload.HoldingTime,
-                Set = payload.Set,
                 WorkoutDate = payload.WorkoutDate,
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
@@ -92,7 +87,7 @@ namespace Journal.WorkoutLogs
             return CreatedAtAction(nameof(Get), workoutLog.Id);
         }
 
-        [HttpPut] 
+        [HttpPut]
 
         public async Task<IActionResult> Put([FromBody] Update.Payload payload)
         {
@@ -108,9 +103,6 @@ namespace Journal.WorkoutLogs
             }
 
             workoutLog.WorkoutId = payload.WorkoutId;
-            workoutLog.Rep = payload.Rep;
-            workoutLog.HoldingTime = payload.HoldingTime;
-            workoutLog.Set = payload.Set;
             workoutLog.WorkoutDate = payload.WorkoutDate;
             workoutLog.LastUpdated = DateTime.UtcNow;
             _context.WorkoutLogs.Update(workoutLog);

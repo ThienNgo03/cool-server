@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Journal.WeekPlans
+namespace Journal.WorkoutLogSets
 {
     [ApiController]
     [Authorize]
-    [Route("api/week-plans")]
+    [Route("api/workout-log-sets")]
     public class Controller : ControllerBase
     {
         private readonly IMessageBus _messageBus;
@@ -14,7 +14,10 @@ namespace Journal.WeekPlans
         private readonly JournalDbContext _context;
         private readonly IHubContext<Hub> _hubContext;
 
-        public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
+        public Controller(IMessageBus messageBus,
+                          ILogger<Controller> logger,
+                          JournalDbContext context,
+                          IHubContext<Hub> hubContext)
         {
             _messageBus = messageBus;
             _logger = logger;
@@ -26,28 +29,16 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
         {
-            var query = _context.WeekPlans.AsQueryable();
+            var query = _context.WorkoutLogSets.AsQueryable();
 
             if (parameters.Id.HasValue)
                 query = query.Where(x => x.Id == parameters.Id);
 
-            if (parameters.WorkoutId.HasValue)
-                query = query.Where(x => x.WorkoutId == parameters.WorkoutId);
+            if (parameters.WorkoutLogId.HasValue)
+                query = query.Where(x => x.WorkoutLogId == parameters.WorkoutLogId);
 
-            if (!string.IsNullOrEmpty(parameters.DateOfWeek))
-                query = query.Where(x => x.DateOfWeek == parameters.DateOfWeek);
-
-            if (parameters.Time.HasValue)
-                query = query.Where(x => x.Time == parameters.Time);
-
-            //if (parameters.Rep.HasValue)
-            //    query = query.Where(x => x.Rep == parameters.Rep);
-
-            //if (parameters.HoldingTime.HasValue)
-            //    query = query.Where(x => x.HoldingTime == parameters.HoldingTime);
-
-            //if (parameters.Set.HasValue)
-            //    query = query.Where(x => x.Set == parameters.Set);
+            if (parameters.Value.HasValue)
+                query = query.Where(x => x.Value == parameters.Value);
 
             if (parameters.CreatedDate.HasValue)
                 query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
@@ -60,7 +51,7 @@ namespace Journal.WeekPlans
 
             var result = await query.AsNoTracking().ToListAsync();
 
-            var paginationResults = new Builder<Databases.Journal.Tables.WeekPlan.Table>()
+            var paginationResults = new Builder<Databases.Journal.Tables.WorkoutLogSet.Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -74,56 +65,50 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
-            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
-            if (existingWorkout == null)
+            var existingWorkoutLog = await _context.WorkoutLogs.FindAsync(payload.WorkoutLogId);
+            if (existingWorkoutLog == null)
             {
                 return NotFound();
             }
 
-            var weekPlan = new Databases.Journal.Tables.WeekPlan.Table
+            var workoutLogSet = new Databases.Journal.Tables.WorkoutLogSet.Table
             {
                 Id = Guid.NewGuid(),
-                WorkoutId = payload.WorkoutId,
-                DateOfWeek = payload.DateOfWeek,
-                Time = payload.Time,
+                WorkoutLogId = payload.WorkoutLogId,
+                Value = payload.Value,
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
             };
 
-            _context.WeekPlans.Add(weekPlan);
+            _context.WorkoutLogSets.Add(workoutLogSet);
             await _context.SaveChangesAsync();
-            await _messageBus.PublishAsync(new Post.Messager.Message(weekPlan.Id));
-            await _hubContext.Clients.All.SendAsync("week-plans-created", weekPlan.Id);
-            return CreatedAtAction(nameof(Get), weekPlan.Id);
+            await _messageBus.PublishAsync(new Post.Messager.Message(workoutLogSet.Id));
+            await _hubContext.Clients.All.SendAsync("workout-log-set-created", workoutLogSet.Id);
+            return CreatedAtAction(nameof(Get), workoutLogSet.Id);
         }
 
         [HttpPut]
 
         public async Task<IActionResult> Put([FromBody] Update.Payload payload)
         {
-            var weekPlan = await _context.WeekPlans.FindAsync(payload.Id);
-            if (weekPlan == null)
+            var workoutLogSet = await _context.WorkoutLogSets.FindAsync(payload.Id);
+            if (workoutLogSet == null)
+            {
+                return NotFound();
+            }
+            var existingWorkoutLog = await _context.WorkoutLogs.FindAsync(payload.WorkoutLogId);
+            if (existingWorkoutLog == null)
             {
                 return NotFound();
             }
 
-            var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
-            if (existingWorkout == null)
-            {
-                return NotFound();
-            }
-
-            weekPlan.WorkoutId = payload.WorkoutId;
-            weekPlan.DateOfWeek = payload.DateOfWeek;
-            weekPlan.Time = payload.Time;
-            //weekPlan.Rep = payload.Rep;
-            //weekPlan.HoldingTime = payload.HoldingTime;
-            //weekPlan.Set = payload.Set;
-            weekPlan.LastUpdated = DateTime.UtcNow;
-            _context.WeekPlans.Update(weekPlan);
+            workoutLogSet.WorkoutLogId = payload.WorkoutLogId;
+            workoutLogSet.Value = payload.Value;
+            workoutLogSet.LastUpdated = DateTime.UtcNow;
+            _context.WorkoutLogSets.Update(workoutLogSet);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
-            await _hubContext.Clients.All.SendAsync("week-plans-updated", payload.Id);
+            await _hubContext.Clients.All.SendAsync("workout-log-set-updated", payload.Id);
             return NoContent();
         }
 
@@ -131,16 +116,16 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
         {
-            var weekPlan = await _context.WeekPlans.FindAsync(parameters.Id);
-            if (weekPlan == null)
+            var workoutLogSet = await _context.WorkoutLogSets.FindAsync(parameters.Id);
+            if (workoutLogSet == null)
             {
                 return NotFound();
             }
 
-            _context.WeekPlans.Remove(weekPlan);
+            _context.WorkoutLogSets.Remove(workoutLogSet);
             await _context.SaveChangesAsync();
             await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
-            await _hubContext.Clients.All.SendAsync("week-plans-deleted", parameters.Id);
+            await _hubContext.Clients.All.SendAsync("workout-log-set-deleted", parameters.Id);
             return NoContent();
         }
     }
