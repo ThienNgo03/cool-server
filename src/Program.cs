@@ -46,10 +46,4 @@ app.MapHub<Journal.Muscles.Hub>("muscles-hub");
 
 app.MapHub<Journal.ExerciseMuscles.Hub>("exercise-muscles-hub");
 
-
-app.MapHub<Journal.WorkoutLogSets.Hub>("workout-log-sets-hub");
-
-app.MapHub<Journal.WeekPlanSets.Hub>("week-plan-sets-hub");
-
-
 app.Run();
