@@ -58,6 +58,10 @@ public static class Extensions
             options.PublishMessage<Journal.WorkoutLogSets.Post.Messager.Message>().ToLocalQueue("workoutlogset-post");
             options.PublishMessage<Journal.WorkoutLogSets.Update.Messager.Message>().ToLocalQueue("workoutlogset-update");
 
+            options.PublishMessage<Journal.Muscles.Delete.Messager.Message>().ToLocalQueue("muscle-delete");
+            options.PublishMessage<Journal.Muscles.Post.Messager.Message>().ToLocalQueue("muscle-post");
+            options.PublishMessage<Journal.Muscles.Update.Messager.Message>().ToLocalQueue("muscle-update");
+
         });
         return services;
 

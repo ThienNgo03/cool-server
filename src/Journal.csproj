@@ -28,4 +28,8 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.18" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ExerciseMuscles\" />
+  </ItemGroup>
+
 </Project>
