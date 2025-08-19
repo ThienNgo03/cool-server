@@ -1,14 +1,30 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Journal.Workouts.Post
+namespace Journal.Workouts.Post;
+
+public class Payload
 {
-    public class Payload
-    {
-        [Required]
-        public Guid ExerciseId { get; set; }
+    [Required]
+    public Guid ExerciseId { get; set; }
 
-        [Required]
-        public Guid UserId { get; set; }
+    [Required]
+    public Guid UserId { get; set; }
 
-    }
+    public ICollection<WeekPlan>? WeekPlans { get; set; }
+
+
+}
+
+public class WeekPlan
+{
+    public string DateOfWeek { get; set; }
+
+    public DateTime Time { get; set; }
+
+    public ICollection<WeekPlanSet>? WeekPlanSets { get; set; }
+}
+
+public class WeekPlanSet
+{
+    public int Value { get; set; }
 }

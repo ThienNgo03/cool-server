@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace Journal.Identity.Register
+namespace Journal.Authentication.Register
 {
     public class Payload: IdentityUser
     {

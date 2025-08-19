@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Journal.Identity.Signin;
+namespace Journal.Authentication.Signin;
 
 public class Payload
 {
