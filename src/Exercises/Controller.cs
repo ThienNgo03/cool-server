@@ -1,6 +1,7 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Journal.Exercises;
 
@@ -63,6 +64,13 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var exercise = new Databases.Journal.Tables.Exercise.Table
         {
             Id = Guid.NewGuid(),
@@ -83,6 +91,13 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var exercise = await _context.Exercises.FindAsync(payload.Id);
         if (exercise == null)
         {
@@ -104,6 +119,13 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var exercise = await _context.Exercises.FindAsync(parameters.Id);
         if (exercise == null)
         {

@@ -177,6 +177,13 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var weekPlanSet = await _context.WeekPlans.FindAsync(parameters.Id);
         if (weekPlanSet == null)
         {
