@@ -2,6 +2,7 @@
 using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Journal.Competitions;
 
@@ -26,6 +27,7 @@ public class Controller : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
+
         var query =_dbContext.Competitions.AsQueryable();
 
         if (parameters.Id.HasValue)
@@ -161,7 +163,14 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Payload competition)
     {
-        if(competition.Type!= Post.Type.Solo.ToString() && 
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        if (competition.Type!= Post.Type.Solo.ToString() && 
             competition.Type != Post.Type.Team.ToString())
         {
             return BadRequest($"Invalid competition type: {competition.Type}");
@@ -201,6 +210,13 @@ public class Controller : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var competition = await _dbContext.Competitions.FindAsync(parameters.Id);
         if (competition == null)
         {
@@ -216,6 +232,14 @@ public class Controller : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Update([FromBody]Put.Payload competition)
     {
+
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var existingCompetition = await _dbContext.Competitions.FindAsync(competition.Id);
         if (existingCompetition == null)
         {

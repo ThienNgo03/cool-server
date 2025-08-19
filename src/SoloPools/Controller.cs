@@ -1,5 +1,6 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Journal.SoloPools;
 
@@ -67,6 +68,13 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var existingCompetition = await _dbContext.Competitions.FindAsync(payload.CompetitionId);
         if (existingCompetition == null)
         {
@@ -88,7 +96,14 @@ public class Controller : ControllerBase
     }
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Put.Payload payload)
-    {   
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var soloPool = await _dbContext.SoloPools.FindAsync(payload.Id);
         if (soloPool == null)
         {
@@ -113,6 +128,13 @@ public class Controller : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var soloPool = await _dbContext.SoloPools.FindAsync(parameters.Id);
         if (soloPool == null)
         {

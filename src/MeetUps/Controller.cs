@@ -1,6 +1,7 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Hosting;
+using System.Security.Claims;
 using Wolverine.Persistence;
 
 namespace Journal.MeetUps;
@@ -23,6 +24,7 @@ public class Controller : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
+
         var query = _context.MeetUps.AsQueryable();
 
         if (parameters.Id.HasValue)
@@ -61,6 +63,13 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var meetUp = new Databases.Journal.Tables.MeetUp.Table
         {
             Id = Guid.NewGuid(),
@@ -81,6 +90,13 @@ public class Controller : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var meetUp = await _context.MeetUps.FindAsync(payload.Id);
         if (meetUp == null)
         {
@@ -103,6 +119,13 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var meetUp = await _context.MeetUps.FindAsync(parameters.Id);
         if (meetUp == null)
         {

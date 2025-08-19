@@ -1,6 +1,7 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Journal.WeekPlans
 {
@@ -65,6 +66,13 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
+            if (User.Identity is null)
+                return Unauthorized();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
+
             var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
             if (existingWorkout == null)
             {
@@ -92,6 +100,13 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Put([FromBody] Update.Payload payload)
         {
+            if (User.Identity is null)
+                return Unauthorized();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
+
             var weekPlan = await _context.WeekPlans.FindAsync(payload.Id);
             if (weekPlan == null)
             {
@@ -119,6 +134,13 @@ namespace Journal.WeekPlans
 
         public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
         {
+            if (User.Identity is null)
+                return Unauthorized();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
+
             var weekPlan = await _context.WeekPlans.FindAsync(parameters.Id);
             if (weekPlan == null)
             {
