@@ -1,19 +1,19 @@
 ﻿using Journal.Databases;
 using Journal.Wolverine;
 using Journal.Journeys;
-using Journal.Identity;
+using Journal.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson();
 
 //đăng ký service 
 builder.Services.AddDatabases(builder.Configuration);
 builder.Services.AddWolverines(builder.Configuration);
 builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
-builder.Services.AddIdentity(builder.Configuration);
+builder.Services.AddAuthentication(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -46,6 +46,10 @@ app.MapHub<Journal.Muscles.Hub>("muscles-hub");
 
 app.MapHub<Journal.ExerciseMuscles.Hub>("exercise-muscles-hub");
 
+
+app.MapHub<Journal.WorkoutLogSets.Hub>("workout-log-sets-hub");
+
+app.MapHub<Journal.WeekPlanSets.Hub>("week-plan-sets-hub");
 
 
 app.Run();

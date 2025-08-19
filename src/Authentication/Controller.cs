@@ -1,11 +1,10 @@
-﻿using JasperFx.CodeGeneration.Frames;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Journal.Identity;
+namespace Journal.Authentication;
 
 [ApiController]
 [Route("api/authentication")]
@@ -38,7 +37,7 @@ public class Controller:ControllerBase
     }
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> RegisterAsync([FromBody] Identity.Register.Payload payload)
+    public async Task<IActionResult> RegisterAsync([FromBody] Register.Payload payload)
     {
         var newUser = new IdentityUser
         {
@@ -51,12 +50,13 @@ public class Controller:ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
+
         return NoContent();
     }
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> LoginAsync([FromBody] Identity.Signin.Payload payload)
+    public async Task<IActionResult> LoginAsync([FromBody] Signin.Payload payload)
     {
         var user = await _userManager.FindByEmailAsync(payload.AccountEmail);
         if (user == null)
@@ -87,12 +87,24 @@ public class Controller:ControllerBase
         var issuer = _configuration["JWT:Issuer"];
         var audience = _configuration["JWT:Audience"];
 
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+        if (user == null)
+            throw new InvalidOperationException("User not found");
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
         var securityKey = new SymmetricSecurityKey(key);
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
+            claims: claims,
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: credentials
         );

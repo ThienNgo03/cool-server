@@ -1,4 +1,3 @@
-﻿namespace Journal.Workouts.Delete.Messager
-{
-    public record Message(Guid Id);
-}
+﻿namespace Journal.Workouts.Delete.Messager;
+
+public record Message(Guid Id, bool IsWeekPlanDelete, bool IsWeekPlanSetDelete);

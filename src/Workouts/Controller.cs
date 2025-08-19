@@ -110,7 +110,7 @@ namespace Journal.Workouts
 
             _context.Workouts.Add(workout);
             await _context.SaveChangesAsync();
-            await _messageBus.PublishAsync(new Post.Messager.Message(workout.Id));
+            await _messageBus.PublishAsync(new Post.Messager.Message(workout.Id, payload.WeekPlans));
             await _hubContext.Clients.All.SendAsync("workout-created", workout.Id);
             return CreatedAtAction(nameof(Get), workout.Id);
         }
@@ -157,7 +157,9 @@ namespace Journal.Workouts
 
             _context.Workouts.Remove(workout);
             await _context.SaveChangesAsync();
-            await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+            await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, 
+                                                                       parameters.IsWeekPlanDelete, 
+                                                                       parameters.IsWeekPlanSetDelete));
             await _hubContext.Clients.All.SendAsync("workout-deleted", parameters.Id);
             return NoContent();
         }
