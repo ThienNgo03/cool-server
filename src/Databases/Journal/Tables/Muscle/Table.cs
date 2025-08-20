@@ -1,4 +1,4 @@
-﻿namespace Journal.Databases.Journal.Tables.Exercise;
+﻿namespace Journal.Databases.Journal.Tables.Muscle;
 
 public class Table
 {
@@ -6,12 +6,7 @@ public class Table
 
     public string Name { get; set; }
 
-    public string Description { get; set; }
-
-    public string Type { get; set; }
-
     public DateTime CreatedDate { get; set; }
 
     public DateTime LastUpdated { get; set; }
-
 }

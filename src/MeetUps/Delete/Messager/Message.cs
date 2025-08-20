@@ -1,4 +1,3 @@
-﻿namespace Journal.MeetUps.Delete.Messager
-{
-    public record Message(Guid Id);
-}
+﻿namespace Journal.MeetUps.Delete.Messager;
+
+public record Message(Guid Id);
