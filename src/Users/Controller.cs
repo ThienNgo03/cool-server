@@ -1,5 +1,9 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Journal.Users;
 
@@ -12,13 +16,15 @@ public class Controller : ControllerBase
 
     private readonly ILogger<Controller> _logger;
 
-    private readonly JournalDbContext _context; //biến đại diện cho database
+    private readonly JournalDbContext _context;
+    private readonly IHubContext<Hub> _hubContext;
 
-    public Controller(ILogger<Controller> logger, JournalDbContext context, IMessageBus messageBus)
+    public Controller(ILogger<Controller> logger, JournalDbContext context, IMessageBus messageBus, IHubContext<Hub> hubContext)
     {
         _logger = logger;
-        _context = context; // gán database vào biến(_context) đã tạo
+        _context = context;
         _messageBus = messageBus;
+        _hubContext = hubContext;
     }
 
     [HttpGet]
@@ -104,5 +110,36 @@ public class Controller : ControllerBase
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, parameters.DeleteNotes)); // bắn qua handler
         return NoContent(); //201
+    }
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.User.Table> patchDoc,
+                                       CancellationToken cancellationToken = default!)
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        foreach (var op in patchDoc.Operations)
+            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+
+        if (patchDoc is null)
+            return BadRequest("Patch document cannot be null.");
+
+        var entity = await _context.Users.FindAsync(id, cancellationToken);
+        if (entity == null)
+            return NotFound();
+
+        patchDoc.ApplyTo(entity);
+
+        _context.Users.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        await _hubContext.Clients.All.SendAsync("week-plan-updated", entity.Id);
+
+        return NoContent();
     }
 }

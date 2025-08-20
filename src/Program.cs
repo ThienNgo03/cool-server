@@ -50,5 +50,7 @@ app.MapHub<Journal.SoloPools.Hub> ("solo-pools-hub");
 
 app.MapHub<Journal.TeamPools.Hub>("team-pools-hub");
 
+app.MapHub<Journal.Users.Hub>("users-hub");
+
 
 app.Run();
