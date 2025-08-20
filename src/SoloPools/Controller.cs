@@ -1,5 +1,9 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Journal.SoloPools;
@@ -13,14 +17,16 @@ public class Controller : ControllerBase
     private readonly JournalDbContext _dbContext;
     private readonly ILogger<Controller> _logger;
     private readonly IMessageBus _messageBus;
+    private readonly IHubContext<Hub> _hubContext;
     #endregion
 
     #region [ CTor ]
-    public Controller(JournalDbContext dbContext, ILogger<Controller> logger, IMessageBus messageBus)
+    public Controller(JournalDbContext dbContext, ILogger<Controller> logger, IMessageBus messageBus, IHubContext<Hub> hubContext)
     {
         _dbContext = dbContext;
         _logger = logger;
         _messageBus = messageBus;
+        _hubContext = hubContext;
     }
     #endregion
 
@@ -92,6 +98,7 @@ public class Controller : ControllerBase
         _dbContext.SoloPools.Add(soloPool);
         await _dbContext.SaveChangesAsync();
         await _messageBus.PublishAsync(new Post.Messager.Message(soloPool.Id));
+        await _hubContext.Clients.All.SendAsync("solo-pool-created", soloPool.Id);
         return CreatedAtAction(nameof(Get), new { id = soloPool.Id });
     }
     [HttpPut]
@@ -122,9 +129,43 @@ public class Controller : ControllerBase
 
         _dbContext.SoloPools.Update(soloPool);
         await _dbContext.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Put.Messager.Message(soloPool.Id));
+        await _messageBus.PublishAsync(new Put.Messager.Message(payload.Id));
+        await _hubContext.Clients.All.SendAsync("solo-pool-updated", payload.Id);
         return NoContent();
     }
+
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.SoloPool.Table> patchDoc,
+                                       CancellationToken cancellationToken = default!)
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        foreach (var op in patchDoc.Operations)
+            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+
+        if (patchDoc is null)
+            return BadRequest("Patch document cannot be null.");
+
+        var entity = await _dbContext.SoloPools.FindAsync(id, cancellationToken);
+        if (entity == null)
+            return NotFound();
+
+        patchDoc.ApplyTo(entity);
+
+        _dbContext.SoloPools.Update(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _hubContext.Clients.All.SendAsync("solo-pool-updated", entity.Id);
+
+        return NoContent();
+    }
+
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
@@ -142,7 +183,8 @@ public class Controller : ControllerBase
         }
         _dbContext.SoloPools.Remove(soloPool);
         await _dbContext.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Delete.Messager.Message(soloPool.Id));
+        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+        await _hubContext.Clients.All.SendAsync("solo-pool-deleted", parameters.Id);
         return NoContent();
     }
 }
