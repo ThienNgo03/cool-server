@@ -46,5 +46,9 @@ app.MapHub<Journal.Muscles.Hub>("muscles-hub");
 
 app.MapHub<Journal.ExerciseMuscles.Hub>("exercise-muscles-hub");
 
+app.MapHub<Journal.SoloPools.Hub> ("solo-pools-hub");
+
+app.MapHub<Journal.TeamPools.Hub>("team-pools-hub");
+
 
 app.Run();
