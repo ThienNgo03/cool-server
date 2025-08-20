@@ -1,7 +1,10 @@
 ﻿using Journal.Competitions.Post;
 using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Journal.Competitions;
@@ -226,9 +229,43 @@ public class Controller : ControllerBase
 
         _dbContext.Competitions.Remove(competition);
         await _dbContext.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Delete.Messager.Message(competition.Id, parameters.DeleteSoloPool, parameters.DeleteTeamPool));    
+        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, parameters.DeleteSoloPool, parameters.DeleteTeamPool));
+        await _hubContext.Clients.All.SendAsync("competition-deleted", parameters.Id);
         return NoContent();
     }
+
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.Competition.Table> patchDoc,
+                                           CancellationToken cancellationToken = default!)
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        foreach (var op in patchDoc.Operations)
+            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+
+        if (patchDoc is null)
+            return BadRequest("Patch document cannot be null.");
+
+        var entity = await _dbContext.Competitions.FindAsync(id, cancellationToken);
+        if (entity == null)
+            return NotFound();
+
+        patchDoc.ApplyTo(entity);
+
+        _dbContext.Competitions.Update(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _hubContext.Clients.All.SendAsync("competition-updated", entity.Id);
+
+        return NoContent();
+    }
+
     [HttpPut]
     public async Task<IActionResult> Update([FromBody]Put.Payload competition)
     {
@@ -281,6 +318,7 @@ public class Controller : ControllerBase
         _dbContext.Competitions.Update(existingCompetition);
         await _dbContext.SaveChangesAsync();
         await _messageBus.PublishAsync(new Put.Messager.Message(existingCompetition.Id));
+        await _hubContext.Clients.All.SendAsync("competition-updated", existingCompetition.Id);
         return NoContent();
     }
 }

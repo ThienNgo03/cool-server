@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace Journal.MeetUps;
+namespace Journal.SoloPools;
 
 public sealed class Hub : Microsoft.AspNetCore.SignalR.Hub
 {

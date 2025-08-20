@@ -1,5 +1,7 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
@@ -93,6 +95,40 @@ public class Controller : ControllerBase
         await _messageBus.PublishAsync(new Post.Messager.Message(workoutLogSet.Id));
         await _hubContext.Clients.All.SendAsync("workout-log-set-created", workoutLogSet.Id);
         return CreatedAtAction(nameof(Get), workoutLogSet.Id);
+    }
+
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.WorkoutLogSet.Table> patchDoc,
+                                       CancellationToken cancellationToken = default!)
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        foreach (var op in patchDoc.Operations)
+            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+
+        if (patchDoc is null)
+            return BadRequest("Patch document cannot be null.");
+
+        var entity = await _context.WorkoutLogSets.FindAsync(id, cancellationToken);
+        if (entity == null)
+            return NotFound();
+
+        patchDoc.ApplyTo(entity);
+
+        entity.LastUpdated = DateTime.UtcNow;
+
+        _context.WorkoutLogSets.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        await _hubContext.Clients.All.SendAsync("workout-log-set-updated", entity.Id);
+
+        return NoContent();
     }
 
     [HttpPut]

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-
-namespace Journal.MeetUps;
+namespace Journal.ExerciseMuscles;
 
 public sealed class Hub : Microsoft.AspNetCore.SignalR.Hub
 {
@@ -14,13 +13,6 @@ public sealed class Hub : Microsoft.AspNetCore.SignalR.Hub
     public Hub(JournalDbContext context)
     {
         _context = context;
-    }
-    #endregion
-
-    #region [Methods]
-    public async Task SendMessage(string message)
-    {
-        await Clients.All.SendAsync("ReceiveMessage", $"{Context.ConnectionId}: {message}");
     }
     #endregion
 }

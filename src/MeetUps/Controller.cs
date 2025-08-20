@@ -1,5 +1,8 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using System.Security.Claims;
 using Wolverine.Persistence;
@@ -14,12 +17,14 @@ public class Controller : ControllerBase
     private readonly IMessageBus _messageBus;
     private readonly ILogger<Controller> _logger;
     private readonly JournalDbContext _context;
+    private readonly IHubContext<Hub> _hubContext;
 
-    public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context)
+    public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
     {
         _messageBus = messageBus;
         _logger = logger;
         _context = context;
+        _hubContext = hubContext;
     }
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
@@ -85,6 +90,7 @@ public class Controller : ControllerBase
         _context.MeetUps.Add(meetUp);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Post.Messager.Message(meetUp.Id));
+        await _hubContext.Clients.All.SendAsync("meet-up-created", meetUp.Id);
         return CreatedAtAction(nameof(Get), meetUp.Id);
     }
     [HttpPut]
@@ -112,6 +118,41 @@ public class Controller : ControllerBase
         _context.MeetUps.Update(meetUp);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _hubContext.Clients.All.SendAsync("meet-up-updated", payload.Id);
+        return NoContent();
+    }
+
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.MeetUp.Table> patchDoc,
+                                           CancellationToken cancellationToken = default!)
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        foreach (var op in patchDoc.Operations)
+            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+
+        if (patchDoc is null)
+            return BadRequest("Patch document cannot be null.");
+
+        var entity = await _context.MeetUps.FindAsync(id, cancellationToken);
+        if (entity == null)
+            return NotFound();
+
+        patchDoc.ApplyTo(entity);
+
+        entity.LastUpdated = DateTime.UtcNow;
+
+        _context.MeetUps.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        await _hubContext.Clients.All.SendAsync("meet-up-updated", entity.Id);
+
         return NoContent();
     }
 
@@ -135,6 +176,7 @@ public class Controller : ControllerBase
         _context.MeetUps.Remove(meetUp);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+        await _hubContext.Clients.All.SendAsync("meet-up-deleted", parameters.Id);
         return NoContent();
     }
 }

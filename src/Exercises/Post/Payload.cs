@@ -8,8 +8,6 @@ namespace Journal.Exercises.Post
 
         public string Description { get; set; } = string.Empty;
 
-        public string MusclesWorked { get; set; } = string.Empty;
-
         public string Type { get; set; } = string.Empty;
 
     }

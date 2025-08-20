@@ -101,7 +101,7 @@ public class Controller : ControllerBase
         _context.WeekPlanSets.Add(weekPlanSet);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Post.Messager.Message(weekPlanSet.Id));
-        await _hubContext.Clients.All.SendAsync("week-plan-sets-created", weekPlanSet.Id);
+        await _hubContext.Clients.All.SendAsync("week-plan-set-created", weekPlanSet.Id);
         return CreatedAtAction(nameof(Get), weekPlanSet.Id);
     }
 
@@ -135,7 +135,7 @@ public class Controller : ControllerBase
 
         _context.WeekPlanSets.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
-        await _hubContext.Clients.All.SendAsync("week-plan-sets-updated", entity.Id);
+        await _hubContext.Clients.All.SendAsync("week-plan-set-updated", entity.Id);
 
         return NoContent();
     }
@@ -169,7 +169,7 @@ public class Controller : ControllerBase
         _context.WeekPlanSets.Update(weekPlanSet);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
-        await _hubContext.Clients.All.SendAsync("week-plan-sets-updated", payload.Id);
+        await _hubContext.Clients.All.SendAsync("week-plan-set-updated", payload.Id);
         return NoContent();
     }
 
@@ -193,7 +193,7 @@ public class Controller : ControllerBase
         _context.WeekPlans.Remove(weekPlanSet);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
-        await _hubContext.Clients.All.SendAsync("week-plan-sets-deleted", parameters.Id);
+        await _hubContext.Clients.All.SendAsync("week-plan-set-deleted", parameters.Id);
         return NoContent();
     }
 

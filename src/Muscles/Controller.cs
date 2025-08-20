@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
-namespace Journal.Exercises;
+namespace Journal.Muscles;
 
 [ApiController]
 [Authorize]
-[Route("api/exercises")]
+[Route("api/muscles")]
 public class Controller : ControllerBase
 {
     private readonly IMessageBus _messageBus;
@@ -28,19 +28,13 @@ public class Controller : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
-        var query = _context.Exercises.AsQueryable();
+        var query = _context.Muscles.AsQueryable();
 
         if (parameters.Id.HasValue)
             query = query.Where(x => x.Id == parameters.Id);
 
         if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(x => x.Name.Contains(parameters.Name));
-
-        if (!string.IsNullOrEmpty(parameters.Description))
-            query = query.Where(x => x.Description.Contains(parameters.Description));
-
-        if (!string.IsNullOrEmpty(parameters.Type))
-            query = query.Where(x => x.Type.Contains(parameters.Type));
 
         if (parameters.CreatedDate.HasValue)
             query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
@@ -53,12 +47,12 @@ public class Controller : ControllerBase
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.Exercise.Table>()
-            .WithIndex(parameters.PageIndex)
-            .WithSize(parameters.PageSize)
-            .WithTotal(result.Count)
-            .WithItems(result)
-            .Build();
+        var paginationResults = new Builder<Databases.Journal.Tables.Muscle.Table>()
+          .WithIndex(parameters.PageIndex)
+          .WithSize(parameters.PageSize)
+          .WithTotal(result.Count)
+          .WithItems(result)
+          .Build();
 
         return Ok(paginationResults);
     }
@@ -66,61 +60,24 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
-        if (User.Identity is null)
-            return Unauthorized();
-
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
-
-        var exercise = new Databases.Journal.Tables.Exercise.Table
+        var muscle = new Databases.Journal.Tables.Muscle.Table
         {
             Id = Guid.NewGuid(),
             Name = payload.Name,
-            Description = payload.Description,
-            Type = payload.Type,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
-        _context.Exercises.Add(exercise);
+        _context.Muscles.Add(muscle);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Post.Messager.Message(exercise.Id));
-        await _hubContext.Clients.All.SendAsync("exercise-created", exercise.Id);
-        return CreatedAtAction(nameof(Get), exercise.Id);
-    }
-
-    [HttpPut]
-
-    public async Task<IActionResult> Put([FromBody] Update.Payload payload)
-    {
-        if (User.Identity is null)
-            return Unauthorized();
-
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
-
-        var exercise = await _context.Exercises.FindAsync(payload.Id);
-        if (exercise == null)
-        {
-            return NotFound();
-        }
-
-        exercise.Name = payload.Name;
-        exercise.Description = payload.Description;
-        exercise.Type = payload.Type;
-        exercise.LastUpdated = DateTime.UtcNow;
-        _context.Exercises.Update(exercise);
-        await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
-        await _hubContext.Clients.All.SendAsync("exercise-updated", payload.Id);
-        return NoContent();
+        await _messageBus.PublishAsync(new Post.Messager.Message(muscle.Id));
+        await _hubContext.Clients.All.SendAsync("muscle-created", muscle.Id);
+        return CreatedAtAction(nameof(Get), muscle.Id);
     }
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.Exercise.Table> patchDoc,
-                                           CancellationToken cancellationToken = default!)
+                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.Muscle.Table> patchDoc,
+                                       CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)
             return Unauthorized();
@@ -136,7 +93,7 @@ public class Controller : ControllerBase
         if (patchDoc is null)
             return BadRequest("Patch document cannot be null.");
 
-        var entity = await _context.Exercises.FindAsync(id, cancellationToken);
+        var entity = await _context.Muscles.FindAsync(id, cancellationToken);
         if (entity == null)
             return NotFound();
 
@@ -144,10 +101,28 @@ public class Controller : ControllerBase
 
         entity.LastUpdated = DateTime.UtcNow;
 
-        _context.Exercises.Update(entity);
+        _context.Muscles.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
-        await _hubContext.Clients.All.SendAsync("exercise-updated", entity.Id);
+        await _hubContext.Clients.All.SendAsync("muscle-updated", entity.Id);
 
+        return NoContent();
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Put([FromBody] Update.Payload payload)
+    {
+        var muscle = await _context.Muscles.FindAsync(payload.Id);
+        if (muscle == null)
+        {
+            return NotFound();
+        }
+
+        muscle.Name = payload.Name;
+        muscle.LastUpdated = DateTime.UtcNow;
+        _context.Muscles.Update(muscle);
+        await _context.SaveChangesAsync();
+        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _hubContext.Clients.All.SendAsync("muscle-updated", payload.Id);
         return NoContent();
     }
 
@@ -155,23 +130,16 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
-        if (User.Identity is null)
-            return Unauthorized();
-
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
-
-        var exercise = await _context.Exercises.FindAsync(parameters.Id);
-        if (exercise == null)
+        var muscle = await _context.Muscles.FindAsync(parameters.Id);
+        if (muscle == null)
         {
             return NotFound();
         }
 
-        _context.Exercises.Remove(exercise);
+        _context.Muscles.Remove(muscle);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
-        await _hubContext.Clients.All.SendAsync("exercise-deleted", parameters.Id);
+        await _hubContext.Clients.All.SendAsync("muscle-deleted", parameters.Id);
         return NoContent();
     }
 }
