@@ -1,7 +1,10 @@
-﻿namespace Journal.Workouts.Delete
+﻿namespace Journal.Workouts.Delete;
+
+public class Parameters
 {
-    public class Parameters
-    {
-        public Guid Id { get; set; }
-    }
+    public Guid Id { get; set; }
+
+    public bool IsWeekPlanDelete { get; set; }
+
+    public bool IsWeekPlanSetDelete { get; set; }
 }

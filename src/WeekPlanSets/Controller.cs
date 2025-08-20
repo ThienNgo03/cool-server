@@ -1,6 +1,9 @@
 ﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Journal.WeekPlanSets;
 
@@ -37,7 +40,7 @@ public class Controller : ControllerBase
             query = query.Where(x => x.Value == parameters.Value);
 
         if (parameters.CreatedDate.HasValue)
-            query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
+            query = query.Where(x => x.CreateAt == parameters.CreatedDate);
 
         if (parameters.LastUpdated.HasValue)
             query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
@@ -47,11 +50,22 @@ public class Controller : ControllerBase
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.WeekPlanSet.Table>()
+        List<Get.Response> response = result.Select(x => new Get.Response
+        {
+            Id = x.Id,
+            WeekPlanId = x.WeekPlanId,
+            Value = x.Value,
+            CreateAt = x.CreateAt,
+            InsertedBy = x.InsertedBy,
+            LastUpdated = x.LastUpdated,
+            UpdatedBy = x.UpdatedBy
+        }).ToList();
+
+        var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
-            .WithTotal(result.Count)
-            .WithItems(result)
+            .WithTotal(response.Count)
+            .WithItems(response)
             .Build();
 
         return Ok(paginationResults);
@@ -61,6 +75,13 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var existingWeekPlan = await _context.WeekPlans.FindAsync(payload.WeekPlanId);
         if (existingWeekPlan == null)
         {
@@ -72,7 +93,8 @@ public class Controller : ControllerBase
             Id = Guid.NewGuid(),
             WeekPlanId = payload.WeekPlanId,
             Value = payload.Value,
-            CreatedDate = DateTime.UtcNow,
+            CreateAt = DateTime.UtcNow,
+            InsertedBy = Guid.Parse(userId),
             LastUpdated = DateTime.UtcNow
         };
 
@@ -83,10 +105,52 @@ public class Controller : ControllerBase
         return CreatedAtAction(nameof(Get), weekPlanSet.Id);
     }
 
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.WeekPlanSet.Table> patchDoc,
+                                           CancellationToken cancellationToken = default!)
+    {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
+        foreach (var op in patchDoc.Operations)
+            if(op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+
+        if(patchDoc is null)
+            return BadRequest("Patch document cannot be null.");
+
+        var entity = await _context.WeekPlanSets.FindAsync(id, cancellationToken);
+        if(entity == null)
+            return NotFound();
+
+        patchDoc.ApplyTo(entity);
+
+        entity.LastUpdated = DateTime.UtcNow;
+        entity.UpdatedBy = Guid.Parse(userId);
+
+        _context.WeekPlanSets.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        await _hubContext.Clients.All.SendAsync("week-plan-sets-updated", entity.Id);
+
+        return NoContent();
+    }
+
     [HttpPut]
 
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var weekPlanSet = await _context.WeekPlanSets.FindAsync(payload.Id);
         if (weekPlanSet == null)
         {
@@ -101,6 +165,7 @@ public class Controller : ControllerBase
         weekPlanSet.WeekPlanId = payload.WeekPlanId;
         weekPlanSet.Value = payload.Value;
         weekPlanSet.LastUpdated = DateTime.UtcNow;
+        weekPlanSet.UpdatedBy = Guid.Parse(userId);
         _context.WeekPlanSets.Update(weekPlanSet);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
@@ -112,6 +177,13 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var weekPlanSet = await _context.WeekPlans.FindAsync(parameters.Id);
         if (weekPlanSet == null)
         {

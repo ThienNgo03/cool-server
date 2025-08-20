@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Journal.TeamPools;
 
@@ -61,6 +62,13 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var existingCompetition = await _dbContext.Competitions.FindAsync(payload.CompetitionId);
         if (existingCompetition == null)
         {
@@ -82,6 +90,13 @@ public class Controller : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Put.Payload payload)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var teamPool = await _dbContext.TeamPools.FindAsync(payload.Id);
         if (teamPool == null)
         {
@@ -104,6 +119,13 @@ public class Controller : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
+
         var teamPool = await _dbContext.TeamPools.FindAsync(parameters.Id);
         if (teamPool == null)
         {
