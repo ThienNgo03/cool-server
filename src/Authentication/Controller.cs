@@ -11,6 +11,7 @@ namespace Journal.Authentication;
 public class Controller:ControllerBase
 {
     private readonly ILogger<Controller> _logger;
+    private readonly IMessageBus _messageBus;
     private readonly Databases.Identity.IdentityContext _context;
     private readonly UserManager<IdentityUser> _userManager;
     
@@ -18,12 +19,14 @@ public class Controller:ControllerBase
     public Controller(ILogger<Controller> logger, 
         Databases.Identity.IdentityContext context, 
         UserManager<IdentityUser> userManager, 
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IMessageBus messageBus)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _configuration = configuration;
+        _messageBus = messageBus;
     }
     [HttpGet]
     public async Task<IActionResult> Get()
@@ -39,17 +42,22 @@ public class Controller:ControllerBase
     [Route("register")]
     public async Task<IActionResult> RegisterAsync([FromBody] Register.Payload payload)
     {
-        var newUser = new IdentityUser
+        var newAccount = new IdentityUser
         {
             UserName = payload.AccountName,
             Email = payload.AccountEmail,
-            EmailConfirmed = true 
+            PhoneNumber = payload.PhoneNumber,
         };
-        var result = await _userManager.CreateAsync(newUser, payload.Password);
+        if (payload.Password != payload.ConfirmPassword)
+        {
+            return BadRequest("Passwords do not match.");
+        }
+        newAccount.EmailConfirmed = true;
+        var result = await _userManager.CreateAsync(newAccount, payload.Password);
 
         if (!result.Succeeded)
             return BadRequest(result.Errors);
-
+        await _messageBus.PublishAsync(new Register.Messager.Message(newAccount.Id, payload));
 
         return NoContent();
     }
