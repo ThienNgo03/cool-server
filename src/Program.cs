@@ -46,16 +46,9 @@ app.MapHub<Journal.Muscles.Hub>("muscles-hub");
 
 app.MapHub<Journal.ExerciseMuscles.Hub>("exercise-muscles-hub");
 
-<<<<<<< HEAD
-app.MapHub<Journal.WorkoutLogSets.Hub>("workout-log-sets-hub");
-
-app.MapHub<Journal.WeekPlanSets.Hub>("week-plan-sets-hub");
->>>>>>>>> Temporary merge branch 2
-=======
 app.MapHub<Journal.SoloPools.Hub> ("solo-pools-hub");
 
 app.MapHub<Journal.TeamPools.Hub>("team-pools-hub");
->>>>>>> e059c5cfebbbffba11aae56d2657f197ae780ce9
 
 
 app.Run();
