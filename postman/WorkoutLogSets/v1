@@ -1,0 +1,158 @@
+{
+	"info": {
+		"_postman_id": "8311fd5a-3c74-4a8f-8df2-2bb6f7b952f2",
+		"name": "WorkoutLogSets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29660279"
+	},
+	"item": [
+		{
+			"name": "get workout log set",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7011/api/workout-log-sets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"workout-log-sets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create workout log set",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"WorkoutLogId\": \"5b42198b-56cd-412f-a2ff-d83ff52ee916\",\r\n    \"Value\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/workout-log-sets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"workout-log-sets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update workout log set",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Id\": \"d6135ed7-0a85-4883-aa7f-f0b7380e2c4a\",\r\n    \"WorkoutLogId\": \"5b42198b-56cd-412f-a2ff-d83ff52ee916\",\r\n    \"Value\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/workout-log-sets",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"workout-log-sets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete workout log set",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Id\": \"620f41f1-5f5c-4ff0-bbb1-7323c7659ffd\",\r\n    \"WorkoutLogId\": \"5e42acee-cf15-42fd-a5ba-87ee930d1195\",\r\n    \"Value\": 2\r\n}"
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/workout-log-sets?id=d6135ed7-0a85-4883-aa7f-f0b7380e2c4a",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"workout-log-sets"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "d6135ed7-0a85-4883-aa7f-f0b7380e2c4a"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,154 @@
+{
+	"info": {
+		"_postman_id": "c0b61c8c-78bc-402c-80fd-65bb28c2fd2b",
+		"name": "ExerciseMuscles",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29660279"
+	},
+	"item": [
+		{
+			"name": "get exercise muscle",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create exercise muscle",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ExerciseId\": \"838ea3ee-4089-435e-b29c-874c905098d9\",\r\n    \"MuscleId\": \"129744b9-de09-4310-81d7-7dad8de8dcf6\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update exercise muscle",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Id\": \"79081904-814f-4cb6-a66e-ed67d7daed04\",\r\n    \"ExerciseId\": \"81491e20-fb69-46d1-aa51-8117eccfb0f0\",\r\n    \"MuscleId\": \"075e7293-27b7-43a1-a3bf-2e872e9dd477\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete exercise muscle",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles?id=79081904-814f-4cb6-a66e-ed67d7daed04",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "79081904-814f-4cb6-a66e-ed67d7daed04"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

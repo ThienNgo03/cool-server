@@ -184,13 +184,13 @@ public class Controller : ControllerBase
         if (userId is null)
             return Unauthorized("User Id not found");
 
-        var weekPlanSet = await _context.WeekPlans.FindAsync(parameters.Id);
+        var weekPlanSet = await _context.WeekPlanSets.FindAsync(parameters.Id);
         if (weekPlanSet == null)
         {
             return NotFound();
         }
 
-        _context.WeekPlans.Remove(weekPlanSet);
+        _context.WeekPlanSets.Remove(weekPlanSet);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
         await _hubContext.Clients.All.SendAsync("week-plan-set-deleted", parameters.Id);
