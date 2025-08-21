@@ -66,19 +66,19 @@ public class Controller:ControllerBase
     [Route("login")]
     public async Task<IActionResult> LoginAsync([FromBody] Signin.Payload payload)
     {
-        var user = await _userManager.FindByEmailAsync(payload.AccountEmail);
+        var user = await _userManager.FindByEmailAsync(payload.Account);
         if (user == null)
         {
             return Unauthorized("Invalid email or password.");
         }
-        
+
         var result = await _userManager.CheckPasswordAsync(user, payload.Password);
         if (!result)
         {
             return Unauthorized("Invalid email or password.");
         }
 
-        var token = GenerateToken(payload.AccountEmail);
+        var token = GenerateToken(payload.Account);
         var response = new
         {
             Token = token,

@@ -10,20 +10,15 @@ namespace Journal.Muscles;
 [ApiController]
 [Authorize]
 [Route("api/muscles")]
-public class Controller : ControllerBase
+public class Controller(IMessageBus messageBus, 
+                        JournalDbContext context, 
+                        ILogger<Controller> logger, 
+                        IHubContext<Hub> hubContext) : ControllerBase
 {
-    private readonly IMessageBus _messageBus;
-    private readonly JournalDbContext _context;
-    private readonly ILogger<Controller> _logger;
-    private readonly IHubContext<Hub> _hubContext;
-
-    public Controller(IMessageBus messageBus, JournalDbContext context, ILogger<Controller> logger, IHubContext<Hub> hubContext)
-    {
-        _context = context;
-        _logger = logger;
-        _messageBus = messageBus;
-        _hubContext = hubContext;
-    }
+    private readonly IMessageBus _messageBus = messageBus;
+    private readonly JournalDbContext _context = context;
+    private readonly ILogger<Controller> _logger = logger;
+    private readonly IHubContext<Hub> _hubContext = hubContext;
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
