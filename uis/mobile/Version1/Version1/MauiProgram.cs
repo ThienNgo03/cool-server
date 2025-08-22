@@ -4,6 +4,7 @@ using Mvvm;
 using Navigation;
 using Syncfusion.Maui.Toolkit.Hosting;
 using Version1.Features.Authentication;
+using Library;
 
 namespace Version1;
 
@@ -39,6 +40,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
 
         builder.Services.AddSingleton<IAppNavigator, AppNavigator>();
+        builder.Services.AddEndpoints(true, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwYjAzYjVjMi0yMzAzLTRmODMtOGQ5Ny01ODk1ZDVmN2M0NTYiLCJlbWFpbCI6InN5c3RlbXRlc3RlckBqb3VybmFsLmNvbSIsImp0aSI6ImFjZWU3ZDgzLWY4NzUtNGIzMi05ZjIyLWM1ZTcyOTg4MWFiNiIsImV4cCI6MTc1NTg4MTIyMCwiaXNzIjoiQXV0aENvb2xTZXJ2ZXIiLCJhdWQiOiJBdXRoQ29vbENsaWVudCJ9.LZXfumO0ThL28agjlzZnWJwXY_XGtEE-RsTxI3hQaOE");
         return builder;
     }
 

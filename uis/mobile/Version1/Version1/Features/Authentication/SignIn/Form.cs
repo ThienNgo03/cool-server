@@ -12,7 +12,7 @@ public partial class Form : BaseFormModel
     [Phone(ErrorMessage = "Please enter a valid phone number")]
     [NotifyPropertyChangedFor(nameof(AccountErrors))]
     [NotifyDataErrorInfo]
-    string account;
+    string account = "0348164682";
 
     [ObservableProperty]
     [Required(ErrorMessage = "Please enter a password")]
@@ -26,7 +26,7 @@ public partial class Form : BaseFormModel
     )]
     [NotifyPropertyChangedFor(nameof(PasswordErrors))]
     [NotifyDataErrorInfo]
-    string password;
+    string password = "StrongPassword123!!@#";
 
     public IEnumerable<ValidationResult> AccountErrors => GetErrors(nameof(Account));
     public IEnumerable<ValidationResult> PasswordErrors => GetErrors(nameof(Password));

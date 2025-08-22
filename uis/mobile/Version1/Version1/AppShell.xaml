@@ -3,16 +3,31 @@
     x:Class="Version1.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:signIn="clr-namespace:Version1.Features.Authentication.SignIn"
+    xmlns:exercises="clr-namespace:Version1.Features.Exercises"
+    xmlns:home="clr-namespace:Version1.Features.Home"
     xmlns:local="clr-namespace:Version1"
-    
+    xmlns:signIn="clr-namespace:Version1.Features.Authentication.SignIn"
     Title="Version1">
 
     <TabBar>
         <ShellContent
-            Route="authentication"
             Title="Authentication"
-            ContentTemplate="{DataTemplate signIn:Page}" />
+            ContentTemplate="{DataTemplate signIn:Page}"
+            Route="authentication" />
+    </TabBar>
+    <TabBar Route="main">
+        <Tab
+            Title="Trang chủ"
+            Icon="ic_home.png"
+            Route="home">
+            <ShellContent ContentTemplate="{DataTemplate home:Page}" />
+        </Tab>
+        <Tab
+            Title="Bài Tập"
+            Icon="dumbbell-icon.jng"
+            Route="exercises">
+            <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
+        </Tab>
     </TabBar>
 
 </Shell>

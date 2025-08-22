@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Version1.Features.Exercises.Page"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:card="clr-namespace:Version1.Features.Exercises.ContentViews.Card"
+    xmlns:local="clr-namespace:Version1.Features.Exercises"
+    Title="Page"
+    x:DataType="local:ViewModel">
+    <VerticalStackLayout>
+        <Label
+            HorizontalOptions="Center"
+            Text="Welcome to Exercises!"
+            VerticalOptions="Center" />
+        <Button Command="{x:Binding LoadCommand, Mode=OneWay}" Text="Load data" />
+        <CollectionView ItemsSource="{x:Binding Items, Mode=TwoWay}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="card:Model">
+                    <Border>
+                        <VerticalStackLayout>
+                            <Label Text="{x:Binding Title}" />
+                            <Label Text="{x:Binding SubTitle}" />
+                            <Image
+                                HeightRequest="100"
+                                Source="{x:Binding IconUrl}"
+                                WidthRequest="100" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>
