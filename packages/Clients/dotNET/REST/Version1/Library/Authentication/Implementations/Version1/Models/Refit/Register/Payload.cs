@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace Journal.Authentication.Register;
+namespace Library.Authentication.Implementations.Version1.Models.Refit.Register;
 
-public class Payload: IdentityUser
+public class Payload : IdentityUser
 {
     [Required]
-    public string AccountName { get; set; }= string.Empty;
+    public string AccountName { get; set; } = string.Empty;
     [Required]
-    public string AccountEmail { get; set; }= string.Empty;
+    public string AccountEmail { get; set; } = string.Empty;
     [Required]
     public string Password { get; set; } = string.Empty;
     [Required]

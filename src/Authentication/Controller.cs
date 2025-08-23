@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -40,6 +41,7 @@ public class Controller:ControllerBase
     }
     [HttpPost]
     [Route("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterAsync([FromBody] Register.Payload payload)
     {
         var newAccount = new IdentityUser
@@ -64,6 +66,7 @@ public class Controller:ControllerBase
 
     [HttpPost]
     [Route("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> LoginAsync([FromBody] Signin.Payload payload)
     {
         var user = await _userManager.FindByEmailAsync(payload.Account);

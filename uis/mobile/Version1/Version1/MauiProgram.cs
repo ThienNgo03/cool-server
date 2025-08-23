@@ -40,7 +40,11 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
 
         builder.Services.AddSingleton<IAppNavigator, AppNavigator>();
-        builder.Services.AddEndpoints(true, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwYjAzYjVjMi0yMzAzLTRmODMtOGQ5Ny01ODk1ZDVmN2M0NTYiLCJlbWFpbCI6InN5c3RlbXRlc3RlckBqb3VybmFsLmNvbSIsImp0aSI6ImFjZWU3ZDgzLWY4NzUtNGIzMi05ZjIyLWM1ZTcyOTg4MWFiNiIsImV4cCI6MTc1NTg4MTIyMCwiaXNzIjoiQXV0aENvb2xTZXJ2ZXIiLCJhdWQiOiJBdXRoQ29vbENsaWVudCJ9.LZXfumO0ThL28agjlzZnWJwXY_XGtEE-RsTxI3hQaOE");
+
+
+        Library.Config locaHostConfig = new("https://localhost:7011");
+        Library.Config devTunnelEnviroment = new("https://bqk7w3xc-7011.asse.devtunnels.ms/");
+        builder.Services.AddEndpoints(devTunnelEnviroment);
         return builder;
     }
 
@@ -78,14 +82,6 @@ public static class MauiProgram
         }
 
         return builder;
-    }
-
-    static IServiceCollection AddPage<TPage, TViewModel>(this IServiceCollection services)
-        where TPage : BasePage where TViewModel : BaseViewModel
-    {
-        services.AddTransient<TPage>();
-        services.AddTransient<TViewModel>();
-        return services;
     }
 
     static IServiceCollection AddPopup<TPopup, TViewModel>(this IServiceCollection services, string name)

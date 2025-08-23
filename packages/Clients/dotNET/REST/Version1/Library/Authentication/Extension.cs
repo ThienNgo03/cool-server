@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Refit;
 
-namespace Library.Exercises;
+namespace Library.Authentication;
 
 public static class Extensions
 {
-    public static void RegisterExercises(this IServiceCollection services, Config config)
+    public static void RegisterAuthentication(this IServiceCollection services, Config config)
     {
         services.AddTransient<Implementations.Version1.RefitHttpClientHandler>();
         services.AddTransient<Interface, Implementations.Version1.Implementation>();
@@ -17,3 +17,4 @@ public static class Extensions
                 .ConfigureHttpClient(x => x.BaseAddress = new Uri(baseUrl));
     }
 }
+

@@ -5,26 +5,27 @@ using Library.Workouts;
 using Library.SoloPools;
 using Library.TeamPools;
 using Library.WorkoutLogs;
-using Microsoft.Extensions.DependencyInjection;
 using Library.MeetUps;
+using Library.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Library;
 
 public static class Extensions
 {
-    public static IServiceCollection AddEndpoints(this IServiceCollection services, bool isLocal, string token)
+    public static IServiceCollection AddEndpoints(this IServiceCollection services, Config config)
     {
-        Models.Authentication.Model authentication = new() { BearerToken = token };
-        services.AddSingleton(authentication);
+        services.AddSingleton<Token.Service>();
 
-        services.RegisterExercises(isLocal);
-        services.RegisterWorkouts(isLocal);
-        services.RegisterWeekPlans(isLocal);
-        services.RegisterCompetitions(isLocal);
-        services.RegisterSoloPools(isLocal);
-        services.RegisterTeamPools(isLocal);
-        services.RegisterWorkoutLogs(isLocal);
-        services.RegisterMeetUps(isLocal);
+        services.RegisterAuthentication(config);
+        services.RegisterExercises(config);
+        services.RegisterWorkouts(config);
+        services.RegisterWeekPlans(config);
+        services.RegisterCompetitions(config);
+        services.RegisterSoloPools(config);
+        services.RegisterTeamPools(config);
+        services.RegisterWorkoutLogs(config);
+        services.RegisterMeetUps(config);
         return services;
     }
 }

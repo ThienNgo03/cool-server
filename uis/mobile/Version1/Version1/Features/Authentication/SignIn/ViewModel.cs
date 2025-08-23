@@ -3,31 +3,41 @@ using Navigation;
 
 namespace Version1.Features.Authentication.SignIn;
 
-public partial class ViewModel(IAppNavigator appNavigator) : BaseViewModel(appNavigator)
+public partial class ViewModel(
+    Library.Token.Service tokenService,
+    Library.Authentication.Interface authInterface,
+    IAppNavigator appNavigator) : BaseViewModel(appNavigator)
 {
+    #region [ Fields ]
+
+    private readonly Library.Token.Service tokenService = tokenService;
+    private readonly Library.Authentication.Interface authInterface = authInterface;    
+    #endregion
+
     #region [ UI ]
 
     public Form Form { get; init; } = new();
 
     [RelayCommand]
-    Task SignInAsync()
+    async Task SignInAsync()
     {
-        var isValid = Form.IsValid();
+        //var isValid = Form.IsValid();
+        //if (!isValid)
+        //    return;
 
-        if (!isValid)
+        // Authenticate
+        var result = await authInterface.SignInAsync(new()
         {
-            return Task.CompletedTask;
-        }
+            Account = Form.Account,
+            Password = Form.Password
+        });
 
-        //appSettingsService.SetAccessTokenAsync(
-        //    Convert.ToBase64String(
-        //        System.Text.Encoding.UTF8.GetBytes(
-        //            $"{Form.UserName}:{Form.Password}"
-        //        )
-        //    )
-        //);
+        tokenService.SetToken(result?.Token ?? string.Empty);
 
-        return GoHomeAsync();
+        if (result is null || string.IsNullOrWhiteSpace(result.Token))
+            return;
+
+        await GoHomeAsync();
     }
 
 

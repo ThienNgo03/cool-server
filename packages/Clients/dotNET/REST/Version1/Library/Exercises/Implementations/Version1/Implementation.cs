@@ -128,7 +128,7 @@ public class Implementation : Interface
 
     public async Task CreateAsync(Payload payload)
     {
-        /*Stopwatch stopwatch = Stopwatch.StartNew();*/
+        Stopwatch stopwatch = Stopwatch.StartNew();
         try
         {
             var refitPayload = new Models.Refit.POST.Payload
@@ -140,12 +140,12 @@ public class Implementation : Interface
 
             var response = await this.refitInterface.POST(refitPayload);
 
-            /*stopwatch.Stop();
-            var duration = stopwatch.ElapsedMilliseconds;*/
+            stopwatch.Stop();
+            var duration = stopwatch.ElapsedMilliseconds;
         }
         catch (ApiException ex)
         {
-            throw new NotImplementedException();
+            stopwatch.Stop();
         }
     }
 

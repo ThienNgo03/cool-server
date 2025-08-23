@@ -7,27 +7,38 @@
     xmlns:local="clr-namespace:Version1.Features.Exercises"
     Title="Page"
     x:DataType="local:ViewModel">
-    <VerticalStackLayout>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <Label
             HorizontalOptions="Center"
             Text="Welcome to Exercises!"
             VerticalOptions="Center" />
-        <Button Command="{x:Binding LoadCommand, Mode=OneWay}" Text="Load data" />
-        <CollectionView ItemsSource="{x:Binding Items, Mode=TwoWay}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="card:Model">
-                    <Border>
-                        <VerticalStackLayout>
-                            <Label Text="{x:Binding Title}" />
-                            <Label Text="{x:Binding SubTitle}" />
-                            <Image
-                                HeightRequest="100"
-                                Source="{x:Binding IconUrl}"
-                                WidthRequest="100" />
-                        </VerticalStackLayout>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+        <Button
+            Grid.Row="1"
+            Command="{x:Binding LoadCommand,
+                                Mode=OneWay}"
+            Text="Load data" />
+        <ScrollView Grid.Row="2">
+            <CollectionView ItemsSource="{x:Binding Items, Mode=TwoWay}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="card:Model">
+                        <Border>
+                            <VerticalStackLayout>
+                                <Label Text="{x:Binding Title}" />
+                                <Label Text="{x:Binding SubTitle}" />
+                                <Image
+                                    HeightRequest="100"
+                                    Source="{x:Binding IconUrl}"
+                                    WidthRequest="100" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+    </Grid>
 </ContentPage>

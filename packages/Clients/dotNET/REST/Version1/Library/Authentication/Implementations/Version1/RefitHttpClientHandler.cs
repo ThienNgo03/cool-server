@@ -1,4 +1,4 @@
-﻿namespace Library.WeekPlans.Implementations.Version1;
+﻿namespace Library.Authentication.Implementations.Version1;
 
 public class RefitHttpClientHandler : HttpClientHandler
 {
