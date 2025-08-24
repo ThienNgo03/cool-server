@@ -9,7 +9,7 @@ public class Parameters
 
     public string? Description { get; set; }
 
-    public string? MusclesWorked { get; set; }
+    public string? Type { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 

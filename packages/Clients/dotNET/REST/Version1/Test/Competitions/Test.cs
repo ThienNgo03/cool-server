@@ -1,38 +1,18 @@
 ﻿using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text;
-using System.Text.Json;
-using Test.Constant;
 using Test.Databases.Journal;
 
 namespace Test.Competitions;
 
-public class Test
+public class Test : BaseTest
 {
-	#region [ Fields ] 
-
-	private readonly IServiceProvider serviceProvider;
-
-    #endregion
 
     #region [ CTors ]
 
-    public Test()
-    {
-        string? token = GetBearerToken();
-        if (string.IsNullOrEmpty(token))
-            throw new InvalidOperationException("Failed to retrieve authentication token.");
-
-        var services = new ServiceCollection();
-        services.AddEndpoints(isLocal: true, token);
-
-        services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer(Config.ConnectionString));
-
-        serviceProvider = services.BuildServiceProvider();
-    }
+    public Test() : base() { }
     #endregion
+
 
     #region [ Endpoints ]
 
@@ -41,6 +21,7 @@ public class Test
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
+        var title = id.ToString();
         var participantId1 = Guid.NewGuid();
         var participantId2 = Guid.NewGuid();
         var exerciseId = Guid.NewGuid();
@@ -48,7 +29,7 @@ public class Test
         var pushUpChalenge = new Databases.Journal.Tables.Competition.Table()
         {
             Id = id,
-            Title = "Push Up",
+            Title = title,
             Description = "A basic exercise for upper body strength.",
             ParticipantIds = participantIds,
             CreatedDate = DateTime.UtcNow,
@@ -64,14 +45,14 @@ public class Test
         {
             PageIndex = 0,
             PageSize = 1,
-            Title = "Push Up"
+            Title = title
         });
 
         Assert.NotNull(result);
         Assert.NotNull(result.Data);
         Assert.NotNull(result.Data.Items);
         Assert.True(result.Data.Items.Count > 0, "Expected at least one exercise in result.");
-        Assert.True(result.Data.Items.Any(e => e.Title == "Push Up"), "Expected to find 'Push Up' exercise in the result.");
+        Assert.True(result.Data.Items.Any(e => e.Title == title), "Expected to find 'Push Up' exercise in the result.");
         dbContext.Competitions.Remove(pushUpChalenge);
         await dbContext.SaveChangesAsync();
     }
@@ -185,32 +166,6 @@ public class Test
         var deletedExercise = await dbContext.Competitions.FindAsync(existingCompetition.Id);
 
         Assert.Null(deletedExercise);
-    }
-    #endregion
-
-    #region [ Authentication ]
-
-    private string? GetBearerToken()
-    {
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
-
-        var jsonPayload = @"{
-            ""accountEmail"": ""systemtester@journal.com"",
-            ""password"": ""NewPassword@1""
-        }";
-
-        request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-        var response = client.Send(request);
-        response.EnsureSuccessStatusCode();
-
-        var responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-        using var document = JsonDocument.Parse(responseBody);
-        var token = document.RootElement.GetProperty("token").GetString();
-
-        return token;
     }
     #endregion
 }

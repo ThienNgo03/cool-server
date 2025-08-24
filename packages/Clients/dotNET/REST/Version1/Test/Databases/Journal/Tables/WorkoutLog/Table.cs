@@ -1,21 +1,14 @@
-﻿namespace Test.Databases.Journal.Tables.WorkoutLog
+﻿namespace Test.Databases.Journal.Tables.WorkoutLog;
+
+public class Table
 {
-    public class Table
-    {
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-        public Guid WorkoutId { get; set; }
+    public Guid WorkoutId { get; set; }
 
-        public int Rep { get; set; } // làm sao để chỉ có một trong hai Rep hoặc HoldingTime
+    public DateTime WorkoutDate { get; set; }
 
-        public TimeSpan HoldingTime { get; set; }
+    public DateTime CreatedDate { get; set; }
 
-        public int Set { get; set; }
-
-        public DateTime WorkoutDate { get; set; }
-
-        public DateTime CreatedDate { get; set; }
-
-        public DateTime LastUpdated { get; set; }
-    }
+    public DateTime LastUpdated { get; set; }
 }

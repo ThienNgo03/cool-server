@@ -1,18 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Test.Databases.Journal.Tables.MeetUp
+namespace Test.Databases.Journal.Tables.MeetUp;
+
+public class Table
 {
-    public class Table
-    {
-        public Guid Id { get; set; }
-        public string ParticipantIds { get; set; }
-        public string Title { get; set; }
-        public DateTime DateTime { get; set; }
-        public string Location { get; set; }
-        public string CoverImage { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime LastUpdated { get; set; }
+    [Required]
+    public Guid Id { get; set; }
+    [Required]
+    public string ParticipantIds { get; set; }
+    public string Title { get; set; }
+    public DateTime DateTime { get; set; }
+    public string Location { get; set; }
+    public string CoverImage { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public DateTime LastUpdated { get; set; }
 
 
-    }
 }

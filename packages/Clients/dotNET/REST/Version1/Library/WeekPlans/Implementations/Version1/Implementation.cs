@@ -30,9 +30,6 @@ public class Implementation : Interface
             WorkoutId = parameters.WorkoutId,
             DateOfWeek = parameters.DateOfWeek,
             Time = parameters.Time,
-            Rep = parameters.Rep,
-            Set = parameters.Set,
-            HoldingTime = parameters.HoldingTime,
             CreatedDate = parameters.CreatedDate,
             LastUpdated = parameters.LastUpdated
         };
@@ -97,10 +94,7 @@ public class Implementation : Interface
                     Id = item.Id,
                     WorkoutId = item.WorkoutId,
                     DateOfWeek = item.DateOfWeek,
-                    HoldingTime = item.HoldingTime,
-                    Rep = item.Rep,
                     Time = item.Time,
-                    Set = item.Set,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
                 });
@@ -136,10 +130,7 @@ public class Implementation : Interface
             {
                 WorkoutId = payload.WorkoutId,
                 DateOfWeek = payload.DateOfWeek,
-                Time = payload.Time,
-                Rep = payload.Rep,
-                HoldingTime = payload.HoldingTime,
-                Set = payload.Set
+                Time = payload.Time
             };
 
             var response = await this.refitInterface.POST(refitPayload);
@@ -159,10 +150,7 @@ public class Implementation : Interface
                 Id = payload.Id,
                 WorkoutId = payload.WorkoutId,
                 DateOfWeek = payload.DateOfWeek,
-                Time = payload.Time,
-                Rep = payload.Rep,
-                HoldingTime = payload.HoldingTime,
-                Set = payload.Set
+                Time = payload.Time
             };
             var response = await this.refitInterface.PUT(refitPayload);
         }

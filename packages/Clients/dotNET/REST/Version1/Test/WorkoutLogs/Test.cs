@@ -1,39 +1,16 @@
-﻿using Library;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Refit;
-using System;
-using System.Text;
-using System.Text.Json;
-using Test.Constant;
 using Test.Databases.Journal;
 
 namespace Test.WorkoutLogs;
 
-public class Test
+public class Test : BaseTest
 {
-    #region [Fields]
-
-    private readonly IServiceProvider serviceProvider;
-
-    #endregion
 
     #region [ CTors ]
 
-    public Test()
-    {
-        string? token = GetBearerToken();
-        if (string.IsNullOrEmpty(token))
-            throw new InvalidOperationException("Failed to retrieve authentication token.");
-
-        var services = new ServiceCollection();
-        services.AddEndpoints(isLocal: true, token);
-
-        services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer(Config.ConnectionString));
-
-        serviceProvider = services.BuildServiceProvider();
-    }
+    public Test() : base() { }
     #endregion
 
     #region [ Endpoints ]
@@ -45,9 +22,6 @@ public class Test
         {
             Id = Guid.NewGuid(),
             WorkoutId = Guid.NewGuid(),
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             WorkoutDate = DateTime.UtcNow,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
@@ -93,9 +67,6 @@ public class Test
         var payload = new Library.WorkoutLogs.Create.Payload()
         {
             WorkoutId = workoutId,
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             WorkoutDate = DateTime.UtcNow,
         };
         var workoutLogsEndpoint = serviceProvider!.GetRequiredService<Library.WorkoutLogs.Interface>();
@@ -104,9 +75,6 @@ public class Test
         var expected = await dbContext.WorkoutLogs.FirstOrDefaultAsync(x => x.WorkoutId == workoutId);
         Assert.NotNull(expected);
         Assert.Equal(expected.WorkoutId, workoutId);
-        Assert.Equal(expected.Rep, payload.Rep);
-        Assert.Equal(expected.Set, payload.Set);
-        Assert.Equal(expected.HoldingTime, payload.HoldingTime);
         Assert.Equal(expected.WorkoutDate, payload.WorkoutDate);
 
         dbContext.WorkoutLogs.Remove(expected);
@@ -125,9 +93,6 @@ public class Test
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             WorkoutDate = DateTime.UtcNow
         };
         dbContext.WorkoutLogs.Add(existingWorkoutLog);
@@ -143,16 +108,10 @@ public class Test
         await dbContext.SaveChangesAsync();
 
         var workoutLogsEndpoint = serviceProvider!.GetRequiredService<Library.WorkoutLogs.Interface>();
-        var updatedRep = 12;
-        var updatedSet = 2;
-        var updatedHoldingTime = TimeSpan.FromSeconds(20);
         var payload = new Library.WorkoutLogs.Update.Payload
         {
             Id = id,
             WorkoutId = updatedWorkoutId,
-            Rep = updatedRep,
-            Set = updatedSet,
-            HoldingTime = updatedHoldingTime,
             WorkoutDate = DateTime.UtcNow
         };
         await workoutLogsEndpoint.UpdateAsync(payload);
@@ -161,9 +120,6 @@ public class Test
         var updatedWorkoutLog = existingWorkoutLog;
         Assert.NotNull(updatedWorkoutLog);
         Assert.Equal(updatedWorkoutLog.WorkoutId, updatedWorkoutId);
-        Assert.Equal(updatedWorkoutLog.Rep, updatedRep);
-        Assert.Equal(updatedWorkoutLog.Set, updatedSet);
-        Assert.Equal(updatedWorkoutLog.HoldingTime, updatedHoldingTime);
         Assert.Equal(updatedWorkoutLog.WorkoutDate.Date, payload.WorkoutDate.Date);
 
         dbContext.WorkoutLogs.Remove(updatedWorkoutLog);
@@ -180,9 +136,6 @@ public class Test
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             WorkoutDate = DateTime.UtcNow
         };
         dbContext.WorkoutLogs.Add(workoutLog);
@@ -194,32 +147,6 @@ public class Test
         await dbContext.Entry(workoutLog).ReloadAsync();
         var deletedWorkoutLog = await dbContext.WorkoutLogs.FindAsync(id);
         Assert.Null(deletedWorkoutLog);
-    }
-    #endregion
-
-    #region [ Authentication ]
-
-    private string? GetBearerToken()
-    {
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
-
-        var jsonPayload = @"{
-            ""accountEmail"": ""systemtester@journal.com"",
-            ""password"": ""NewPassword@1""
-        }";
-
-        request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-        var response = client.Send(request);
-        response.EnsureSuccessStatusCode();
-
-        var responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-        using var document = JsonDocument.Parse(responseBody);
-        var token = document.RootElement.GetProperty("token").GetString();
-
-        return token;
     }
     #endregion
 }

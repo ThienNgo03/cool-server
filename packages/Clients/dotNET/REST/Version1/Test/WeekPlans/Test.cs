@@ -1,39 +1,16 @@
-﻿using Library;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Refit;
-using System;
-using System.Text;
-using System.Text.Json;
-using Test.Constant;
 using Test.Databases.Journal;
 
 namespace Test.WeekPlans;
 
-public class Test
+public class Test : BaseTest
 {
-    #region [Fields]
-
-    private readonly IServiceProvider serviceProvider;
-
-    #endregion
 
     #region [ CTors ]
 
-    public Test()
-    {
-        string? token = GetBearerToken();
-        if (string.IsNullOrEmpty(token))
-            throw new InvalidOperationException("Failed to retrieve authentication token.");
-
-        var services = new ServiceCollection();
-        services.AddEndpoints(isLocal: true, token);
-
-        services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer(Config.ConnectionString));
-
-        serviceProvider = services.BuildServiceProvider();
-    }
+    public Test() : base() { }
     #endregion
 
     #region [ Endpoints ]
@@ -45,9 +22,6 @@ public class Test
         {
             Id = Guid.NewGuid(),
             WorkoutId = Guid.NewGuid(),
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             DateOfWeek = "Monday",
             Time = DateTime.UtcNow,
             CreatedDate = DateTime.UtcNow,
@@ -98,9 +72,6 @@ public class Test
         var payload = new Library.WeekPlans.Create.Payload()
         {
             WorkoutId = workoutId,
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             DateOfWeek = dateOfWeek,
             Time = DateTime.UtcNow
         };
@@ -110,9 +81,6 @@ public class Test
         var expected = await dbContext.WeekPlans.FirstOrDefaultAsync(x => x.DateOfWeek == dateOfWeek);
         Assert.NotNull(expected);
         Assert.True(expected.WorkoutId == workoutId);
-        Assert.Equal(expected.Rep, payload.Rep);
-        Assert.Equal(expected.Set, payload.Set);
-        Assert.Equal(expected.HoldingTime, payload.HoldingTime);
         Assert.Equal(expected.DateOfWeek, payload.DateOfWeek);
         Assert.Equal(expected.Time.Date, payload.Time.Date);
 
@@ -132,9 +100,6 @@ public class Test
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             DateOfWeek = "Monday",
             Time = DateTime.UtcNow
         };
@@ -151,17 +116,11 @@ public class Test
         await dbContext.SaveChangesAsync();
 
         var weekPlansEndpoint = serviceProvider!.GetRequiredService<Library.WeekPlans.Interface>();
-        var updatedRep = 12;
-        var updatedSet = 2;
         var updatedDateOfWeek = "Tuesday";
-        var updatedHoldingTime = TimeSpan.FromSeconds(20);
         var payload = new Library.WeekPlans.Update.Payload
         {
             Id = id,
             WorkoutId = updatedWorkoutId,
-            Rep = updatedRep,
-            Set = updatedSet,
-            HoldingTime = updatedHoldingTime,
             DateOfWeek = updatedDateOfWeek,
             Time = DateTime.UtcNow
         };
@@ -171,10 +130,7 @@ public class Test
         var updatedWeekPlan = existingWeekPlan;
         Assert.NotNull(updatedWeekPlan);
         Assert.Equal(updatedWeekPlan.WorkoutId, updatedWorkoutId);
-        Assert.Equal(updatedWeekPlan.Rep, updatedRep);
         Assert.Equal(updatedWeekPlan.DateOfWeek, updatedDateOfWeek);
-        Assert.Equal(updatedWeekPlan.Set, updatedSet);
-        Assert.Equal(updatedWeekPlan.HoldingTime, updatedHoldingTime);
         Assert.Equal(updatedWeekPlan.Time.Date, payload.Time.Date);
 
         dbContext.Workouts.Remove(existingWorkout);
@@ -191,9 +147,6 @@ public class Test
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),
-            Rep = 10,
-            Set = 3,
-            HoldingTime = TimeSpan.FromSeconds(30),
             DateOfWeek = "Monday",
             Time = DateTime.UtcNow
         };
@@ -206,32 +159,6 @@ public class Test
         await dbContext.Entry(weekPlan).ReloadAsync();
         var deletedWeekPlan = await dbContext.WeekPlans.FindAsync(id);
         Assert.Null(deletedWeekPlan);
-    }
-    #endregion
-
-    #region [ Authentication ]
-
-    private string? GetBearerToken()
-    {
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
-
-        var jsonPayload = @"{
-            ""accountEmail"": ""systemtester@journal.com"",
-            ""password"": ""NewPassword@1""
-        }";
-
-        request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-        var response = client.Send(request);
-        response.EnsureSuccessStatusCode();
-
-        var responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-        using var document = JsonDocument.Parse(responseBody);
-        var token = document.RootElement.GetProperty("token").GetString();
-
-        return token;
     }
     #endregion
 }

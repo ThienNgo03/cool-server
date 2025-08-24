@@ -1,15 +1,12 @@
-﻿namespace Test.Databases.Journal.Tables.Workout;
+﻿namespace Test.Databases.Journal.Tables.Muscle;
 
 public class Table
 {
     public Guid Id { get; set; }
 
-    public Guid ExerciseId { get; set; }
-
-    public Guid UserId { get; set; }
+    public string Name { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
     public DateTime LastUpdated { get; set; }
-
 }

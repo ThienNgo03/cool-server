@@ -29,9 +29,6 @@ public class Implementation : Interface
             PageSize = parameters.PageSize,
             WorkoutId = parameters.WorkoutId,
             WorkoutDate = parameters.WorkoutDate,
-            Rep = parameters.Rep,
-            Set = parameters.Set,
-            HoldingTime = parameters.HoldingTime,
             CreatedDate = parameters.CreatedDate,
             LastUpdated = parameters.LastUpdated
         };
@@ -95,10 +92,7 @@ public class Implementation : Interface
                 {
                     Id = item.Id,
                     WorkoutId = item.WorkoutId,
-                    HoldingTime = item.HoldingTime,
-                    Rep = item.Rep,
                     WorkoutDate = item.WorkoutDate,
-                    Set = item.Set,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
                 });
@@ -133,10 +127,7 @@ public class Implementation : Interface
             var refitPayload = new Models.Refit.POST.Payload
             {
                 WorkoutId = payload.WorkoutId,
-                WorkoutDate = payload.WorkoutDate,
-                Rep = payload.Rep,
-                HoldingTime = payload.HoldingTime,
-                Set = payload.Set
+                WorkoutDate = payload.WorkoutDate
             };
 
             var response = await this.refitInterface.POST(refitPayload);
@@ -155,10 +146,7 @@ public class Implementation : Interface
             {
                 Id = payload.Id,
                 WorkoutId = payload.WorkoutId,
-                WorkoutDate = payload.WorkoutDate,
-                Rep = payload.Rep,
-                HoldingTime = payload.HoldingTime,
-                Set = payload.Set
+                WorkoutDate = payload.WorkoutDate
             };
             var response = await this.refitInterface.PUT(refitPayload);
         }

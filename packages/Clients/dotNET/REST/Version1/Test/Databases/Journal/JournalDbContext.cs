@@ -23,6 +23,10 @@ namespace Test.Databases.Journal
         public DbSet<Tables.Competition.Table> Competitions { get; set; }
         public DbSet<Tables.SoloPool.Table> SoloPools { get; set; }
         public DbSet<Tables.TeamPool.Table> TeamPools { get; set; }
+        public DbSet<Tables.WorkoutLogSet.Table> WorkoutLogSets { get; set; }
+        public DbSet<Tables.WeekPlanSet.Table> WeekPlanSets { get; set; }
+        public DbSet<Tables.Muscle.Table> Muscles { get; set; }
+        public DbSet<Tables.ExerciseMuscle.Table> ExerciseMuscles { get; set; }
 
     }
 }

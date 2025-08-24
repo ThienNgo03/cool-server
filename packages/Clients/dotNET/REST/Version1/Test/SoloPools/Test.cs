@@ -1,43 +1,22 @@
 ﻿
-using Library;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text;
-using System.Text.Json;
-using Test.Constant;
 using Test.Databases.Journal;
 
 namespace Test.SoloPools;
 
-public class Test
+public class Test : BaseTest
 {
-	#region [ Fields ] 
-
-	private readonly IServiceProvider serviceProvider;
-
-    #endregion
 
     #region [ CTors ]
 
-    public Test()
-    {
-        string? token = GetBearerToken();
-        if (string.IsNullOrEmpty(token))
-            throw new InvalidOperationException("Failed to retrieve authentication token.");
-
-        var services = new ServiceCollection();
-        services.AddEndpoints(isLocal: true, token);
-
-        services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer(Config.ConnectionString));
-
-        serviceProvider = services.BuildServiceProvider();
-    }
+    public Test() : base() { }
     #endregion
 
-    #region [ Endpoints ]
+#region [ Endpoints ]
 
-    [Fact]
+[Fact]
     public async Task GET_CompetitionExist()
     {
         #region [ Prepare ]
@@ -244,29 +223,4 @@ public class Test
     #endregion
 
 
-    #region [ Authentication ]
-
-    private string? GetBearerToken()
-    {
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
-
-        var jsonPayload = @"{
-            ""accountEmail"": ""systemtester@journal.com"",
-            ""password"": ""NewPassword@1""
-        }";
-
-        request.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-        var response = client.Send(request);
-        response.EnsureSuccessStatusCode();
-
-        var responseBody = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-        using var document = JsonDocument.Parse(responseBody);
-        var token = document.RootElement.GetProperty("token").GetString();
-
-        return token;
-    }
-    #endregion
 }
