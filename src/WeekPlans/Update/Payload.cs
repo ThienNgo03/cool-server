@@ -12,7 +12,7 @@ namespace Journal.WeekPlans.Update
 
         public string DateOfWeek { get; set; } = string.Empty;
 
-        public DateTime Time { get; set; }
+        public TimeSpan Time { get; set; }
 
     }
 }

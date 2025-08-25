@@ -10,4 +10,8 @@ public partial class Page : ContentPage
 
         viewModel.LoadAsync();
     }
+
+    private void Switch_Toggled(object sender, ToggledEventArgs e)
+    {
+    }
 }

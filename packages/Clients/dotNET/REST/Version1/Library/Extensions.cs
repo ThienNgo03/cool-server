@@ -8,6 +8,8 @@ using Library.WorkoutLogs;
 using Library.MeetUps;
 using Library.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Library.WeekPlanSets;
+using Library.WorkoutLogSets;
 
 namespace Library;
 
@@ -26,6 +28,8 @@ public static class Extensions
         services.RegisterTeamPools(config);
         services.RegisterWorkoutLogs(config);
         services.RegisterMeetUps(config);
+        services.RegisterWeekPlanSets(config);
+        services.RegisterWorkoutLogSets(config);
         return services;
     }
 }

@@ -27,14 +27,73 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="card:Model">
                         <Border>
-                            <VerticalStackLayout>
-                                <Label Text="{x:Binding Title}" />
-                                <Label Text="{x:Binding SubTitle}" />
-                                <Image
-                                    HeightRequest="100"
-                                    Source="{x:Binding IconUrl}"
-                                    WidthRequest="100" />
-                            </VerticalStackLayout>
+                            <Grid RowDefinitions="120, auto, 160, auto, auto">
+                                <VerticalStackLayout>
+                                    <Label Text="{x:Binding Title}" />
+                                    <Label Text="{x:Binding SubTitle}" />
+                                    <Image
+                                        HeightRequest="100"
+                                        Source="{x:Binding IconUrl}"
+                                        WidthRequest="100" />
+                                    <Button Text="Add Set" />
+                                </VerticalStackLayout>
+                                <CollectionView Grid.Row="1" ItemsSource="{x:Binding Sets}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="card:Set">
+                                            <VerticalStackLayout>
+                                                <Label Text="{x:Binding Text, Mode=OneWay}" />
+                                                <Label Text="{x:Binding Value, Mode=OneWay}" />
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <HorizontalStackLayout Grid.Row="2">
+                                    <VerticalStackLayout>
+                                        <Label Text="Monday" VerticalOptions="Center" />
+                                        <Switch
+                                            x:Name="Monday"
+                                            Toggled="Switch_Toggled"
+                                            VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Text="Tuesday" VerticalOptions="Center" />
+                                        <Switch
+                                            x:Name="Tuesday"
+                                            Toggled="Switch_Toggled"
+                                            VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Text="Wednesday" VerticalOptions="Center" />
+                                        <Switch VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Text="Thursday" VerticalOptions="Center" />
+                                        <Switch VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Text="Friday" VerticalOptions="Center" />
+                                        <Switch VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Text="Saturday" VerticalOptions="Center" />
+                                        <Switch VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Text="Sunday" VerticalOptions="Center" />
+                                        <Switch VerticalOptions="Center" />
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                                <CollectionView Grid.Row="3" ItemsSource="{x:Binding WeekPlans, Mode=OneWay}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="card:WeekPlan">
+                                            <VerticalStackLayout>
+                                                <Label Text="{x:Binding DateOfWeek, Mode=OneWay}" />
+                                                <TimePicker Time="{x:Binding Time, Mode=OneWay}" />
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

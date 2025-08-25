@@ -3,6 +3,7 @@
 public class Parameters
 {
     public Guid? Id { get; set; }
+    public Guid? UserId { get; set; }
 
     public Guid? WorkoutId { get; set; }
 

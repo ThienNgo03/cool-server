@@ -40,7 +40,7 @@ public class Controller : ControllerBase
             query = query.Where(x => x.Value == parameters.Value);
 
         if (parameters.CreatedDate.HasValue)
-            query = query.Where(x => x.CreateAt == parameters.CreatedDate);
+            query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
 
         if (parameters.LastUpdated.HasValue)
             query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
@@ -55,7 +55,7 @@ public class Controller : ControllerBase
             Id = x.Id,
             WeekPlanId = x.WeekPlanId,
             Value = x.Value,
-            CreateAt = x.CreateAt,
+            CreatedDate = x.CreatedDate,
             InsertedBy = x.InsertedBy,
             LastUpdated = x.LastUpdated,
             UpdatedBy = x.UpdatedBy
@@ -93,7 +93,7 @@ public class Controller : ControllerBase
             Id = Guid.NewGuid(),
             WeekPlanId = payload.WeekPlanId,
             Value = payload.Value,
-            CreateAt = DateTime.UtcNow,
+            CreatedDate = DateTime.UtcNow,
             InsertedBy = Guid.Parse(userId),
             LastUpdated = DateTime.UtcNow
         };

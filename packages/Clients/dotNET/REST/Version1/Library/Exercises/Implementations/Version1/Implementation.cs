@@ -1,6 +1,4 @@
-﻿using Library.Exercises.All;
-using Library.Exercises.Create;
-using Refit;
+﻿using Refit;
 using System.Diagnostics;
 
 namespace Library.Exercises.Implementations.Version1;
@@ -22,21 +20,25 @@ public class Implementation : Interface
 
     #region [ Methods ]
 
-    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(Parameters parameters)
+    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>>? AllAsync(All.Parameters? parameters = null)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        Models.Refit.GET.Parameters refitParameters = new()
-        {
-            Id = parameters.Id,
-            PageIndex = parameters.PageIndex,
-            PageSize = parameters.PageSize,
-            Name = parameters.Name,
-            Description = parameters.Description,
-            Type = parameters.Type,
-            CreatedDate = parameters.CreatedDate,
-            LastUpdated = parameters.LastUpdated,
-        };
+        Models.Refit.GET.Parameters refitParameters;
+        if (parameters is null)
+            refitParameters = new();
+        else
+            refitParameters = new()
+            {
+                Id = parameters.Id,
+                PageIndex = parameters.PageIndex,
+                PageSize = parameters.PageSize,
+                Name = parameters.Name,
+                Description = parameters.Description,
+                Type = parameters.Type,
+                CreatedDate = parameters.CreatedDate,
+                LastUpdated = parameters.LastUpdated,
+            };
 
         try
         {
@@ -84,8 +86,8 @@ public class Implementation : Interface
                     Data = new Library.Models.PaginationResults.Model<Model>
                     {
                         Total = items.Count,
-                        Index = parameters.PageIndex,
-                        Size = parameters.PageSize,
+                        Index = parameters is null ? null : parameters.PageIndex,
+                        Size = parameters is null ? null : parameters.PageSize,
                         Items = items
                     }
                 };
@@ -113,8 +115,8 @@ public class Implementation : Interface
                 Data = new Library.Models.PaginationResults.Model<Model>
                 {
                     Total = items.Count,
-                    Index = parameters.PageIndex,
-                    Size = parameters.PageSize,
+                    Index = parameters is null ? null : parameters.PageIndex,
+                    Size = parameters is null ? null : parameters.PageSize,
                     Items = items
                 }
             };
@@ -126,7 +128,7 @@ public class Implementation : Interface
         }
     }
 
-    public async Task CreateAsync(Payload payload)
+    public async Task CreateAsync(Create.Payload payload)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         try

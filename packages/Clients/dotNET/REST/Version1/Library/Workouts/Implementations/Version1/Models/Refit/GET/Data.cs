@@ -11,4 +11,6 @@ public class Data
     public DateTime CreatedDate { get; set; }
 
     public DateTime LastUpdated { get; set; }
+
+    public ICollection<Library.WeekPlans.Implementations.Version1.Models.Refit.GET.Data> WeekPlans { get; set; }
 }

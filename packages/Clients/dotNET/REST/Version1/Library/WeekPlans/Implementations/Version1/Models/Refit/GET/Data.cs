@@ -8,9 +8,11 @@ public class Data
 
     public string DateOfWeek { get; set; }
 
-    public DateTime Time { get; set; }
+    public TimeSpan Time { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
+
+    public ICollection<Library.WeekPlanSets.Implementations.Version1.Models.Refit.GET.Data> WeekPlanSets { get; set; }
 }

@@ -33,7 +33,8 @@ public class Implementation : Interface
             ExerciseId = parameters.ExerciseId,
             UserId = parameters.UserId,
             CreatedDate = parameters.CreatedDate,
-            LastUpdated = parameters.LastUpdated
+            LastUpdated = parameters.LastUpdated,
+            IsIncludeWeekPlans = parameters.IsIncludeWeekPlans
         };
 
         try
@@ -98,6 +99,21 @@ public class Implementation : Interface
                     UserId = item.UserId,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
+                    WeekPlans = item.WeekPlans?.Select(wp => new WeekPlan
+                    {
+                        Id = wp.Id,
+                        WorkoutId = wp.WorkoutId,
+                        DateOfWeek = wp.DateOfWeek,
+                        Time = wp.Time,
+                        CreatedDate = wp.CreatedDate,
+                        LastUpdated = wp.LastUpdated,
+                        WeekPlanSets = wp.WeekPlanSets?.Select(wps => new WeekPlanSet
+                        {
+                            Id = wps.Id,
+                            WeekPlanId = wps.WeekPlanId,
+                            Value = wps.Value
+                        }).ToList()
+                    }).ToList()
                 });
             }
 

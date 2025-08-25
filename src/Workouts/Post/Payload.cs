@@ -19,7 +19,7 @@ public class WeekPlan
 {
     public string DateOfWeek { get; set; }
 
-    public DateTime Time { get; set; }
+    public TimeSpan Time { get; set; }
 
     public ICollection<WeekPlanSet>? WeekPlanSets { get; set; }
 }

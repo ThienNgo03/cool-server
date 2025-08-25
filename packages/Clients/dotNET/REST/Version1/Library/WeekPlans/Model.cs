@@ -8,9 +8,9 @@ public class Model
 
     public string DateOfWeek { get; set; }
 
-    public DateTime Time { get; set; }
+    public TimeSpan Time { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 }

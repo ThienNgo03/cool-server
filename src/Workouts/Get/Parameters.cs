@@ -1,20 +1,21 @@
-﻿namespace Journal.Workouts.Get
+﻿namespace Journal.Workouts.Get;
+
+public class Parameters
 {
-    public class Parameters
-    {
-        public Guid? Id { get; set; }
+    public Guid? Id { get; set; }
 
-        public Guid? ExerciseId { get; set; }
+    public Guid? ExerciseId { get; set; }
 
-        public Guid? UserId { get; set; }
+    public Guid? UserId { get; set; }
 
-        public DateTime? CreatedDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
 
-        public DateTime? LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
-        public int? PageSize { get; set; }
+    public int? PageSize { get; set; }
 
-        public int? PageIndex { get; set; }
+    public int? PageIndex { get; set; }
 
-    }
+    public bool IsIncludeWeekPlans { get; set; } = false;
+
 }

@@ -44,7 +44,7 @@ public class Handler
                     Id = Guid.NewGuid(),
                     WeekPlanId = newWeekPlan.Id,
                     Value = weekPlanSet.Value,
-                    CreateAt = DateTime.UtcNow,
+                    CreatedDate = DateTime.UtcNow,
                     LastUpdated = DateTime.UtcNow
                 };
                 _context.WeekPlanSets.Add(newWeekPlanSet);

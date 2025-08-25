@@ -26,7 +26,6 @@ public class Controller : ControllerBase
     }
 
     [HttpGet]
-
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query = _context.Workouts.AsQueryable();
@@ -45,10 +44,55 @@ public class Controller : ControllerBase
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex.Value >= 0)
             query = query.Skip(parameters.PageSize.Value * parameters.PageIndex.Value).Take(parameters.PageSize.Value);
 
-        var QueryResult = await query.AsNoTracking().ToListAsync();
-        List<Get.Response> responses = new();
-        foreach (var item in QueryResult)
+        var result = await query.AsNoTracking().ToListAsync();
+
+        // Pre-fetch all related data in single queries
+        var workoutIds = result.Select(w => w.Id).ToList();
+        var exerciseIds = result.Select(w => w.ExerciseId).Distinct().ToList();
+
+        // Get all related exercises in one query
+        var exercises = await _context.Exercises
+            .Where(e => exerciseIds.Contains(e.Id))
+            .ToDictionaryAsync(e => e.Id);
+
+        // Get all related week plans and sets in single queries if requested
+        Dictionary<Guid, List<Get.WeekPlan>> workoutWeekPlans = new();
+        if (parameters.IsIncludeWeekPlans)
         {
+            var weekPlans = await _context.WeekPlans
+                .Where(wp => workoutIds.Contains(wp.WorkoutId))
+                .ToListAsync();
+
+            var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
+            var weekPlanSets = await _context.WeekPlanSets
+                .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
+                .ToListAsync();
+
+            // Group week plans by workout ID
+            foreach (var weekPlan in weekPlans)
+            {
+                if (!workoutWeekPlans.ContainsKey(weekPlan.WorkoutId))
+                    workoutWeekPlans[weekPlan.WorkoutId] = new List<Get.WeekPlan>();
+
+                var weekPlanModel = new Get.WeekPlan
+                {
+                    Id = weekPlan.Id,
+                    DateOfWeek = weekPlan.DateOfWeek,
+                    Time = weekPlan.Time,
+                    WeekPlanSets = weekPlanSets
+                        .Where(wps => wps.WeekPlanId == weekPlan.Id)
+                        .Select(wps => new Get.WeekPlanSet
+                        {
+                            Id = wps.Id,
+                            Value = wps.Value
+                        }).ToList()
+                };
+                workoutWeekPlans[weekPlan.WorkoutId].Add(weekPlanModel);
+            }
+        }
+
+        // Build responses using pre-fetched data
+        List<Get.Response> responses = result.Select(item => {
             var response = new Get.Response
             {
                 Id = item.Id,
@@ -57,8 +101,8 @@ public class Controller : ControllerBase
                 CreatedDate = item.CreatedDate,
                 LastUpdated = item.LastUpdated
             };
-            var exercise = await _context.Exercises.FindAsync(item.ExerciseId);
-            if (exercise != null)
+
+            if (exercises.TryGetValue(item.ExerciseId, out var exercise))
             {
                 response.Exercise = new Get.Exercise
                 {
@@ -67,17 +111,15 @@ public class Controller : ControllerBase
                     Description = exercise.Description
                 };
             }
-            var weekPlans = await _context.WeekPlans.Where(wp => wp.WorkoutId == item.Id).ToListAsync();
-            var weekPlanSets = await _context.WeekPlanSets
-                .Where(wps => weekPlans.Select(wp => wp.Id).Contains(wps.WeekPlanId))
-                .ToListAsync();
-            response.WeekPlans = weekPlans.Select(wp => new Get.WeekPlan
+
+            if (parameters.IsIncludeWeekPlans && workoutWeekPlans.TryGetValue(item.Id, out var weekPlans))
             {
-                Id = wp.Id,
-            }).ToList();
-            response.WeekPlans.Select(wp => wp.WeekPlanSets?.Select(wps=>weekPlanSets)).ToList();
-            responses.Add(response);
-        }
+                response.WeekPlans = weekPlans;
+            }
+
+            return response;
+        }).ToList();
+
         var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
