@@ -56,7 +56,7 @@ public class Test : BaseTest
             Id = weekPlanId,
             WorkoutId = Guid.NewGuid(),
             DateOfWeek = "Monday",
-            Time = DateTime.UtcNow,
+            Time = TimeSpan.Zero,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
@@ -94,7 +94,7 @@ public class Test : BaseTest
             Id =updatedWeekPlanId,
             WorkoutId = Guid.NewGuid(),
             DateOfWeek = "Monday",
-            Time = DateTime.UtcNow,
+            Time = TimeSpan.Zero,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };

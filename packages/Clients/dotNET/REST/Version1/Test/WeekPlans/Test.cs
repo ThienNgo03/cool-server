@@ -23,7 +23,7 @@ public class Test : BaseTest
             Id = Guid.NewGuid(),
             WorkoutId = Guid.NewGuid(),
             DateOfWeek = "Monday",
-            Time = DateTime.UtcNow,
+            Time = TimeSpan.Zero,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
@@ -73,7 +73,7 @@ public class Test : BaseTest
         {
             WorkoutId = workoutId,
             DateOfWeek = dateOfWeek,
-            Time = DateTime.UtcNow
+            Time = TimeSpan.Zero,
         };
         var weekPlansEndpoint = serviceProvider!.GetRequiredService<Library.WeekPlans.Interface>();
         await weekPlansEndpoint.CreateAsync(payload);
@@ -82,7 +82,7 @@ public class Test : BaseTest
         Assert.NotNull(expected);
         Assert.True(expected.WorkoutId == workoutId);
         Assert.Equal(expected.DateOfWeek, payload.DateOfWeek);
-        Assert.Equal(expected.Time.Date, payload.Time.Date);
+        Assert.Equal(expected.Time, payload.Time);
 
         dbContext.Workouts.Remove(existingWorkout);
         dbContext.WeekPlans.Remove(expected);
@@ -101,7 +101,7 @@ public class Test : BaseTest
             Id = id,
             WorkoutId = Guid.NewGuid(),
             DateOfWeek = "Monday",
-            Time = DateTime.UtcNow
+            Time = TimeSpan.Zero
         };
         dbContext.WeekPlans.Add(existingWeekPlan);
         var existingWorkout = new Databases.Journal.Tables.Workout.Table()
@@ -122,7 +122,7 @@ public class Test : BaseTest
             Id = id,
             WorkoutId = updatedWorkoutId,
             DateOfWeek = updatedDateOfWeek,
-            Time = DateTime.UtcNow
+            Time = TimeSpan.Zero
         };
         await weekPlansEndpoint.UpdateAsync(payload);
 
@@ -131,7 +131,7 @@ public class Test : BaseTest
         Assert.NotNull(updatedWeekPlan);
         Assert.Equal(updatedWeekPlan.WorkoutId, updatedWorkoutId);
         Assert.Equal(updatedWeekPlan.DateOfWeek, updatedDateOfWeek);
-        Assert.Equal(updatedWeekPlan.Time.Date, payload.Time.Date);
+        Assert.Equal(updatedWeekPlan.Time, payload.Time);
 
         dbContext.Workouts.Remove(existingWorkout);
         dbContext.WeekPlans.Remove(updatedWeekPlan);
@@ -148,7 +148,7 @@ public class Test : BaseTest
             Id = id,
             WorkoutId = Guid.NewGuid(),
             DateOfWeek = "Monday",
-            Time = DateTime.UtcNow
+            Time = TimeSpan.Zero
         };
         dbContext.WeekPlans.Add(weekPlan);
         await dbContext.SaveChangesAsync();

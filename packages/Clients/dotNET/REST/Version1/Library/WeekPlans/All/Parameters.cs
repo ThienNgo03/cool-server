@@ -9,7 +9,7 @@ public class Parameters
 
     public string? DateOfWeek { get; set; }
 
-    public DateTime? Time { get; set; }
+    public TimeSpan? Time { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 
