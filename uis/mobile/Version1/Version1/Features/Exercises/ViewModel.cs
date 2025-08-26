@@ -33,6 +33,11 @@ public partial class ViewModel(
                 IconUrl = "dotnet_bot.png"
             });
         }
+
+        var testUser = Guid.Parse("2a57b84f-963f-4860-a6b9-559185f75227");
+        var workouts = await LoadWorkoutsAsync(userId: testUser, 
+                                               isIncludeWeekPlans: true,
+                                               isIncludeWeekPlanSets: true);
     }
     #endregion
 
@@ -50,12 +55,14 @@ public partial class ViewModel(
 
     async Task<ICollection<Library.Workouts.Model>> LoadWorkoutsAsync(
         Guid? userId, 
-        bool isIncludeWeekPlans)
+        bool isIncludeWeekPlans,
+        bool isIncludeWeekPlanSets)
     {
         var response = await this.workouts.AllAsync(new() 
         { 
             UserId = userId,
-            IsIncludeWeekPlans = isIncludeWeekPlans
+            IsIncludeWeekPlans = isIncludeWeekPlans,
+            IsIncludeWeekPlanSets = isIncludeWeekPlanSets
         });
 
         if (response == null || response.Data == null || response.Data.Items == null || response.Data.Items.Count == 0)
@@ -80,6 +87,19 @@ public partial class ViewModel(
             });
         }
         return items;
+    }
+
+    public async Task UpdateCardAsync(string id, bool isSelected)
+    {
+        var item = Items.FirstOrDefault(x => x.Id == id);
+        if(item == null) return;
+
+        item.IsSelected = true;
+        item.IsMondaySelected = isSelected;
+        item.IsWednesdaySelected = isSelected;  
+        item.IsFridaySelected = isSelected;
+
+
     }
     #endregion
 }

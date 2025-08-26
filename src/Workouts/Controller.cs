@@ -64,9 +64,32 @@ public class Controller : ControllerBase
                 .ToListAsync();
 
             var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
-            var weekPlanSets = await _context.WeekPlanSets
-                .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
-                .ToListAsync();
+
+            // Only fetch WeekPlanSets if IsIncludeWeekPlanSets is true
+            Dictionary<Guid, List<Get.WeekPlanSet>> weekPlanSetsByWeekPlanId = new();
+            if (parameters.IsIncludeWeekPlanSets)
+            {
+                var weekPlanSets = await _context.WeekPlanSets
+                    .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
+                    .ToListAsync();
+
+                foreach (var set in weekPlanSets)
+                {
+                    if (!weekPlanSetsByWeekPlanId.ContainsKey(set.WeekPlanId))
+                        weekPlanSetsByWeekPlanId[set.WeekPlanId] = new List<Get.WeekPlanSet>();
+
+                    weekPlanSetsByWeekPlanId[set.WeekPlanId].Add(new Get.WeekPlanSet
+                    {
+                        Id = set.Id,
+                        Value = set.Value,
+                        WeekPlanId = set.WeekPlanId,
+                        InsertedBy = set.InsertedBy,
+                        UpdatedBy = set.UpdatedBy,
+                        LastUpdated = set.LastUpdated,
+                        CreatedDate = set.CreatedDate
+                    });
+                }
+            }
 
             // Group week plans by workout ID
             foreach (var weekPlan in weekPlans)
@@ -79,13 +102,13 @@ public class Controller : ControllerBase
                     Id = weekPlan.Id,
                     DateOfWeek = weekPlan.DateOfWeek,
                     Time = weekPlan.Time,
-                    WeekPlanSets = weekPlanSets
-                        .Where(wps => wps.WeekPlanId == weekPlan.Id)
-                        .Select(wps => new Get.WeekPlanSet
-                        {
-                            Id = wps.Id,
-                            Value = wps.Value
-                        }).ToList()
+                    WorkoutId = weekPlan.WorkoutId,
+                    CreatedDate = weekPlan.CreatedDate,
+                    LastUpdated = weekPlan.LastUpdated,
+                    WeekPlanSets = parameters.IsIncludeWeekPlanSets &&
+                                  weekPlanSetsByWeekPlanId.ContainsKey(weekPlan.Id)
+                                  ? weekPlanSetsByWeekPlanId[weekPlan.Id]
+                                  : null
                 };
                 workoutWeekPlans[weekPlan.WorkoutId].Add(weekPlanModel);
             }

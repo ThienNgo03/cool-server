@@ -17,4 +17,6 @@ public class Parameters
     public int? PageIndex { get; set; }
 
     public bool IsIncludeWeekPlans { get; set; }
+
+    public bool IsIncludeWeekPlanSets { get; set; }
 }

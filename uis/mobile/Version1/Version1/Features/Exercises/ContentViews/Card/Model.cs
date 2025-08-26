@@ -22,6 +22,24 @@ public partial class Model : BaseModel
     [ObservableProperty]
     bool isSelected;
 
+
+
+
+    [ObservableProperty]
+    bool isMondaySelected;
+    [ObservableProperty]
+    bool isTuesdaySelected;
+    [ObservableProperty]
+    bool isWednesdaySelected;
+    [ObservableProperty]
+    bool isThursdaySelected;
+    [ObservableProperty]
+    bool isFridaySelected;
+    [ObservableProperty]
+    bool isSaturdaySelected;
+    [ObservableProperty]
+    bool isSundaySelected;
+
     [ObservableProperty]
     ObservableCollection<Set> sets;
 

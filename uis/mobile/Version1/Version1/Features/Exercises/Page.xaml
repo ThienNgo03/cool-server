@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:card="clr-namespace:Version1.Features.Exercises.ContentViews.Card"
     xmlns:local="clr-namespace:Version1.Features.Exercises"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
     Title="Page"
     x:DataType="local:ViewModel">
     <Grid>
@@ -30,6 +31,21 @@
                             <Grid RowDefinitions="120, auto, 160, auto, auto">
                                 <VerticalStackLayout>
                                     <Label Text="{x:Binding Title}" />
+                                    <syncfusionToolkit:SfButton
+                                        x:Name="SelectButton"
+                                        BackgroundColor="#27354a"
+                                        CommandParameter="{x:Binding Id,
+                                                                     Mode=OneWay}"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsSelected,
+                                                              Mode=TwoWay}"
+                                        Text="🔘 Select" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#27354a"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        Text="🔘 Select" />
                                     <Label Text="{x:Binding SubTitle}" />
                                     <Image
                                         HeightRequest="100"
@@ -48,40 +64,55 @@
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
                                 <HorizontalStackLayout Grid.Row="2">
-                                    <VerticalStackLayout>
-                                        <Label Text="Monday" VerticalOptions="Center" />
-                                        <Switch
-                                            x:Name="Monday"
-                                            Toggled="Switch_Toggled"
-                                            VerticalOptions="Center" />
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout>
-                                        <Label Text="Tuesday" VerticalOptions="Center" />
-                                        <Switch
-                                            x:Name="Tuesday"
-                                            Toggled="Switch_Toggled"
-                                            VerticalOptions="Center" />
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout>
-                                        <Label Text="Wednesday" VerticalOptions="Center" />
-                                        <Switch VerticalOptions="Center" />
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout>
-                                        <Label Text="Thursday" VerticalOptions="Center" />
-                                        <Switch VerticalOptions="Center" />
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout>
-                                        <Label Text="Friday" VerticalOptions="Center" />
-                                        <Switch VerticalOptions="Center" />
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout>
-                                        <Label Text="Saturday" VerticalOptions="Center" />
-                                        <Switch VerticalOptions="Center" />
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout>
-                                        <Label Text="Sunday" VerticalOptions="Center" />
-                                        <Switch VerticalOptions="Center" />
-                                    </VerticalStackLayout>
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsMondaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Monday" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsTuesdaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Tuesday" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsWednesdaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Wednesday" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsThursdaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Thursday" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsFridaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Friday" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsSaturdaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Saturday" />
+                                    <syncfusionToolkit:SfButton
+                                        BackgroundColor="#7deaec"
+                                        CornerRadius="4"
+                                        IsCheckable="True"
+                                        IsChecked="{x:Binding IsSundaySelected,
+                                                              Mode=TwoWay}"
+                                        Text="Sunday" />
                                 </HorizontalStackLayout>
                                 <CollectionView Grid.Row="3" ItemsSource="{x:Binding WeekPlans, Mode=OneWay}">
                                     <CollectionView.ItemTemplate>

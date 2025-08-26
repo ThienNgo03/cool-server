@@ -34,7 +34,8 @@ public class Implementation : Interface
             UserId = parameters.UserId,
             CreatedDate = parameters.CreatedDate,
             LastUpdated = parameters.LastUpdated,
-            IsIncludeWeekPlans = parameters.IsIncludeWeekPlans
+            IsIncludeWeekPlans = parameters.IsIncludeWeekPlans,
+            IsIncludeWeekPlanSets = parameters.IsIncludeWeekPlanSets,
         };
 
         try
