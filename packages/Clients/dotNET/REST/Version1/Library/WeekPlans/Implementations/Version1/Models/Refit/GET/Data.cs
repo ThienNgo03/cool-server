@@ -14,5 +14,4 @@ public class Data
 
     public DateTime? LastUpdated { get; set; }
 
-    public ICollection<Library.WeekPlanSets.Implementations.Version1.Models.Refit.GET.Data> WeekPlanSets { get; set; }
 }

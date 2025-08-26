@@ -111,7 +111,11 @@ public class Implementation : Interface
                         {
                             Id = wps.Id,
                             WeekPlanId = wps.WeekPlanId,
-                            Value = wps.Value
+                            Value = wps.Value,
+                            CreatedDate = wps.CreatedDate,
+                            InsertedBy = wps.InsertedBy,
+                            LastUpdated = wps.LastUpdated,
+                            UpdatedBy = wps.UpdatedBy
                         }).ToList()
                     }).ToList()
                 });
