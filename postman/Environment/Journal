@@ -1,0 +1,49 @@
+{
+	"id": "48d0b191-b1b2-48c9-adbd-8ce5791a4e74",
+	"name": "Journal",
+	"values": [
+		{
+			"key": "access-token",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "dev-url",
+			"value": "https://localhost:7011",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "dev-tunnel-url",
+			"value": "https://qs5xs4dh-7011.asse.devtunnels.ms",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "production-url",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-08-27T07:07:01.910Z",
+	"_postman_exported_using": "Postman/11.60.1"
+}

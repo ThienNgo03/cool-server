@@ -1,0 +1,161 @@
+{
+	"info": {
+		"_postman_id": "540ab8b1-09cb-49ad-b840-d5366e776e64",
+		"name": "Workouts",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-540ab8b1-09cb-49ad-b840-d5366e776e64?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": ".",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "{{dev-url}} /api/workouts?IsIncludeWeekPlans=True&IsIncludeWeekPlanSets=True",
+					"host": [
+						"{{dev-url}} "
+					],
+					"path": [
+						"api",
+						"workouts"
+					],
+					"query": [
+						{
+							"key": "IsIncludeWeekPlans",
+							"value": "True"
+						},
+						{
+							"key": "IsIncludeWeekPlanSets",
+							"value": "True"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostWorkout",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwYjAzYjVjMi0yMzAzLTRmODMtOGQ5Ny01ODk1ZDVmN2M0NTYiLCJlbWFpbCI6InN5c3RlbXRlc3RlckBqb3VybmFsLmNvbSIsImp0aSI6ImNhZDdhYTMxLTIwOTItNDQ0NS04Mjc1LTg1ODNmZjYyNjJkMyIsImV4cCI6MTc1NTYyNDM2MywiaXNzIjoiQXV0aENvb2xTZXJ2ZXIiLCJhdWQiOiJBdXRoQ29vbENsaWVudCJ9.7Qbzc_nMIQTqq4iewOdKLMGkKDbMaa3EyBFeXXedSxU",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"0b03b5c2-2303-4f83-8d97-5895d5f7c456\",\r\n    \"exerciseId\": \"0dba3844-4fc1-4cee-9cb9-3932b6758303\",\r\n    \"weekPlans\": [\r\n        {\r\n            \"dateOfWeek\": \"Monday\",\r\n            \"time\": \"2025-07-20\",\r\n            \"weekPlanSets\": [\r\n                {\r\n                    \"value\": 12\r\n                },\r\n                {\r\n                    \"value\": 10\r\n                },\r\n                {\r\n                    \"value\": 8\r\n                }\r\n            ]\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/workouts",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PutWorkout",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"9858ae46-e924-4810-e7c4-08ddc6e978d6\",\r\n    \"userId\": \"Pull Up\",\r\n    \"exerciseId\": \"abcde\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/Workouts",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"Workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteWorkout",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/workouts?id=33CD4E18-1A2F-462E-80F0-8BF245BBD2CD&isWeekPlanDelete=true&isWeekPlanSetDelete=true",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"workouts"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "33CD4E18-1A2F-462E-80F0-8BF245BBD2CD"
+						},
+						{
+							"key": "isWeekPlanDelete",
+							"value": "true"
+						},
+						{
+							"key": "isWeekPlanSetDelete",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
