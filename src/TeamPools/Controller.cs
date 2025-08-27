@@ -80,6 +80,14 @@ public class Controller : ControllerBase
         {
             return NotFound($"Competition with ID {payload.CompetitionId} not found.");
         }
+
+        var refereeId = existingCompetition.RefereeId;
+        if (refereeId is null)
+            return BadRequest("Require Referee");
+
+        if (refereeId != Guid.Parse(userId))
+            return BadRequest("Not match Referee");
+
         var teamPool = new Journal.Databases.Journal.Tables.TeamPool.Table
         {
             Id = Guid.NewGuid(),

@@ -26,4 +26,6 @@ public class Payload
     
     
     public string Type { get; set; }= string.Empty;
+
+    public Guid? RefereeId { get; set; }
 }

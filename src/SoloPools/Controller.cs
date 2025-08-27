@@ -86,6 +86,14 @@ public class Controller : ControllerBase
         {
             return NotFound($"Competition with ID {payload.CompetitionId} not found.");
         }
+
+        var refereeId = existingCompetition.RefereeId;
+        if (refereeId is null)
+            return BadRequest("Require Referee");
+
+        if (refereeId != Guid.Parse(userId))
+            return BadRequest("Not match Referee");
+
         var soloPool = new Databases.Journal.Tables.SoloPool.Table
         {
             Id = Guid.NewGuid(),

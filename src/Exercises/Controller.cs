@@ -1,4 +1,5 @@
-﻿using Journal.Models.PaginationResults;
+﻿using Journal.Exercises.Get;
+using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -52,12 +53,62 @@ public class Controller : ControllerBase
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
         var result = await query.AsNoTracking().ToListAsync();
+        var exerciseIds = result.Select(x => x.Id).ToList();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.Exercise.Table>()
+        // Create response model to include muscles
+        var responses = result.Select(exercise => new Get.Response
+        {
+            Id = exercise.Id,
+            Name = exercise.Name,
+            Description = exercise.Description,
+            Type = exercise.Type,
+            CreatedDate = exercise.CreatedDate,
+            LastUpdated = exercise.LastUpdated
+        }).ToList();
+
+        if (parameters.IsIncludeMuscles && exerciseIds.Any())
+        {
+            // Get all related exercise muscles in one query
+            var exerciseMuscles = await _context.ExerciseMuscles
+                .Where(x => exerciseIds.Contains(x.ExerciseId))
+                .ToListAsync();
+
+            var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
+
+            // Get all related muscles in one query
+            var muscles = await _context.Muscles
+                .Where(x => muscleIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id);
+
+            // Group exercise muscles by exercise ID
+            var exerciseMuscleGroups = exerciseMuscles
+                .GroupBy(x => x.ExerciseId)
+                .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
+
+            // Attach muscles to each response
+            foreach (var response in responses)
+            {
+                if (exerciseMuscleGroups.TryGetValue(response.Id, out var responseMuscleIds))
+                {
+                    response.Muscles = responseMuscleIds
+                        .Where(muscleId => muscles.ContainsKey(muscleId))
+                        .Select(muscleId => new Get.Muscle
+                        {
+                            Id = muscles[muscleId].Id,
+                            Name = muscles[muscleId].Name,
+                            CreatedDate = muscles[muscleId].CreatedDate,
+                            LastUpdated = muscles[muscleId].LastUpdated
+                        })
+                        .ToList();
+                }
+            }
+        }
+
+        var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
-            .WithTotal(result.Count)
-            .WithItems(result)
+            .WithTotal(responses.Count)
+            .WithItems(responses)
             .Build();
 
         return Ok(paginationResults);

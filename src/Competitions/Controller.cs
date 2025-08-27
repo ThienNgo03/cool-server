@@ -37,6 +37,10 @@ public class Controller : ControllerBase
         {
             query = query.Where(c => c.Id == parameters.Id.Value);
         }
+        if (parameters.RefereeId.HasValue)
+        {
+            query = query.Where(c => c.RefereeId == parameters.RefereeId.Value);
+        }
         if (!string.IsNullOrEmpty(parameters.Title))
         {
             query = query.Where(c => c.Title.ToLower().Trim().Contains(parameters.Title.ToLower().Trim()));
@@ -102,7 +106,8 @@ public class Controller : ControllerBase
                 Location = item.Location,
                 DateTime = item.DateTime,
                 CreatedDate = item.CreatedDate,
-                Type = item.Type
+                Type = item.Type,
+                RefereeId = item.RefereeId
             };
             response.Add(competitionResponse);
         }
@@ -187,7 +192,8 @@ public class Controller : ControllerBase
             DateTime = competition.DateTime,
             CreatedDate = DateTime.UtcNow,
             Type = competition.Type,
-            ExerciseId = competition.ExerciseId 
+            ExerciseId = competition.ExerciseId,
+            RefereeId = competition.RefereeId
         };
         if(!string.IsNullOrEmpty(competition.ParticipantIds))
         {
@@ -294,6 +300,7 @@ public class Controller : ControllerBase
         existingCompetition.DateTime = competition.DateTime;
         existingCompetition.ExerciseId = competition.ExerciseId;
         existingCompetition.Type = competition.Type;
+        existingCompetition.RefereeId = competition.RefereeId;
 
         if (string.IsNullOrEmpty(competition.ParticipantIds))
             existingCompetition.ParticipantIds = new List<Guid>();

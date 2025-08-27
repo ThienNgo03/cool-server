@@ -11,4 +11,5 @@ public class Table
     public DateTime DateTime { get; set; }
     public DateTime CreatedDate { get; set; }
     public string Type { get; set; }= string.Empty;
+    public Guid? RefereeId { get; set; }
 }

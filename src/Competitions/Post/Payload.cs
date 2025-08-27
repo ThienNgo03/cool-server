@@ -16,6 +16,8 @@ public class Payload
     public Guid ExerciseId { get; set; }
     
     public DateTime DateTime { get; set; }
+
+    public Guid? RefereeId { get; set; }
     
     public string Type { get; set; } = string.Empty;
 }
