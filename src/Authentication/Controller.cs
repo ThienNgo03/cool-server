@@ -50,16 +50,17 @@ public class Controller:ControllerBase
             Email = payload.AccountEmail,
             PhoneNumber = payload.PhoneNumber,
         };
+
         if (payload.Password != payload.ConfirmPassword)
-        {
             return BadRequest("Passwords do not match.");
-        }
+
         newAccount.EmailConfirmed = true;
         var result = await _userManager.CreateAsync(newAccount, payload.Password);
 
         if (!result.Succeeded)
             return BadRequest(result.Errors);
-        await _messageBus.PublishAsync(new Register.Messager.Message(newAccount.Id, payload));
+
+        await _messageBus.PublishAsync(new Register.Messager.Message(Guid.Parse(newAccount.Id), payload));
 
         return NoContent();
     }

@@ -1,5 +1,4 @@
-﻿using Library.Authentication.Implementations.Version1;
-using Refit;
+﻿using Refit;
 
 namespace Library.WeekPlanSets.Implementations.Version1;
 
@@ -10,6 +9,9 @@ public interface IRefitInterface
 
     [Post("/api/week-plan-sets")]
     Task<ApiResponse<object>> POST([Body] Models.Refit.POST.Payload payload);
+
+    [Patch("/api/reports")]
+    Task<ApiResponse<object>> PATCH([Query] Models.Refit.PATCH.Parameters parameters, [Body] List<Models.Refit.PATCH.Operation> operations);
 
     [Put("/api/week-plan-sets")]
     Task<ApiResponse<object>> PUT([Body] Models.Refit.PUT.Payload payload);

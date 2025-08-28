@@ -9,13 +9,9 @@ public class Handler
     }
     public async Task Handle(Message message)
     {
-        if (message.id is null)
-        {
-            throw new ArgumentNullException(nameof(message.Payload), "Id cannot be null");
-        }
         var newAccount = new Databases.Journal.Tables.User.Table
         {
-            Id = Guid.NewGuid(),
+            Id = message.id,
             Name = message.Payload.AccountName,
             Email = message.Payload.AccountEmail,
             PhoneNumber = message.Payload.PhoneNumber,

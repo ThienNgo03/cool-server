@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:card="clr-namespace:Version1.Features.Exercises.ContentViews.Card"
     xmlns:local="clr-namespace:Version1.Features.Exercises"
+    xmlns:signalR="clr-namespace:Version1.Features.WebSocket.SignalR"
     xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
     Title="Page"
     x:DataType="local:ViewModel">
@@ -33,32 +34,46 @@
                                     <Label Text="{x:Binding Title}" />
                                     <syncfusionToolkit:SfButton
                                         x:Name="SelectButton"
-                                        BackgroundColor="#27354a"
+                                        BackgroundColor="#171717"
+                                        Clicked="SelectButton_Clicked"
                                         CommandParameter="{x:Binding Id,
                                                                      Mode=OneWay}"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsSelected,
-                                                              Mode=TwoWay}"
-                                        Text="🔘 Select" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#27354a"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        Text="🔘 Select" />
+                                                              Mode=OneWay}"
+                                        Text="🔘 Select"
+                                        TextColor="Red" />
+                                    <Button
+                                        Clicked="AddSet"
+                                        CommandParameter="{x:Binding Id,
+                                                                     Mode=TwoWay}"
+                                        HeightRequest="20"
+                                        Text="Add Set" />
                                     <Label Text="{x:Binding SubTitle}" />
                                     <Image
                                         HeightRequest="100"
                                         Source="{x:Binding IconUrl}"
                                         WidthRequest="100" />
-                                    <Button Text="Add Set" />
                                 </VerticalStackLayout>
                                 <CollectionView Grid.Row="1" ItemsSource="{x:Binding Sets}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="card:Set">
                                             <VerticalStackLayout>
                                                 <Label Text="{x:Binding Text, Mode=OneWay}" />
-                                                <Label Text="{x:Binding Value, Mode=OneWay}" />
+                                                <HorizontalStackLayout>
+                                                    <Button
+                                                        Clicked="DecreaseSet"
+                                                        CommandParameter="{x:Binding Mode=OneWay}"
+                                                        Text="-"
+                                                        VerticalOptions="Center" />
+                                                    <Label Text="{x:Binding Value, Mode=OneWay}" VerticalOptions="Center" />
+                                                    <Button
+                                                        Clicked="IncreaseSet"
+                                                        CommandParameter="{x:Binding Mode=OneWay}"
+                                                        Text="+"
+                                                        VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
                                             </VerticalStackLayout>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
@@ -66,6 +81,7 @@
                                 <HorizontalStackLayout Grid.Row="2">
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Monday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsMondaySelected,
@@ -73,6 +89,7 @@
                                         Text="Monday" />
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Tuesday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsTuesdaySelected,
@@ -80,6 +97,7 @@
                                         Text="Tuesday" />
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Wednesday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsWednesdaySelected,
@@ -87,6 +105,7 @@
                                         Text="Wednesday" />
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Thursday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsThursdaySelected,
@@ -94,6 +113,7 @@
                                         Text="Thursday" />
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Friday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsFridaySelected,
@@ -101,6 +121,7 @@
                                         Text="Friday" />
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Saturday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsSaturdaySelected,
@@ -108,6 +129,7 @@
                                         Text="Saturday" />
                                     <syncfusionToolkit:SfButton
                                         BackgroundColor="#7deaec"
+                                        CommandParameter="Sunday"
                                         CornerRadius="4"
                                         IsCheckable="True"
                                         IsChecked="{x:Binding IsSundaySelected,
@@ -130,5 +152,11 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </ScrollView>
+        <signalR:Component
+            BaseUrl="wss://localhost:7011"
+            Command="{x:Binding HandleSocketReportsPayloadCommand}"
+            Events="{x:Binding Events,
+                               Mode=OneWay}"
+            EndPoint="workouts-hub" />
     </Grid>
 </ContentPage>

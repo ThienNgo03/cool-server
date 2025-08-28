@@ -22,21 +22,24 @@ public partial class Model : BaseModel
     [ObservableProperty]
     bool isSelected;
 
-
-
-
     [ObservableProperty]
     bool isMondaySelected;
+
     [ObservableProperty]
     bool isTuesdaySelected;
+
     [ObservableProperty]
     bool isWednesdaySelected;
+
     [ObservableProperty]
     bool isThursdaySelected;
+
     [ObservableProperty]
     bool isFridaySelected;
+
     [ObservableProperty]
     bool isSaturdaySelected;
+
     [ObservableProperty]
     bool isSundaySelected;
 
@@ -47,24 +50,35 @@ public partial class Model : BaseModel
     ObservableCollection<WeekPlan> weekPlans;
 }
 
-public class Set
+public partial class Set : BaseModel
 {
-    public Guid Id { get; set; }
-    public string Text { get; set; } = string.Empty;
-    public int Value { get; set; }
+    [ObservableProperty]
+    Guid id;
+
+    [ObservableProperty]
+    string text;
+
+    [ObservableProperty]
+    int value;
 }
 
-public partial class WeekPlan
+public partial class WeekPlan : BaseModel
 {
-    public Guid Id { get; set; }
+    [ObservableProperty]
+    Guid id;
 
-    public Guid WorkoutId { get; set; }
+    [ObservableProperty]
+    Guid workoutId;
 
-    public string DateOfWeek { get; set; } = string.Empty;
+    [ObservableProperty]
+    string dateOfWeek;
 
-    public DateTime Time { get; set; }
+    [ObservableProperty]
+    TimeSpan time;
 
-    public DateTime CreatedDate { get; set; }
+    [ObservableProperty]
+    DateTime createdDate;
 
-    public DateTime LastUpdated { get; set; }
+    [ObservableProperty]
+    DateTime? lastUpdated;
 }
