@@ -8,5 +8,7 @@ public interface Interface
 
     Task UpdateAsync(Update.Payload payload);
 
+    Task PatchAsync(Models.Patch.Parameters parameters);
+
     Task DeleteAsync(Delete.Parameters parameters);
 }
