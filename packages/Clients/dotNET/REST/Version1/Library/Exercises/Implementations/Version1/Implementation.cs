@@ -103,6 +103,13 @@ public class Implementation : Interface
                     Type = item.Type,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
+                    Muscles = item.Muscles?.Select(m => new Muscle
+                    {
+                        Id = m.Id,
+                        Name = m.Name,
+                        CreatedDate = m.CreatedDate,
+                        LastUpdated = m.LastUpdated
+                    }).ToList()
                 });
             }
 
