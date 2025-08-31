@@ -1,12 +1,181 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Version1.Features.Authentication.SignUp.Page"
-             Title="Sign Up Page">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to Sign Up Page"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+<ContentPage
+    x:Class="Version1.Features.Authentication.SignUp.Page"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:ui="clr-namespace:UI"
+    Title="Sign Up Page"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="Black" />
+            <GradientStop Offset="1.0" Color="Cyan" />
+        </LinearGradientBrush>
+        <FontImageSource
+            x:Key="DumbbellIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_dumbbell_28_regular}"
+            Color="#ff6c37" />
+        <FontImageSource
+            x:Key="HeartPulseIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_heart_pulse_32_regular}"
+            Color="#f25767" />
+        <FontImageSource
+            x:Key="SoccerIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_sport_soccer_24_regular}"
+            Color="#91cb89" />
+    </ContentPage.Resources>
+
+    <ScrollView Padding="16" Background="{x:StaticResource GradientBackground}">
+        <VerticalStackLayout Spacing="16">
+            <Grid
+                ColumnDefinitions="*, *"
+                ColumnSpacing="16"
+                HorizontalOptions="Center"
+                RowDefinitions="*, *"
+                RowSpacing="16">
+                <Border Grid.RowSpan="2" StrokeShape="RoundRectangle 8">
+                    <Image HeightRequest="120" WidthRequest="120" />
+                </Border>
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    BackgroundColor="Black"
+                    Text="Camera" />
+                <Button
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    BackgroundColor="Black"
+                    Text="Upload" />
+            </Grid>
+
+            <Border
+                Padding="16"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Information" />
+                    <Grid ColumnDefinitions="* , *" ColumnSpacing="16">
+                        <syncfusionToolkit:SfTextInputLayout
+                            ContainerType="Outlined"
+                            Hint="First Name"
+                            InputViewPadding="14,0,0,0"
+                            ReserveSpaceForAssistiveLabels="False">
+                            <Entry />
+                        </syncfusionToolkit:SfTextInputLayout>
+                        <syncfusionToolkit:SfTextInputLayout
+                            Grid.Column="1"
+                            ContainerType="Outlined"
+                            Hint="Last Name"
+                            InputViewPadding="14,0,0,0"
+                            ReserveSpaceForAssistiveLabels="False">
+                            <Entry />
+                        </syncfusionToolkit:SfTextInputLayout>
+                    </Grid>
+                    <syncfusionToolkit:SfTextInputLayout
+                        ContainerType="Outlined"
+                        HelperText="ex: +84 348164682"
+                        Hint="Phone Number"
+                        InputViewPadding="14,0,0,0">
+                        <Entry />
+                    </syncfusionToolkit:SfTextInputLayout>
+                    <syncfusionToolkit:SfTextInputLayout
+                        ContainerType="Outlined"
+                        HelperText="ex: abc@gmail.com"
+                        Hint="Email"
+                        InputViewPadding="14,0,0,0">
+                        <Entry />
+                    </syncfusionToolkit:SfTextInputLayout>
+                    <syncfusionToolkit:SfTextInputLayout
+                        ContainerType="Outlined"
+                        HelperText="required: "
+                        Hint="Password"
+                        InputViewPadding="14,0,0,0">
+                        <Entry />
+                    </syncfusionToolkit:SfTextInputLayout>
+                    <syncfusionToolkit:SfTextInputLayout
+                        ContainerType="Outlined"
+                        HelperText="required: "
+                        Hint="Confirm Password"
+                        InputViewPadding="14,0,0,0">
+                        <Entry />
+                    </syncfusionToolkit:SfTextInputLayout>
+                </VerticalStackLayout>
+            </Border>
+            <Border
+                Padding="16"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="24">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Gender" />
+                        <syncfusionToolkit:SfChipGroup ChipType="Choice">
+                            <syncfusionToolkit:SfChip Text="Male" />
+                            <syncfusionToolkit:SfChip Text="Female" />
+                        </syncfusionToolkit:SfChipGroup>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Date Of Birth" />
+                        <Border StrokeShape="RoundRectangle 8">
+                            <syncfusionToolkit:SfDatePicker BackgroundColor="Transparent">
+                                <syncfusionToolkit:SfDatePicker.ColumnHeaderView>
+                                    <syncfusionToolkit:DatePickerColumnHeaderView
+                                        Background="Transparent"
+                                        DayHeaderText="Day"
+                                        MonthHeaderText="Month"
+                                        YearHeaderText="Year" />
+                                </syncfusionToolkit:SfDatePicker.ColumnHeaderView>
+                                <syncfusionToolkit:SfDatePicker.SelectionView>
+                                    <syncfusionToolkit:PickerSelectionView
+                                        Padding="10,5,10,5"
+                                        Background="Black"
+                                        CornerRadius="10"
+                                        Stroke="#36454F" />
+                                </syncfusionToolkit:SfDatePicker.SelectionView>
+                            </syncfusionToolkit:SfDatePicker>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+            <Border
+                Padding="16"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Body" />
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                        <syncfusionToolkit:SfTextInputLayout
+                            ContainerType="Outlined"
+                            HelperText="ex: 170 cm"
+                            Hint="Height (cm)">
+                            <syncfusionToolkit:SfNumericUpDown />
+                        </syncfusionToolkit:SfTextInputLayout>
+                        <syncfusionToolkit:SfTextInputLayout
+                            Grid.Column="1"
+                            ContainerType="Outlined"
+                            HelperText="ex: 108 kg"
+                            Hint="Weight (kg)">
+                            <syncfusionToolkit:SfNumericUpDown />
+                        </syncfusionToolkit:SfTextInputLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+            <Border
+                Padding="16"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="24">
+                    <Button
+                        BackgroundColor="Black"
+                        Command="{x:Binding SignUpCommand}"
+                        Text="Create New Account"
+                        TextColor="White" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

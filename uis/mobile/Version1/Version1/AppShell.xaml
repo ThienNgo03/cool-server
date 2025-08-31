@@ -7,7 +7,44 @@
     xmlns:home="clr-namespace:Version1.Features.Home"
     xmlns:local="clr-namespace:Version1"
     xmlns:signIn="clr-namespace:Version1.Features.Authentication.SignIn"
-    Title="Version1">
+    xmlns:ui="clr-namespace:UI"
+    Title="Version1"
+    Shell.TabBarBackgroundColor="#182026"
+    Shell.TabBarForegroundColor="Cyan"
+    Shell.TabBarTitleColor="Cyan"
+    Shell.TabBarUnselectedColor="Gray">
+    <Shell.Resources>
+        <FontImageSource
+            x:Key="HomeIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_home_32_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="DumbbellIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_dumbbell_28_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="HeartPulseIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_heart_pulse_32_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="SoccerIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_sport_soccer_24_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="TrophyIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_trophy_48_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="ProfileIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_person_48_regular}"
+            Color="Cyan" />
+    </Shell.Resources>
 
     <TabBar>
         <ShellContent
@@ -17,14 +54,26 @@
     </TabBar>
     <TabBar Route="main">
         <Tab
-            Title="Trang chủ"
-            Icon="ic_home.png"
+            Title="Home"
+            Icon="{x:StaticResource HomeIcon}"
             Route="home">
             <ShellContent ContentTemplate="{DataTemplate home:Page}" />
         </Tab>
         <Tab
-            Title="Bài Tập"
-            Icon="dumbbell-icon.jng"
+            Title="Exercises"
+            Icon="{x:StaticResource DumbbellIcon}"
+            Route="exercises">
+            <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
+        </Tab>
+        <Tab
+            Title="Challenges"
+            Icon="{x:StaticResource TrophyIcon}"
+            Route="exercises">
+            <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
+        </Tab>
+        <Tab
+            Title="Profile"
+            Icon="{x:StaticResource ProfileIcon}"
             Route="exercises">
             <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
         </Tab>

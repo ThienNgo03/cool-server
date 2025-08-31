@@ -5,6 +5,8 @@ using Navigation;
 using Syncfusion.Maui.Toolkit.Hosting;
 using Version1.Features.Authentication;
 using Library;
+using UI;
+using Maui.FreakyEffects;
 
 namespace Version1;
 
@@ -19,12 +21,18 @@ public static class MauiProgram
             .ConfigureSyncfusionToolkit()
             .ConfigureFonts(fonts =>
             {
+                fonts.AddFont("Damageplan.ttf", "Damageplan");
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFont("FluentSystemIcons-Regular.ttf", FontNames.FluentSystemIconsRegular);
             })
             .RegisterCore()
             .RegisterFeatures()
-            .RegisterPages();
+            .RegisterPages()
+            .ConfigureEffects(effects =>
+            {
+                effects.InitFreakyEffects();
+            });
 
 #if DEBUG
         builder.Logging.AddDebug();

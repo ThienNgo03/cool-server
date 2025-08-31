@@ -26,16 +26,16 @@ public partial class ViewModel(
         //    return;
 
         // Authenticate
-        var result = await authInterface.SignInAsync(new()
-        {
-            Account = Form.Account,
-            Password = Form.Password
-        });
+        //var result = await authInterface.SignInAsync(new()
+        //{
+        //    Account = Form.Account,
+        //    Password = Form.Password
+        //});
 
-        tokenService.SetToken(result?.Token ?? string.Empty);
+        //tokenService.SetToken(result?.Token ?? string.Empty);
 
-        if (result is null || string.IsNullOrWhiteSpace(result.Token))
-            return;
+        //if (result is null || string.IsNullOrWhiteSpace(result.Token))
+        //    return;
 
         await GoHomeAsync();
     }

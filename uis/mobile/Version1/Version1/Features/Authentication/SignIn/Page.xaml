@@ -1,31 +1,97 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:app="clr-namespace:Version1.Features.Authentication.SignIn"
-             xmlns:ui="clr-namespace:UI"
-             xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
-             x:Class="Version1.Features.Authentication.SignIn.Page"
-             x:DataType="app:ViewModel"
-             Title="Page">
-    <VerticalStackLayout Spacing="16">
-        <Entry Text="{x:Binding Form.Account, Mode=TwoWay}" Placeholder="Phone number"/>
-        <Entry Text="{x:Binding Form.Password, Mode=TwoWay}" IsPassword="True" Placeholder="Password"/>
+<ContentPage
+    x:Class="Version1.Features.Authentication.SignIn.Page"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Version1.Features.Authentication.SignIn"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:ui="clr-namespace:UI"
+    x:DataType="app:ViewModel"
+    Shell.NavBarIsVisible="False">
+    <ContentPage.Resources>
+        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="Black" />
+            <GradientStop Offset="1.0" Color="Cyan" />
+        </LinearGradientBrush>
+        <FontImageSource
+            x:Key="DumbbellIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_dumbbell_28_regular}"
+            Color="#ff6c37" />
+        <FontImageSource
+            x:Key="HeartPulseIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_heart_pulse_32_regular}"
+            Color="#f25767" />
+        <FontImageSource
+            x:Key="SoccerIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_sport_soccer_24_regular}"
+            Color="#91cb89" />
+    </ContentPage.Resources>
 
-        <ui:RoundedEntry Placeholder="Alo alo" 
-                    PrefixIcon="dotnet_bot.png"/>
-        <syncfusionToolkit:SfTextInputLayout
-            VerticalOptions="Start" HelperText="Help me bitch" Hint="Card number"
-                               ContainerType="Outlined"> 
 
-            <Entry Text="{x:Binding Form.Account, Mode=TwoWay}" Placeholder="Phone number"/>
-        </syncfusionToolkit:SfTextInputLayout>
-        <syncfusionToolkit:SfTextInputLayout
-            VerticalOptions="Start">
-
-            <Entry Text="{x:Binding Form.Password, Mode=TwoWay}" IsPassword="True" Placeholder="Password"/>
-        </syncfusionToolkit:SfTextInputLayout>
-
+    <Grid Background="{x:StaticResource GradientBackground}" RowDefinitions="0, *, 30">
+        <Border
+            Grid.Row="1"
+            Margin="16"
+            BackgroundColor="#ededed"
+            StrokeShape="RoundRectangle 8"
+            VerticalOptions="Center">
+            <VerticalStackLayout Padding="24" Spacing="16">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="Title"
+                    HorizontalOptions="Center"
+                    Text="Welcome" />
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="16">
+                    <ImageButton
+                        HeightRequest="40"
+                        Source="{x:StaticResource DumbbellIcon}"
+                        WidthRequest="40" />
+                    <ImageButton
+                        HeightRequest="40"
+                        Source="{x:StaticResource HeartPulseIcon}"
+                        WidthRequest="40" />
+                    <ImageButton
+                        HeightRequest="40"
+                        Source="{x:StaticResource SoccerIcon}"
+                        WidthRequest="40" />
+                </HorizontalStackLayout>
+                <VerticalStackLayout>
+                    <syncfusionToolkit:SfTextInputLayout ContainerType="Outlined" Hint="Email Or Phone Number">
+                        <Entry Text="{x:Binding Form.Account, Mode=TwoWay}" />
+                    </syncfusionToolkit:SfTextInputLayout>
+                    <syncfusionToolkit:SfTextInputLayout ContainerType="Outlined" Hint="Password">
+                        <Entry
+                            IsPassword="True"
+                            Placeholder="Password"
+                            Text="{x:Binding Form.Password,
+                                             Mode=TwoWay}" />
+                    </syncfusionToolkit:SfTextInputLayout>
+                </VerticalStackLayout>
+                <Button
+                    BackgroundColor="Black"
+                    Command="{x:Binding SignInCommand}"
+                    Text="Login"
+                    TextColor="White" />
+                <Button
+                    BackgroundColor="Black"
+                    Command="{x:Binding SignUpCommand}"
+                    Text="Create New Account"
+                    TextColor="White" />
+                <Label
+                    HorizontalOptions="Center"
+                    Text="Forgot password?"
+                    TextColor="Purple">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+        </Border>
         <Label
+            Grid.Row="2"
             Padding="{ui:EdgeInsets Horizontal={x:Static ui:Dimens.SpacingMd}}"
             HorizontalTextAlignment="Center"
             Style="{x:Static ui:Styles.Body2}"
@@ -43,9 +109,5 @@
                 </MultiBinding>
             </Label.Text>
         </Label>
-
-        <Button Text="Sign In" Command="{x:Binding SignInCommand}"/>
-        <Button Text="Forgot Password" Command="{x:Binding ForgotPasswordCommand}"/>
-        <Button Text="Sign Up" Command="{x:Binding SignUpCommand}"/>
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

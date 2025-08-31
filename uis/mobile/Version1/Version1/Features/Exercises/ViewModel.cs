@@ -19,93 +19,176 @@ public partial class ViewModel(
     #region [ UI ]
 
     [ObservableProperty]
-    ObservableCollection<ContentViews.Card.Model> items = new();
+    ObservableCollection<string> tags = new()
+    {
+        "Chest",
+        "Back",
+        "Legs",
+        "Arms",
+        "Shoulders",
+        "Full body"
+    };
+
+    [ObservableProperty]
+    ObservableCollection<ContentViews.Card.Model> items = new()
+    {
+        new()
+        {
+            Title = "Squat",
+            SubTitle = "Legs",
+            Description = "A squat is a strength exercise in which the trainee lowers their hips from a standing position and then stands back up. During the descent, the hip and knee joints flex while the ankle joint dorsiflexes; conversely the hip and knee joints extend and the ankle joint plantarflexes when standing up.",
+            IconUrl = "squat_64.png",
+            Badge = "Easy",
+            BadgeTextColor = "#2f8557",
+            BadgeBackgroundColor = "#dbfce7",
+        },
+        new()
+        {
+            Title = "Lunges",
+            SubTitle = "Legs & Glutes",
+            Description = "Lunges strengthen the lower body by targeting the quads, hamstrings, and glutes. They also improve balance and coordination.",
+            IconUrl = "lunges_64.png",
+            Badge = "Easy",
+            BadgeTextColor = "#2f8557",
+            BadgeBackgroundColor = "#dbfce7",
+        },
+        new()
+        {
+            Title = "Triceps Extension",
+            SubTitle = "Arms",
+            Description = "Triceps extensions isolate and strengthen the triceps muscles, helping to tone the back of the arms and improve upper body strength.",
+            IconUrl = "triceps_64.png",
+            Badge = "Medium",
+            BadgeTextColor = "#2b6cb0",
+            BadgeBackgroundColor = "#ebf8ff",
+        },
+        new()
+        {
+            Title = "Pull-Up",
+            SubTitle = "Back & Biceps",
+            Description = "Pull-ups are a compound upper-body exercise that build strength in the lats, biceps, and shoulders by lifting your body over a bar.",
+            IconUrl = "pullup_64.png",
+            Badge = "Hard",
+            BadgeTextColor = "#c53030",
+            BadgeBackgroundColor = "#fed7d7",
+        },
+        new()
+        {
+            Title = "Push-Up",
+            SubTitle = "Chest & Triceps",
+            Description = "Push-ups are a classic bodyweight exercise that target the chest, shoulders, and triceps while also engaging the core.",
+            IconUrl = "pushup_64.png",
+            Badge = "Easy",
+            BadgeTextColor = "#2b6cb0",
+            BadgeBackgroundColor = "#ebf8ff",
+        },
+        new()
+        {
+            Title = "Plank",
+            SubTitle = "Core",
+            Description = "The plank is an isometric hold that strengthens the core, shoulders, and glutes while improving posture and stability.",
+            IconUrl = "plank_64.png",
+            Badge = "Medium",
+            BadgeTextColor = "#b7791f",
+            BadgeBackgroundColor = "#fefcbf",
+        },
+        new()
+        {
+            Title = "Pilates",
+            SubTitle = "Core & Flexibility",
+            Description = "Pilates is a low-impact exercise that focuses on core strength, flexibility, and mindful movement. It improves posture and body awareness.",
+            IconUrl = "pilates_64.png",
+            Badge = "Medium",
+            BadgeTextColor = "#b7791f",
+            BadgeBackgroundColor = "#fefcbf",
+        },
+    };
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        var exercises = await LoadExercisesAsync();
-        var testUser = Guid.Parse("84c361c8-eb0b-415e-a525-8c04992dec47");
-        var workouts = await LoadWorkoutsAsync(userId: testUser,
-                                               isIncludeWeekPlans: true,
-                                               isIncludeWeekPlanSets: true);
+        //var exercises = await LoadExercisesAsync();
+        //var testUser = Guid.Parse("84c361c8-eb0b-415e-a525-8c04992dec47");
+        //var workouts = await LoadWorkoutsAsync(userId: testUser,
+        //                                       isIncludeWeekPlans: true,
+        //                                       isIncludeWeekPlanSets: true);
 
-        foreach (var exercise in exercises)
-        {
-            // Find matching workout for this exercise
-            var matchingWorkout = workouts.FirstOrDefault(w => w.ExerciseId == exercise.Id);
+        //foreach (var exercise in exercises)
+        //{
+        //    // Find matching workout for this exercise
+        //    var matchingWorkout = workouts.FirstOrDefault(w => w.ExerciseId == exercise.Id);
 
-            var cardModel = new ContentViews.Card.Model()
-            {
-                Id = exercise.Id.ToString(),
-                Title = exercise.Name,
-                Description = exercise.Description,
-                IconUrl = "dotnet_bot.png",
-                IsSelected = matchingWorkout != null, 
-                Sets = new ObservableCollection<ContentViews.Card.Set>(),
-                WeekPlans = new ObservableCollection<ContentViews.Card.WeekPlan>()
-            };
+        //    var cardModel = new ContentViews.Card.Model()
+        //    {
+        //        Id = exercise.Id.ToString(),
+        //        Title = exercise.Name,
+        //        Description = exercise.Description,
+        //        IconUrl = "dotnet_bot.png",
+        //        IsSelected = matchingWorkout != null, 
+        //        Sets = new ObservableCollection<ContentViews.Card.Set>(),
+        //        WeekPlans = new ObservableCollection<ContentViews.Card.WeekPlan>()
+        //    };
 
-            if (matchingWorkout != null)
-            {
-                // Map week plans
-                if (matchingWorkout.WeekPlans != null)
-                {
-                    foreach (var weekPlan in matchingWorkout.WeekPlans)
-                    {
-                        cardModel.WeekPlans.Add(new ContentViews.Card.WeekPlan
-                        {
-                            Id = weekPlan.Id,
-                            WorkoutId = weekPlan.WorkoutId,
-                            DateOfWeek = weekPlan.DateOfWeek,
-                            Time = weekPlan.Time,
-                            CreatedDate = weekPlan.CreatedDate,
-                            LastUpdated = weekPlan.LastUpdated
-                        });
+        //    if (matchingWorkout != null)
+        //    {
+        //        // Map week plans
+        //        if (matchingWorkout.WeekPlans != null)
+        //        {
+        //            foreach (var weekPlan in matchingWorkout.WeekPlans)
+        //            {
+        //                cardModel.WeekPlans.Add(new ContentViews.Card.WeekPlan
+        //                {
+        //                    Id = weekPlan.Id,
+        //                    WorkoutId = weekPlan.WorkoutId,
+        //                    DateOfWeek = weekPlan.DateOfWeek,
+        //                    Time = weekPlan.Time,
+        //                    CreatedDate = weekPlan.CreatedDate,
+        //                    LastUpdated = weekPlan.LastUpdated
+        //                });
 
-                        switch (weekPlan.DateOfWeek?.ToLower())
-                        {
-                            case "monday":
-                                cardModel.IsMondaySelected = true;
-                                break;
-                            case "tuesday":
-                                cardModel.IsTuesdaySelected = true;
-                                break;
-                            case "wednesday":
-                                cardModel.IsWednesdaySelected = true;
-                                break;
-                            case "thursday":
-                                cardModel.IsThursdaySelected = true;
-                                break;
-                            case "friday":
-                                cardModel.IsFridaySelected = true;
-                                break;
-                            case "saturday":
-                                cardModel.IsSaturdaySelected = true;
-                                break;
-                            case "sunday":
-                                cardModel.IsSundaySelected = true;
-                                break;
-                        }
+        //                switch (weekPlan.DateOfWeek?.ToLower())
+        //                {
+        //                    case "monday":
+        //                        cardModel.IsMondaySelected = true;
+        //                        break;
+        //                    case "tuesday":
+        //                        cardModel.IsTuesdaySelected = true;
+        //                        break;
+        //                    case "wednesday":
+        //                        cardModel.IsWednesdaySelected = true;
+        //                        break;
+        //                    case "thursday":
+        //                        cardModel.IsThursdaySelected = true;
+        //                        break;
+        //                    case "friday":
+        //                        cardModel.IsFridaySelected = true;
+        //                        break;
+        //                    case "saturday":
+        //                        cardModel.IsSaturdaySelected = true;
+        //                        break;
+        //                    case "sunday":
+        //                        cardModel.IsSundaySelected = true;
+        //                        break;
+        //                }
 
-                        if (weekPlan.WeekPlanSets != null)
-                        {
-                            foreach (var weekPlanSet in weekPlan.WeekPlanSets)
-                            {
-                                cardModel.Sets.Add(new ContentViews.Card.Set
-                                {
-                                    Id = weekPlanSet.Id,
-                                    Text = $"Set {cardModel.Sets.Count + 1}",
-                                    Value = weekPlanSet.Value
-                                });
-                            }
-                        }
-                    }
-                }
-            }
+        //                if (weekPlan.WeekPlanSets != null)
+        //                {
+        //                    foreach (var weekPlanSet in weekPlan.WeekPlanSets)
+        //                    {
+        //                        cardModel.Sets.Add(new ContentViews.Card.Set
+        //                        {
+        //                            Id = weekPlanSet.Id,
+        //                            Text = $"Set {cardModel.Sets.Count + 1}",
+        //                            Value = weekPlanSet.Value
+        //                        });
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
 
-            Items.Add(cardModel);
-        }
+        //    Items.Add(cardModel);
+        //}
     }
 
     #endregion
@@ -116,19 +199,19 @@ public partial class ViewModel(
     {
         var response = await this.exercises.AllAsync();
 
-        if(response == null || response.Data == null || response.Data.Items == null || response.Data.Items.Count == 0)
+        if (response == null || response.Data == null || response.Data.Items == null || response.Data.Items.Count == 0)
             return new ObservableCollection<Library.Exercises.Model>();
 
         return response.Data.Items;
     }
 
     async Task<ICollection<Library.Workouts.Model>> LoadWorkoutsAsync(
-        Guid? userId, 
+        Guid? userId,
         bool isIncludeWeekPlans,
         bool isIncludeWeekPlanSets)
     {
-        var response = await this.workouts.AllAsync(new() 
-        { 
+        var response = await this.workouts.AllAsync(new()
+        {
             UserId = userId,
             IsIncludeWeekPlans = isIncludeWeekPlans,
             IsIncludeWeekPlanSets = isIncludeWeekPlanSets
@@ -159,10 +242,10 @@ public partial class ViewModel(
     public async Task UpdateCardAsync(string id, bool isSelected)
     {
         var item = Items.FirstOrDefault(x => x.Id == id);
-        if(item == null) return;
+        if (item == null) return;
 
         item.IsMondaySelected = isSelected;
-        item.IsWednesdaySelected = isSelected;  
+        item.IsWednesdaySelected = isSelected;
         item.IsFridaySelected = isSelected;
     }
 
@@ -189,6 +272,11 @@ public partial class ViewModel(
                 }
             }
         });
+    }
+
+    public async Task AddDayOfWeekAsync()
+    {
+
     }
 
     public async Task UpdateDayOfWeekAsync(string id, DayOfWeek dayOfWeek, bool isSelected)
