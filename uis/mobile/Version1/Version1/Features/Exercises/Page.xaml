@@ -4,154 +4,156 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:card="clr-namespace:Version1.Features.Exercises.ContentViews.Card"
+    xmlns:freakyEffects="clr-namespace:Maui.FreakyEffects.TouchEffects;assembly=Maui.FreakyEffects"
     xmlns:local="clr-namespace:Version1.Features.Exercises"
     xmlns:signalR="clr-namespace:Version1.Features.WebSocket.SignalR"
     xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:ui="clr-namespace:UI"
     Title="Page"
-    x:DataType="local:ViewModel">
-    <Grid>
+    x:DataType="local:ViewModel"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <FontImageSource
+            x:Key="SearchIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_search_48_regular}"
+            Color="White" />
+        <FontImageSource
+            x:Key="InfoIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_info_28_regular}"
+            Color="Cyan" />
+
+        <DataTemplate x:Key="ItemTemplate" x:DataType="card:Model">
+            <Border
+                Grid.Row="1"
+                Padding="16"
+                Stroke="Cyan"
+                StrokeShape="RoundRectangle 8"
+                VerticalOptions="Start">
+                <Grid
+                    ColumnDefinitions="60, * , 50"
+                    ColumnSpacing="8"
+                    RowDefinitions="auto, *, auto"
+                    RowSpacing="8">
+                    <Border
+                        Grid.RowSpan="3"
+                        Padding="5"
+                        HorizontalOptions="Start"
+                        Stroke="Cyan"
+                        StrokeShape="RoundRectangle 4"
+                        VerticalOptions="Start">
+                        <Image
+                            HeightRequest="45"
+                            Source="{x:Binding IconUrl}"
+                            WidthRequest="45" />
+                    </Border>
+                    <Label
+                        Grid.Row="2"
+                        HorizontalOptions="Center"
+                        Text="45%"
+                        TextColor="Cyan"
+                        VerticalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Start">
+                        <Label
+                            FontSize="Large"
+                            Text="{x:Binding Title,
+                                             Mode=OneTime}"
+                            TextColor="White" />
+                        <Label Text="{x:Binding SubTitle, Mode=OneTime}" TextColor="Gray" />
+                    </VerticalStackLayout>
+                    <Border
+                        Grid.ColumnSpan="3"
+                        Padding="15,4,15,4"
+                        BackgroundColor="{x:Binding BadgeBackgroundColor}"
+                        HorizontalOptions="End"
+                        StrokeShape="RoundRectangle 4"
+                        VerticalOptions="Start">
+                        <Label Text="{x:Binding Badge, Mode=OneTime}" TextColor="{x:Binding BadgeTextColor}" />
+                    </Border>
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        FontSize="12"
+                        LineBreakMode="TailTruncation"
+                        MaxLines="3"
+                        Text="{x:Binding Description,
+                                         Mode=OneTime}"
+                        TextColor="White" />
+                    <syncfusionToolkit:SfButton
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Background="#27354a"
+                        CornerRadius="4"
+                        Text="Select" />
+                    <ImageButton
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Padding="11"
+                        Background="#27354a"
+                        CornerRadius="4"
+                        HeightRequest="30"
+                        Source="{x:StaticResource InfoIcon}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+
+        <LinearItemsLayout
+            x:Key="ItemsLayout"
+            ItemSpacing="16"
+            Orientation="Vertical" />
+    </ContentPage.Resources>
+
+    <Grid
+        Padding="16"
+        BackgroundColor="#131d31"
+        RowSpacing="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="45" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="50" />
         </Grid.RowDefinitions>
-        <Label
-            HorizontalOptions="Center"
-            Text="Welcome to Exercises!"
-            VerticalOptions="Center" />
-        <Button
-            Grid.Row="1"
-            Command="{x:Binding LoadCommand,
-                                Mode=OneWay}"
-            Text="Load data" />
-        <ScrollView Grid.Row="2">
-            <CollectionView ItemsSource="{x:Binding Items, Mode=TwoWay}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="card:Model">
-                        <Border>
-                            <Grid RowDefinitions="120, auto, 160, auto, auto">
-                                <VerticalStackLayout>
-                                    <Label Text="{x:Binding Title}" />
-                                    <syncfusionToolkit:SfButton
-                                        x:Name="SelectButton"
-                                        BackgroundColor="#171717"
-                                        Clicked="SelectButton_Clicked"
-                                        CommandParameter="{x:Binding Id,
-                                                                     Mode=OneWay}"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsSelected,
-                                                              Mode=OneWay}"
-                                        Text="🔘 Select"
-                                        TextColor="Red" />
-                                    <Button
-                                        Clicked="AddSet"
-                                        CommandParameter="{x:Binding Id,
-                                                                     Mode=TwoWay}"
-                                        HeightRequest="20"
-                                        Text="Add Set" />
-                                    <Label Text="{x:Binding SubTitle}" />
-                                    <Image
-                                        HeightRequest="100"
-                                        Source="{x:Binding IconUrl}"
-                                        WidthRequest="100" />
-                                </VerticalStackLayout>
-                                <CollectionView Grid.Row="1" ItemsSource="{x:Binding Sets}">
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="card:Set">
-                                            <VerticalStackLayout>
-                                                <Label Text="{x:Binding Text, Mode=OneWay}" />
-                                                <HorizontalStackLayout>
-                                                    <Button
-                                                        Clicked="DecreaseSet"
-                                                        CommandParameter="{x:Binding Mode=OneWay}"
-                                                        Text="-"
-                                                        VerticalOptions="Center" />
-                                                    <Label Text="{x:Binding Value, Mode=OneWay}" VerticalOptions="Center" />
-                                                    <Button
-                                                        Clicked="IncreaseSet"
-                                                        CommandParameter="{x:Binding Mode=OneWay}"
-                                                        Text="+"
-                                                        VerticalOptions="Center" />
-                                                </HorizontalStackLayout>
-                                            </VerticalStackLayout>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                                <HorizontalStackLayout Grid.Row="2">
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Monday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsMondaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Monday" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Tuesday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsTuesdaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Tuesday" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Wednesday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsWednesdaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Wednesday" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Thursday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsThursdaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Thursday" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Friday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsFridaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Friday" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Saturday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsSaturdaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Saturday" />
-                                    <syncfusionToolkit:SfButton
-                                        BackgroundColor="#7deaec"
-                                        CommandParameter="Sunday"
-                                        CornerRadius="4"
-                                        IsCheckable="True"
-                                        IsChecked="{x:Binding IsSundaySelected,
-                                                              Mode=TwoWay}"
-                                        Text="Sunday" />
-                                </HorizontalStackLayout>
-                                <CollectionView Grid.Row="3" ItemsSource="{x:Binding WeekPlans, Mode=OneWay}">
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="card:WeekPlan">
-                                            <VerticalStackLayout>
-                                                <Label Text="{x:Binding DateOfWeek, Mode=OneWay}" />
-                                                <TimePicker Time="{x:Binding Time, Mode=OneWay}" />
-                                            </VerticalStackLayout>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+
+        <ScrollView Orientation="Horizontal">
+            <syncfusionToolkit:SfChipGroup
+                ChipStroke="Cyan"
+                ChipTextColor="Cyan"
+                ChipType="Filter"
+                IsEnabled="True"
+                ItemsSource="{x:Binding Tags,
+                                        Mode=TwoWay}"
+                SelectedChipBackground="Cyan"
+                SelectedChipTextColor="Black" />
         </ScrollView>
+
+        <CollectionView
+            Grid.Row="1"
+            ItemTemplate="{x:StaticResource ItemTemplate}"
+            ItemsLayout="{x:StaticResource ItemsLayout}"
+            ItemsSource="{x:Binding Items,
+                                    Mode=OneWay}" />
+
+        <syncfusionToolkit:SfTextInputLayout
+            Grid.Row="2"
+            ContainerType="Outlined"
+            Hint="Search"
+            InputViewPadding="14,0,0,0"
+            ReserveSpaceForAssistiveLabels="False"
+            Stroke="White">
+            <syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
+                <syncfusionToolkit:LabelStyle TextColor="White" />
+            </syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
+            <syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
+                <syncfusionToolkit:LabelStyle TextColor="White" />
+            </syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
+            <Entry TextColor="White" />
+            <syncfusionToolkit:SfTextInputLayout.LeadingView>
+                <Image Source="{x:StaticResource SearchIcon}" />
+            </syncfusionToolkit:SfTextInputLayout.LeadingView>
+        </syncfusionToolkit:SfTextInputLayout>
         <signalR:Component
             BaseUrl="wss://localhost:7011"
             Command="{x:Binding HandleSocketReportsPayloadCommand}"

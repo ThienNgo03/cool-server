@@ -20,6 +20,15 @@ public partial class Model : BaseModel
     string iconUrl;
 
     [ObservableProperty]
+    string badge;
+
+    [ObservableProperty]
+    string badgeTextColor;
+
+    [ObservableProperty]
+    string badgeBackgroundColor;
+
+    [ObservableProperty]
     bool isSelected;
 
     [ObservableProperty]

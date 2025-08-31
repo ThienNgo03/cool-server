@@ -31,8 +31,7 @@ public partial class Styles
         .Set(VisualElement.MaximumHeightRequestProperty, Dimens.ButtonHeight)
         .Set(VisualElement.MaximumWidthRequestProperty, Dimens.ButtonWidth)
         .Set(Button.CornerRadiusProperty, Dimens.ButtonCornerRadius)
-        .Set(Button.FontSizeProperty, Dimens.FontSizeT5)
-        .Set(Button.FontFamilyProperty, FontNames.ArchiaSemiBold);
+        .Set(Button.FontSizeProperty, Dimens.FontSizeT5);
 
     public static readonly Style ButtonPrimary = CreateStyle<Button>()
         .BaseOn(ButtonBase)
@@ -118,7 +117,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT1)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT1)
         ;
 
@@ -126,7 +124,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT2)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT2)
         ;
 
@@ -134,7 +131,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT3)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT3)
         ;
 
@@ -142,7 +138,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT4)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT4)
         ;
 
@@ -150,7 +145,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT5)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT5)
         ;
 
@@ -158,7 +152,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT6)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT6)
         ;
 
@@ -166,7 +159,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT7)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaSemiBold)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT7)
         ;
 
@@ -174,7 +166,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT1)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT1)
         ;
 
@@ -182,7 +173,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT2)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT2)
         ;
 
@@ -190,7 +180,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT3)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT3)
         ;
 
@@ -198,7 +187,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT4)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT4)
         ;
 
@@ -206,7 +194,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT5)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT5)
         ;
 
@@ -214,7 +201,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT6)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT6)
         ;
 
@@ -222,7 +208,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT7)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT6)
         ;
 
@@ -230,7 +215,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT5)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT3)
         ;
 
@@ -238,7 +222,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT6)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT6)
         ;
 
@@ -246,7 +229,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT7)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT7)
         ;
 
@@ -254,7 +236,6 @@ public partial class Styles
         .Set(VisualElement.BackgroundColorProperty, Colors.Transparent)
         .Set(Label.TextColorProperty, textPrimaryColor)
         .Set(Label.FontSizeProperty, Dimens.FontSizeT8)
-        .Set(Label.FontFamilyProperty, FontNames.ArchiaRegular)
         //.Set(Label.LineHeightProperty, Dimens.LineHeightT8)
         ;
 }

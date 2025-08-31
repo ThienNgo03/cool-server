@@ -23,7 +23,6 @@
             <Entry
                 Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingSm}}"
                 Focused="Entry_Focused"
-                FontFamily="{x:Static app:FontNames.ArchiaSemiBold}"
                 FontSize="{x:Static app:Dimens.FontSizeT5}"
                 HorizontalOptions="FillAndExpand"
                 IsPassword="{Binding IsPassword, Source={x:Reference root}}"
