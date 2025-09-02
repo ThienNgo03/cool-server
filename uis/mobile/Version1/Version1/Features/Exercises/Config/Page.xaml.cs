@@ -59,7 +59,7 @@ public partial class Page : ContentPage
         var newSet = new SetConfigItem
         {
             Id = Guid.NewGuid().ToString(),
-            Content = $"Set {viewModel.TotalSets.Count(x => string.Equals(x.Day, viewModel.SelectedDayForSet.Content, StringComparison.OrdinalIgnoreCase))}",
+            Content = $"Set {viewModel.TotalSets.Count(x => string.Equals(x.Day, viewModel.SelectedDayForSet.Content, StringComparison.OrdinalIgnoreCase)) + 1}",
             Reps = 10,
             Day = viewModel.SelectedDayForSet.Content
         };

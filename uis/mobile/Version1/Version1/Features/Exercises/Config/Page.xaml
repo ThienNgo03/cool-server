@@ -368,6 +368,20 @@
 
                 </VerticalStackLayout>
             </Border>
+            <!--  Action Buttons  -->
+            <Border
+                Grid.Row="4"
+                Padding="16"
+                BackgroundColor="#151e30"
+                StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="24">
+                    <Button
+                        BackgroundColor="Black"
+                        Command="{x:Binding SignUpCommand}"
+                        Text="Save"
+                        TextColor="White" />
+                </VerticalStackLayout>
+            </Border>
         </Grid>
     </ScrollView>
 </ContentPage>
