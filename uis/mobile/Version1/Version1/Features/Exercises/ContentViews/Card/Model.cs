@@ -53,6 +53,9 @@ public partial class Model : BaseModel
     bool isSundaySelected;
 
     [ObservableProperty]
+    double progress = 0;
+
+    [ObservableProperty]
     ObservableCollection<Set> sets;
 
     [ObservableProperty]

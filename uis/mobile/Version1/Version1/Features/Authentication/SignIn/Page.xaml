@@ -83,7 +83,7 @@
                 <Label
                     HorizontalOptions="Center"
                     Text="Forgot password?"
-                    TextColor="Purple">
+                    TextColor="#0078d4">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
                     </Label.GestureRecognizers>

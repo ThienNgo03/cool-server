@@ -6,30 +6,43 @@
     xmlns:card="clr-namespace:Version1.Features.Exercises.ContentViews.Card"
     xmlns:freakyEffects="clr-namespace:Maui.FreakyEffects.TouchEffects;assembly=Maui.FreakyEffects"
     xmlns:local="clr-namespace:Version1.Features.Exercises"
+    xmlns:progress="clr-namespace:Plugin.Maui.MauiProgressView;assembly=Plugin.Maui.MauiProgressView"
     xmlns:signalR="clr-namespace:Version1.Features.WebSocket.SignalR"
     xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
     xmlns:ui="clr-namespace:UI"
     Title="Page"
     x:DataType="local:ViewModel"
+    Loaded="ContentPage_Loaded"
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
+        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="Black" />
+            <GradientStop Offset="1.0" Color="Cyan" />
+        </LinearGradientBrush>
+
         <FontImageSource
             x:Key="SearchIcon"
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
             Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_search_48_regular}"
-            Color="White" />
+            Color="Cyan" />
         <FontImageSource
             x:Key="InfoIcon"
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
             Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_info_28_regular}"
-            Color="Cyan" />
+            Color="White" />
+        <FontImageSource
+            x:Key="CalendarAddIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_calendar_add_28_regular}"
+            Color="White" />
 
         <DataTemplate x:Key="ItemTemplate" x:DataType="card:Model">
             <Border
                 Grid.Row="1"
                 Padding="16"
-                Stroke="Cyan"
+                BackgroundColor="White"
+                Stroke="White"
                 StrokeShape="RoundRectangle 8"
                 VerticalOptions="Start">
                 <Grid
@@ -41,7 +54,7 @@
                         Grid.RowSpan="3"
                         Padding="5"
                         HorizontalOptions="Start"
-                        Stroke="Cyan"
+                        Stroke="White"
                         StrokeShape="RoundRectangle 4"
                         VerticalOptions="Start">
                         <Image
@@ -49,18 +62,38 @@
                             Source="{x:Binding IconUrl}"
                             WidthRequest="45" />
                     </Border>
-                    <Label
+                    <Grid
                         Grid.Row="2"
+                        Padding="0"
+                        HeightRequest="40"
                         HorizontalOptions="Center"
-                        Text="45%"
-                        TextColor="Cyan"
-                        VerticalOptions="Center" />
+                        VerticalOptions="Center">
+                        <progress:ProgressRingView
+                            HeightRequest="52"
+                            Maximum="100"
+                            Minimum="0"
+                            Progress="{x:Binding Progress}"
+                            RingColor="Black"
+                            ThumbColor="Cyan" />
+                        <Label
+                            FontSize="9"
+                            HorizontalOptions="Center"
+                            Text="45%"
+                            VerticalOptions="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span FontAttributes="Bold" Text="{x:Binding Progress}" />
+                                    <Span Text="%" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Grid>
                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Start">
                         <Label
                             FontSize="Large"
                             Text="{x:Binding Title,
                                              Mode=OneTime}"
-                            TextColor="White" />
+                            TextColor="Black" />
                         <Label Text="{x:Binding SubTitle, Mode=OneTime}" TextColor="Gray" />
                     </VerticalStackLayout>
                     <Border
@@ -81,43 +114,48 @@
                         MaxLines="3"
                         Text="{x:Binding Description,
                                          Mode=OneTime}"
-                        TextColor="White" />
+                        TextColor="Black" />
                     <syncfusionToolkit:SfButton
+                        x:Name="Detail"
                         Grid.Row="2"
                         Grid.Column="1"
-                        Background="#27354a"
+                        Background="Black"
+                        Clicked="Detail_Clicked"
+                        CommandParameter="{x:Binding Id}"
                         CornerRadius="4"
-                        Text="Select" />
+                        FontAttributes="Bold"
+                        Text="Detail" />
                     <ImageButton
+                        x:Name="ConfigButton"
                         Grid.Row="2"
                         Grid.Column="2"
                         Padding="11"
-                        Background="#27354a"
+                        Background="Black"
+                        Clicked="ConfigButton_Clicked"
+                        CommandParameter="{x:Binding Id}"
                         CornerRadius="4"
                         HeightRequest="30"
-                        Source="{x:StaticResource InfoIcon}" />
+                        Source="{x:StaticResource CalendarAddIcon}" />
                 </Grid>
             </Border>
         </DataTemplate>
-
-
+        <DataTemplate x:Key="ItemsFooterTemplate">
+            <Grid HeightRequest="60" />
+        </DataTemplate>
         <LinearItemsLayout
             x:Key="ItemsLayout"
             ItemSpacing="16"
             Orientation="Vertical" />
     </ContentPage.Resources>
 
-    <Grid
-        Padding="16"
-        BackgroundColor="#131d31"
-        RowSpacing="16">
+    <Grid Background="{x:StaticResource GradientBackground}" RowSpacing="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="45" />
+            <RowDefinition Height="54" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="50" />
+            <RowDefinition Height="60" />
         </Grid.RowDefinitions>
 
-        <ScrollView Orientation="Horizontal">
+        <ScrollView Margin="16,16,16,0" Orientation="Horizontal">
             <syncfusionToolkit:SfChipGroup
                 ChipStroke="Cyan"
                 ChipTextColor="Cyan"
@@ -131,29 +169,38 @@
 
         <CollectionView
             Grid.Row="1"
+            Grid.RowSpan="2"
+            Margin="16,0,16,0"
+            FooterTemplate="{x:StaticResource ItemsFooterTemplate}"
+            HorizontalOptions="Center"
             ItemTemplate="{x:StaticResource ItemTemplate}"
             ItemsLayout="{x:StaticResource ItemsLayout}"
             ItemsSource="{x:Binding Items,
                                     Mode=OneWay}" />
 
-        <syncfusionToolkit:SfTextInputLayout
+        <Border
             Grid.Row="2"
-            ContainerType="Outlined"
-            Hint="Search"
-            InputViewPadding="14,0,0,0"
-            ReserveSpaceForAssistiveLabels="False"
-            Stroke="White">
-            <syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
-                <syncfusionToolkit:LabelStyle TextColor="White" />
-            </syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
-            <syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
-                <syncfusionToolkit:LabelStyle TextColor="White" />
-            </syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
-            <Entry TextColor="White" />
-            <syncfusionToolkit:SfTextInputLayout.LeadingView>
-                <Image Source="{x:StaticResource SearchIcon}" />
-            </syncfusionToolkit:SfTextInputLayout.LeadingView>
-        </syncfusionToolkit:SfTextInputLayout>
+            Padding="8"
+            BackgroundColor="#182026"
+            StrokeThickness="0">
+            <syncfusionToolkit:SfTextInputLayout
+                ContainerType="Outlined"
+                Hint="Search"
+                InputViewPadding="14,0,0,0"
+                ReserveSpaceForAssistiveLabels="False"
+                Stroke="Cyan">
+                <syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
+                    <syncfusionToolkit:LabelStyle TextColor="Cyan" />
+                </syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
+                <syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
+                    <syncfusionToolkit:LabelStyle TextColor="Cyan" />
+                </syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
+                <Entry TextColor="Cyan" />
+                <syncfusionToolkit:SfTextInputLayout.LeadingView>
+                    <Image Source="{x:StaticResource SearchIcon}" />
+                </syncfusionToolkit:SfTextInputLayout.LeadingView>
+            </syncfusionToolkit:SfTextInputLayout>
+        </Border>
         <signalR:Component
             BaseUrl="wss://localhost:7011"
             Command="{x:Binding HandleSocketReportsPayloadCommand}"

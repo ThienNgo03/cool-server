@@ -34,6 +34,7 @@ public partial class ViewModel(
     {
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Squat",
             SubTitle = "Legs",
             Description = "A squat is a strength exercise in which the trainee lowers their hips from a standing position and then stands back up. During the descent, the hip and knee joints flex while the ankle joint dorsiflexes; conversely the hip and knee joints extend and the ankle joint plantarflexes when standing up.",
@@ -41,9 +42,11 @@ public partial class ViewModel(
             Badge = "Easy",
             BadgeTextColor = "#2f8557",
             BadgeBackgroundColor = "#dbfce7",
+            Progress = 45
         },
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Lunges",
             SubTitle = "Legs & Glutes",
             Description = "Lunges strengthen the lower body by targeting the quads, hamstrings, and glutes. They also improve balance and coordination.",
@@ -51,9 +54,11 @@ public partial class ViewModel(
             Badge = "Easy",
             BadgeTextColor = "#2f8557",
             BadgeBackgroundColor = "#dbfce7",
+            Progress = 90
         },
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Triceps Extension",
             SubTitle = "Arms",
             Description = "Triceps extensions isolate and strengthen the triceps muscles, helping to tone the back of the arms and improve upper body strength.",
@@ -64,6 +69,7 @@ public partial class ViewModel(
         },
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Pull-Up",
             SubTitle = "Back & Biceps",
             Description = "Pull-ups are a compound upper-body exercise that build strength in the lats, biceps, and shoulders by lifting your body over a bar.",
@@ -74,6 +80,7 @@ public partial class ViewModel(
         },
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Push-Up",
             SubTitle = "Chest & Triceps",
             Description = "Push-ups are a classic bodyweight exercise that target the chest, shoulders, and triceps while also engaging the core.",
@@ -84,6 +91,7 @@ public partial class ViewModel(
         },
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Plank",
             SubTitle = "Core",
             Description = "The plank is an isometric hold that strengthens the core, shoulders, and glutes while improving posture and stability.",
@@ -94,6 +102,7 @@ public partial class ViewModel(
         },
         new()
         {
+            Id = Guid.NewGuid().ToString(),
             Title = "Pilates",
             SubTitle = "Core & Flexibility",
             Description = "Pilates is a low-impact exercise that focuses on core strength, flexibility, and mindful movement. It improves posture and body awareness.",
@@ -191,6 +200,9 @@ public partial class ViewModel(
         //}
     }
 
+    public async Task NavigateAsync(string route, object args)
+        => await AppNavigator.NavigateAsync(route, args: args, animated: true);
+    
     #endregion
 
     #region [ Utils ]

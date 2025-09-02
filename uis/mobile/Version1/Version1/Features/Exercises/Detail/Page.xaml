@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Version1.Features.Exercises.Detail.Page"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Version1.Features.Exercises.Detail"
+    xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Title="Page"
+    x:DataType="local:ViewModel"
+    Shell.NavBarIsVisible="False">
+
+
+    <ContentPage.Resources>
+        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="Black" />
+            <GradientStop Offset="1.0" Color="Cyan" />
+        </LinearGradientBrush>
+    </ContentPage.Resources>
+    <ScrollView Padding="16" Background="{x:StaticResource GradientBackground}">
+        <Grid RowDefinitions="auto, auto" RowSpacing="16">
+            <Border
+                Padding="16"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 4"
+                StrokeThickness="0">
+                <VerticalStackLayout Spacing="8">
+                    <Grid HeightRequest="180">
+
+                        <toolkit:MediaElement
+                            Aspect="Fill"
+                            HeightRequest="180"
+                            ShouldAutoPlay="True"
+                            ShouldLoopPlayback="True"
+                            ShouldShowPlaybackControls="False"
+                            Source="https://totechsintranet.blob.core.windows.net/mix/squat.mp4" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*, 0.5*, *" ColumnSpacing="8">
+                        <VerticalStackLayout Grid.Column="1" Spacing="8">
+                            <Border
+                                Margin="0,-35,0,0"
+                                Padding="8"
+                                BackgroundColor="Black"
+                                HeightRequest="70"
+                                StrokeShape="RoundRectangle 4"
+                                WidthRequest="70">
+                                <Image Source="squat_64.png" />
+                            </Border>
+                            <Label
+                                FontSize="Title"
+                                HorizontalOptions="Center"
+                                Text="Squat"
+                                TextColor="Black" />
+                            <Label
+                                HorizontalOptions="Center"
+                                Text="Legs"
+                                TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Label Text="A squat is a strength exercise in which the trainee lowers their hips from a standing position and then stands back up. During the descent, the hip and knee joints flex while the ankle joint dorsiflexes; conversely the hip and knee joints extend and the ankle joint plantarflexes when standing up." TextColor="Gray" />
+                </VerticalStackLayout>
+            </Border>
+            <Border
+                Grid.Row="1"
+                Padding="16"
+                BackgroundColor="White"
+                HeightRequest="280"
+                StrokeShape="RoundRectangle 4"
+                StrokeThickness="0">
+                <Grid
+                    ColumnDefinitions="*, *"
+                    ColumnSpacing="16"
+                    RowDefinitions="*, *"
+                    RowSpacing="16">
+                    <Button
+                        BackgroundColor="White"
+                        BorderColor="Black"
+                        BorderWidth="1"
+                        FontSize="Title"
+                        Text="Input"
+                        TextColor="Black" />
+                    <Button
+                        Grid.Column="1"
+                        BackgroundColor="White"
+                        BorderColor="Black"
+                        BorderWidth="1"
+                        FontSize="Title"
+                        Text="Gallery"
+                        TextColor="Black" />
+                    <Button
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2"
+                        BackgroundColor="Black"
+                        BorderWidth="1"
+                        FontSize="Title"
+                        Text="Work !!!"
+                        TextColor="White" />
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollView>
+</ContentPage>
