@@ -1,12 +1,13 @@
-﻿using CommunityToolkit.Maui;
-using Microsoft.Extensions.Logging;
+﻿using UI;
 using Mvvm;
+using Library;
 using Navigation;
+using Maui.FreakyEffects;
+using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
 using Version1.Features.Authentication;
-using Library;
-using UI;
-using Maui.FreakyEffects;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace Version1;
 
@@ -18,6 +19,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
+            .UseMauiCommunityToolkitMediaElement()
             .ConfigureSyncfusionToolkit()
             .ConfigureFonts(fonts =>
             {
@@ -29,10 +31,7 @@ public static class MauiProgram
             .RegisterCore()
             .RegisterFeatures()
             .RegisterPages()
-            .ConfigureEffects(effects =>
-            {
-                effects.InitFreakyEffects();
-            });
+            .UseSkiaSharp();
 
 #if DEBUG
         builder.Logging.AddDebug();

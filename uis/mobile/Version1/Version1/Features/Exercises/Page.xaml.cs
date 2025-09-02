@@ -11,72 +11,36 @@ public partial class Page : ContentPage
 
         BindingContext = this.viewModel = viewModel;
 
-        viewModel.LoadAsync();
     }
 
-    private void AddSet(object sender, EventArgs e)
+    private async void ContentPage_Loaded(object sender, EventArgs e)
     {
-        var button = (Button)sender;
-        var id = button.CommandParameter as string;
-        var item = this.viewModel.Items.FirstOrDefault(x => x.Id == id);
-
-        if(item == null)
-            return;
-
-        int indexOfNextSet = item.Sets.Count;
-
-        item.Sets.Add(new()
-        {
-            Id = Guid.NewGuid(),
-            Text = $"Set {indexOfNextSet + 1}",
-            Value = 10
-        });
+        await viewModel.LoadAsync();
     }
 
-    private void IncreaseSet(object sender, EventArgs e)
-    {
-        var button = (Button)sender;
-        var set = button.CommandParameter as ContentViews.Card.Set;
-
-        if (set == null)
-            return;
-
-        var setFromViewModel = viewModel.Items.SelectMany(x => x.Sets).FirstOrDefault(x => x.Id == set.Id);
-        if(setFromViewModel == null)
-            return;
-
-        setFromViewModel.Value++;
-    }
-
-    private void DecreaseSet(object sender, EventArgs e)
-    {
-        var button = (Button)sender;
-        var set = button.CommandParameter as ContentViews.Card.Set;
-        if (set == null || set.Value <= 0)
-            return;
-
-        var setFromViewModel = viewModel.Items.SelectMany(x => x.Sets).FirstOrDefault(x => x.Id == set.Id);
-        if (setFromViewModel == null)
-            return;
-
-        setFromViewModel.Value--;
-    }
-
-
-    private async void SelectButton_Clicked(object sender, EventArgs e)
+    private async void Detail_Clicked(object sender, EventArgs e)
     {
         var button = (SfButton)sender;
-        button.Background = button.IsChecked ? Brush.Aqua : Brush.Brown;
+        var exerciseId = (string)button.CommandParameter;
+        if (exerciseId is null)
+            return;
 
-        var id = button.CommandParameter as string;
-        await this.viewModel.UpdateCardAsync(id, button.IsChecked);
+        await viewModel.NavigateAsync(AppRoutes.ExerciseDetail, new Dictionary<string, object>
+                    {
+                        { "Id", exerciseId }
+                    });
     }
 
-    private async void DayOfWeekButton_Clicked(object sender, EventArgs e)
+    private async void ConfigButton_Clicked(object sender, EventArgs e)
     {
-        var button = (SfButton)sender;
-        button.Background = button.IsChecked ? Brush.Aqua : Brush.Brown;
+        var button = (ImageButton)sender;
+        var exerciseId = (string)button.CommandParameter;
+        if (exerciseId is null)
+            return;
 
-        var dayOfWeek = (DayOfWeek)button.CommandParameter;
+        await viewModel.NavigateAsync(AppRoutes.ExerciseConfig, new Dictionary<string, object>
+                    {
+                        { "Id", exerciseId }
+                    });
     }
 }

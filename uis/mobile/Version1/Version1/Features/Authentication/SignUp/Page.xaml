@@ -9,10 +9,6 @@
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
-        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0.0" Color="Black" />
-            <GradientStop Offset="1.0" Color="Cyan" />
-        </LinearGradientBrush>
         <FontImageSource
             x:Key="DumbbellIcon"
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
@@ -32,6 +28,8 @@
 
     <ScrollView Padding="16" Background="{x:StaticResource GradientBackground}">
         <VerticalStackLayout Spacing="16">
+
+            <!--  Upload Avatar  -->
             <Grid
                 ColumnDefinitions="*, *"
                 ColumnSpacing="16"
@@ -113,7 +111,12 @@
                 <VerticalStackLayout Spacing="24">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Gender" />
-                        <syncfusionToolkit:SfChipGroup ChipType="Choice">
+                        <syncfusionToolkit:SfChipGroup
+                            ChipStroke="Cyan"
+                            ChipTextColor="Cyan"
+                            ChipType="Choice"
+                            SelectedChipBackground="Cyan"
+                            SelectedChipTextColor="Black">
                             <syncfusionToolkit:SfChip Text="Male" />
                             <syncfusionToolkit:SfChip Text="Female" />
                         </syncfusionToolkit:SfChipGroup>
