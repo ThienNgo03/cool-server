@@ -377,7 +377,7 @@
                 <VerticalStackLayout Spacing="24">
                     <Button
                         BackgroundColor="Black"
-                        Command="{x:Binding SignUpCommand}"
+                        Command="{x:Binding SaveCommand}"
                         Text="Save"
                         TextColor="White" />
                 </VerticalStackLayout>

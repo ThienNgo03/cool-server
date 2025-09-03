@@ -1,11 +1,18 @@
 ﻿using Mvvm;
 using Navigation;
+using System.Collections.Specialized;
 
 namespace Version1.Features.Exercises.Config;
 
 public partial class ViewModel(
+    Library.Workouts.Interface workoutsBiz,
     IAppNavigator appNavigator) : NavigationAwareBaseViewModel(appNavigator)
 {
+    #region [ Fields ]
+
+    private readonly Library.Workouts.Interface workoutsBiz = workoutsBiz;
+    #endregion
+
     #region [ UI ]
 
     [ObservableProperty]
@@ -22,11 +29,31 @@ public partial class ViewModel(
         {
             Id = idStr;
         }
+        TotalSets.CollectionChanged += TotalSets_CollectionChanged;
+    }
 
-        TotalSets.CollectionChanged += (s, e) =>
+    [RelayCommand]
+    async Task SaveAsync()
+    {
+        if (Id is null)
+            return;
+        if (WorkoutTimeItems is null)
+            return;
+
+        await workoutsBiz.CreateAsync(new()
         {
-            SummaryTotalReps = TotalSets.Sum(x => x.Reps);
-        };
+            ExerciseId = Guid.Parse(Id),
+            UserId = Guid.Empty,
+            WeekPlans = WorkoutTimeItems?.Select(wti => new Library.Workouts.Create.WeekPlan
+            {
+                DateOfWeek = wti.Content,
+                Time = wti.Time,
+                WeekPlanSets = SetConfigItems?.Select(sci => new Library.Workouts.Create.WeekPlanSet
+                {
+                    Value = sci.Reps
+                }).ToList()
+            }).ToList(),
+        });
     }
     #endregion
 
@@ -60,20 +87,7 @@ public partial class ViewModel(
 
     partial void OnSelectedDayForSetChanged(WeeklyItem? value)
     {
-        if (SetConfigItems == null) return;
-        SetConfigItems.Clear();
-
-        if (value != null)
-        {
-            var filteredItems = TotalSets
-                .Where(item => string.Equals(item.Day, value.Content, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            foreach (var item in filteredItems)
-            {
-                SetConfigItems.Add(item);
-            }
-        }
+        UpdateSetConfigItems();
     }
 
     [ObservableProperty]
@@ -84,6 +98,29 @@ public partial class ViewModel(
     [ObservableProperty]
     ObservableCollection<SetConfigItem>? setConfigItems = new();
 
+    private void TotalSets_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        SummaryTotalReps = TotalSets.Sum(x => x.Reps);
+        UpdateSetConfigItems();
+    }
+
+    private void UpdateSetConfigItems()
+    {
+        if (SetConfigItems == null) return;
+        SetConfigItems.Clear();
+
+        if (SelectedDayForSet != null)
+        {
+            var filteredItems = TotalSets
+                .Where(item => string.Equals(item.Day, SelectedDayForSet.Content, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var item in filteredItems)
+            {
+                SetConfigItems.Add(item);
+            }
+        }
+    }
     #endregion
 
     #region [ Summary ]

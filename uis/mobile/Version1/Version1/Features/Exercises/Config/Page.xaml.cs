@@ -44,7 +44,6 @@ public partial class Page : ContentPage
 
             if (viewModel.SelectedDayForSet?.Content == removedWeeklyItem.Content)
             {
-                viewModel.SetConfigItems?.Clear();
                 viewModel.SelectedDayForSet = null; 
             }
         }
@@ -65,8 +64,22 @@ public partial class Page : ContentPage
         };
 
         viewModel.TotalSets.Add(newSet);
+    }
 
-        viewModel.SetConfigItems?.Add(newSet);
+
+    private void Remove_Tapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Label removeLabel &&
+            removeLabel.BindingContext is SetConfigItem setConfigItem)
+        {
+            var totalSetItem = viewModel.TotalSets.FirstOrDefault(x => x.Id == setConfigItem.Id);
+            if (totalSetItem != null)
+            {
+                viewModel.TotalSets.Remove(totalSetItem);
+            }
+
+            viewModel.SummaryTotalReps = viewModel.TotalSets.Sum(x => x.Reps);
+        }
     }
 
     private void RepsEntry_ValueChanged(object sender, Syncfusion.Maui.Toolkit.NumericEntry.NumericEntryValueChangedEventArgs e)
@@ -82,21 +95,4 @@ public partial class Page : ContentPage
             viewModel.SummaryTotalReps = viewModel.TotalSets.Sum(x => x.Reps);
         }
     }
-
-    private void Remove_Tapped(object sender, TappedEventArgs e)
-    {
-        if (sender is Label removeLabel &&
-            removeLabel.BindingContext is SetConfigItem setConfigItem)
-        {
-            var totalSetItem = viewModel.TotalSets.FirstOrDefault(x => x.Id == setConfigItem.Id);
-            if (totalSetItem != null)
-            {
-                viewModel.TotalSets.Remove(totalSetItem);
-            }
-
-            viewModel.SetConfigItems?.Remove(setConfigItem);
-            viewModel.SummaryTotalReps = viewModel.TotalSets.Sum(x => x.Reps);
-        }
-    }
-
 }

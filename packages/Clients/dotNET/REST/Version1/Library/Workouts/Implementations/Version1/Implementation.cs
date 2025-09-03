@@ -148,13 +148,24 @@ public class Implementation : Interface
     {
         try
         {
-
             var refitPayload = new Models.Refit.POST.Payload
             {
                 ExerciseId = payload.ExerciseId,
-                UserId = payload.UserId
+                UserId = payload.UserId,
+                WeekPlans = payload.WeekPlans?
+                .Select(wp => new Models.Refit.POST.WeekPlan
+                {
+                    DateOfWeek = wp.DateOfWeek,
+                    Time = wp.Time,
+                    WeekPlanSets = wp.WeekPlanSets?
+                        .Select(wps => new Models.Refit.POST.WeekPlanSet
+                        {
+                            value = wps.Value
+                        })
+                        .ToList()
+                })
+                .ToList()
             };
-
             var response = await this.refitInterface.POST(refitPayload);
         }
 
