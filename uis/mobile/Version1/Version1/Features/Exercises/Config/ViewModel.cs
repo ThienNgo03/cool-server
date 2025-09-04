@@ -37,10 +37,14 @@ public partial class ViewModel(
     {
         if (Id is null)
             return;
+        if (WeeklyItems is null)
+            return;
         if (WorkoutTimeItems is null)
             return;
+        if (SetConfigItems is null)
+            return;
 
-        await workoutsBiz.CreateAsync(new()
+        await workoutsBiz.CreateAsync(new Library.Workouts.Create.Payload
         {
             ExerciseId = Guid.Parse(Id),
             UserId = Guid.Empty,
@@ -52,7 +56,7 @@ public partial class ViewModel(
                 {
                     Value = sci.Reps
                 }).ToList()
-            }).ToList(),
+            }).ToList()
         });
     }
     #endregion
