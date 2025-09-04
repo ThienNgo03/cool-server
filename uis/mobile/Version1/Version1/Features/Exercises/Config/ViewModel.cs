@@ -36,13 +36,25 @@ public partial class ViewModel(
     async Task SaveAsync()
     {
         if (Id is null)
+        {
+            await ShowSnackBarAsync("Exercise Id is missing.");
             return;
-        if (WeeklyItems is null)
+        }
+        if (WeeklyItems is null || !WeeklyItems.Any())
+        {
+            await ShowSnackBarAsync("Please select at least one day for the workout.");
             return;
-        if (WorkoutTimeItems is null)
+        }
+        if (WorkoutTimeItems is null || !WorkoutTimeItems.Any())
+        {
+            await ShowSnackBarAsync("Workout times are not configured.");
             return;
-        if (SetConfigItems is null)
+        }
+        if (SetConfigItems is null || !SetConfigItems.Any())
+        {
+            await ShowSnackBarAsync("Set configurations are missing.");
             return;
+        }
 
         await workoutsBiz.CreateAsync(new Library.Workouts.Create.Payload
         {
@@ -58,6 +70,11 @@ public partial class ViewModel(
                 }).ToList()
             }).ToList()
         });
+    }
+
+    public async Task ShowSnackBarAsync(string message)
+    {
+        await AppNavigator.ShowSnackbarAsync(message);
     }
     #endregion
 

@@ -21,21 +21,28 @@ public partial class ViewModel(
     [RelayCommand]
     async Task SignInAsync()
     {
-        //var isValid = Form.IsValid();
-        //if (!isValid)
-        //    return;
+        var isValid = Form.IsValid();
+        if (!isValid)
+        {
+            await AppNavigator.ShowSnackbarAsync("Please fill in all fields");
+            return;
+        }
 
-        // Authenticate
-        //var result = await authInterface.SignInAsync(new()
-        //{
-        //    Account = Form.Account,
-        //    Password = Form.Password
-        //});
+        var result = await authInterface.SignInAsync(new()
+        {
+            Account = Form.Account,
+            Password = Form.Password
+        });
 
-        //tokenService.SetToken(result?.Token ?? string.Empty);
+        if(result is null || result.Token is null || string.IsNullOrEmpty(result.Token))
+        {
+            await AppNavigator.ShowSnackbarAsync("Sign in failed, please double check your account and password");
+            return;
+        };
 
-        //if (result is null || string.IsNullOrWhiteSpace(result.Token))
-        //    return;
+        tokenService.SetToken(result.Token);
+
+        //Set App.CurrentUser to easily access current user credentials
 
         await GoHomeAsync();
     }

@@ -5,14 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:app="clr-namespace:Version1.Features.Authentication.SignIn"
     xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:ui="clr-namespace:UI"
     x:DataType="app:ViewModel"
     Shell.NavBarIsVisible="False">
     <ContentPage.Resources>
-        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0.0" Color="Black" />
-            <GradientStop Offset="1.0" Color="Cyan" />
-        </LinearGradientBrush>
         <FontImageSource
             x:Key="DumbbellIcon"
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
@@ -60,18 +57,41 @@
                 </HorizontalStackLayout>
                 <VerticalStackLayout>
                     <syncfusionToolkit:SfTextInputLayout ContainerType="Outlined" Hint="Email Or Phone Number">
-                        <Entry Text="{x:Binding Form.Account, Mode=TwoWay}" />
+                        <Entry x:Name="AccountEntry" Text="{x:Binding Form.Account, Mode=TwoWay}" />
                     </syncfusionToolkit:SfTextInputLayout>
                     <syncfusionToolkit:SfTextInputLayout ContainerType="Outlined" Hint="Password">
                         <Entry
+                            x:Name="PasswordEntry"
                             IsPassword="True"
                             Placeholder="Password"
                             Text="{x:Binding Form.Password,
                                              Mode=TwoWay}" />
                     </syncfusionToolkit:SfTextInputLayout>
                 </VerticalStackLayout>
+                <Label
+                    Padding="{ui:EdgeInsets Horizontal={x:Static ui:Dimens.SpacingMd}}"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{x:Binding Form.HasErrors,
+                                          Mode=OneWay}"
+                    Style="{x:Static ui:Styles.Body2}"
+                    TextColor="{x:Static ui:AppColors.Red}">
+                    <Label.Opacity>
+                        <MultiBinding Converter="{Static ui:AppConverters.AnyFalseToOpacity}">
+                            <Binding Converter="{x:Static ui:AppConverters.IsListNullOrEmpty}" Path="Form.AccountErrors" />
+                            <Binding Converter="{x:Static ui:AppConverters.IsListNullOrEmpty}" Path="Form.PasswordErrors" />
+                        </MultiBinding>
+                    </Label.Opacity>
+                    <Label.Text>
+                        <MultiBinding Converter="{Static ui:AppConverters.FirstItem}">
+                            <Binding Converter="{x:Static ui:AppConverters.FirstItem}" Path="Form.AccountErrors" />
+                            <Binding Converter="{x:Static ui:AppConverters.FirstItem}" Path="Form.PasswordErrors" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
                 <Button
+                    x:Name="SignInButton"
                     BackgroundColor="Black"
+                    Clicked="SignInButton_Clicked"
                     Command="{x:Binding SignInCommand}"
                     Text="Login"
                     TextColor="White" />
@@ -90,24 +110,5 @@
                 </Label>
             </VerticalStackLayout>
         </Border>
-        <Label
-            Grid.Row="2"
-            Padding="{ui:EdgeInsets Horizontal={x:Static ui:Dimens.SpacingMd}}"
-            HorizontalTextAlignment="Center"
-            Style="{x:Static ui:Styles.Body2}"
-            TextColor="{x:Static ui:AppColors.Red}">
-            <Label.Opacity>
-                <MultiBinding Converter="{Static ui:AppConverters.AnyFalseToOpacity}">
-                    <Binding Converter="{x:Static ui:AppConverters.IsListNullOrEmpty}" Path="Form.AccountErrors" />
-                    <Binding Converter="{x:Static ui:AppConverters.IsListNullOrEmpty}" Path="Form.PasswordErrors" />
-                </MultiBinding>
-            </Label.Opacity>
-            <Label.Text>
-                <MultiBinding Converter="{Static ui:AppConverters.FirstItem}">
-                    <Binding Converter="{x:Static ui:AppConverters.FirstItem}" Path="Form.AccountErrors" />
-                    <Binding Converter="{x:Static ui:AppConverters.FirstItem}" Path="Form.PasswordErrors" />
-                </MultiBinding>
-            </Label.Text>
-        </Label>
     </Grid>
 </ContentPage>

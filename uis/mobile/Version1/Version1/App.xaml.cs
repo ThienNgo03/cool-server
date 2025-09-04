@@ -1,15 +1,34 @@
-﻿namespace Version1
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            InitializeComponent();
-        }
+﻿namespace Version1;
 
-        protected override Window CreateWindow(IActivationState? activationState)
+public partial class App : Application
+{
+    public CurrentUser.Model? CurrentUser { get; set; }
+
+    public App()
+    {
+        InitializeComponent();
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(new AppShell());
+    }
+
+    public void SetCurrentUser(Guid id, 
+                               string name, 
+                               int? age = null, 
+                               string? avatarUrl = null, 
+                               string? bio = null,
+                               string? token = null)
+    {
+        CurrentUser = new CurrentUser.Model
         {
-            return new Window(new AppShell());
-        }
+            Id = id,
+            Name = name,
+            Age = age,
+            AvatarUrl = avatarUrl,
+            Bio = bio,
+            Token = token
+        };
     }
 }
