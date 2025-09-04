@@ -66,13 +66,25 @@ public class Controller : ControllerBase
         var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
         if (existingExercise == null)
         {
-            return NotFound($"Exercise with ID {payload.ExerciseId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Exercise not found",
+                Detail = $"Exercise with ID {payload.ExerciseId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var existingMuscle = await _context.Muscles.FindAsync(payload.MuscleId);
         if (existingMuscle == null)
         {
-            return NotFound($"Muscle with ID {payload.MuscleId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Muscle not found",
+                Detail = $"Muscle with ID {payload.MuscleId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var exerciseMuscle = new Databases.Journal.Tables.ExerciseMuscle.Table
@@ -111,7 +123,13 @@ public class Controller : ControllerBase
 
         var entity = await _context.ExerciseMuscles.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "ExerciseMuscle not found",
+                Detail = $"ExerciseMuscle with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -136,13 +154,25 @@ public class Controller : ControllerBase
         var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
         if (existingExercise == null)
         {
-            return NotFound($"Exercise with ID {payload.ExerciseId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Exercise not found",
+                Detail = $"Exercise with ID {payload.ExerciseId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var existingMuscle = await _context.Muscles.FindAsync(payload.MuscleId);
         if (existingMuscle == null)
         {
-            return NotFound($"Muscle with ID {payload.MuscleId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Muscle not found",
+                Detail = $"Muscle with ID {payload.MuscleId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         exerciseMuscle.ExerciseId = payload.ExerciseId;
@@ -162,7 +192,13 @@ public class Controller : ControllerBase
         var exerciseMuscle = await _context.ExerciseMuscles.FindAsync(parameters.Id);
         if (exerciseMuscle == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "ExerciseMuscle not found",
+                Detail = $"ExerciseMuscle with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _context.ExerciseMuscles.Remove(exerciseMuscle);

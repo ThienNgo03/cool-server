@@ -84,7 +84,13 @@ public class Controller : ControllerBase
         var existingCompetition = await _dbContext.Competitions.FindAsync(payload.CompetitionId);
         if (existingCompetition == null)
         {
-            return NotFound($"Competition with ID {payload.CompetitionId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Competition with ID {payload.CompetitionId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var refereeId = existingCompetition.RefereeId;
@@ -122,12 +128,24 @@ public class Controller : ControllerBase
         var soloPool = await _dbContext.SoloPools.FindAsync(payload.Id);
         if (soloPool == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Solo Pool not found",
+                Detail = $"Solo Pool with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         var existingCompetition = await _dbContext.Competitions.FindAsync(payload.CompetitionId);
         if (existingCompetition == null)
         {
-            return NotFound($"Competition with ID {payload.CompetitionId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Competition with ID {payload.CompetitionId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         soloPool.WinnerId = payload.WinnerId;
         soloPool.LoserId = payload.LoserId;
@@ -163,7 +181,13 @@ public class Controller : ControllerBase
 
         var entity = await _dbContext.SoloPools.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Solo Pool not found",
+                Detail = $"Solo Pool with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -187,7 +211,13 @@ public class Controller : ControllerBase
         var soloPool = await _dbContext.SoloPools.FindAsync(parameters.Id);
         if (soloPool == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Solo Pool not found",
+                Detail = $"Solo Pool with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         _dbContext.SoloPools.Remove(soloPool);
         await _dbContext.SaveChangesAsync();

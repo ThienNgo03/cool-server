@@ -78,7 +78,13 @@ public class Controller : ControllerBase
         var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
         if (existingWorkout == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Workout not found",
+                Detail = $"Workout with ID {payload.WorkoutId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table
@@ -118,7 +124,13 @@ public class Controller : ControllerBase
 
         var entity = await _context.WorkoutLogs.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Workout Log not found",
+                Detail = $"Workout Log with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -145,12 +157,24 @@ public class Controller : ControllerBase
         var workoutLog = await _context.WorkoutLogs.FindAsync(payload.Id);
         if (workoutLog == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Workout Log not found",
+                Detail = $"Workout Log with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
         if (existingWorkout == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Workout not found",
+                Detail = $"Workout with ID {payload.WorkoutId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         workoutLog.WorkoutId = payload.WorkoutId;
@@ -177,7 +201,13 @@ public class Controller : ControllerBase
         var workoutLog = await _context.WorkoutLogs.FindAsync(parameters.Id);
         if (workoutLog == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Workout Log not found",
+                Detail = $"Workout Log with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _context.WorkoutLogs.Remove(workoutLog);

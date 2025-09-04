@@ -154,7 +154,13 @@ public class Controller : ControllerBase
         var exercise = await _context.Exercises.FindAsync(payload.Id);
         if (exercise == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Exercise not found",
+                Detail = $"Exercise with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         exercise.Name = payload.Name;
@@ -189,7 +195,13 @@ public class Controller : ControllerBase
 
         var entity = await _context.Exercises.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Exercise not found",
+                Detail = $"Exercise with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -216,7 +228,13 @@ public class Controller : ControllerBase
         var exercise = await _context.Exercises.FindAsync(parameters.Id);
         if (exercise == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Exercise not found",
+                Detail = $"Exercise with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _context.Exercises.Remove(exercise);

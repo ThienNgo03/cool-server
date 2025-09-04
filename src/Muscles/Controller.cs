@@ -90,7 +90,13 @@ public class Controller(IMessageBus messageBus,
 
         var entity = await _context.Muscles.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Muscle not found",
+                Detail = $"Muscle with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -109,7 +115,13 @@ public class Controller(IMessageBus messageBus,
         var muscle = await _context.Muscles.FindAsync(payload.Id);
         if (muscle == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Muscle not found",
+                Detail = $"Muscle with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         muscle.Name = payload.Name;
@@ -128,7 +140,13 @@ public class Controller(IMessageBus messageBus,
         var muscle = await _context.Muscles.FindAsync(parameters.Id);
         if (muscle == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Muscle not found",
+                Detail = $"Muscle with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _context.Muscles.Remove(muscle);

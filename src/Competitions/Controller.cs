@@ -229,8 +229,13 @@ public class Controller : ControllerBase
         var competition = await _dbContext.Competitions.FindAsync(parameters.Id);
         if (competition == null)
         {
-            _logger.LogWarning("Attempted to delete a non-existing competition with ID: {Id}", parameters.Id);
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Competition with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _dbContext.Competitions.Remove(competition);
@@ -261,7 +266,13 @@ public class Controller : ControllerBase
 
         var entity = await _dbContext.Competitions.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Compettion with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -286,8 +297,13 @@ public class Controller : ControllerBase
         var existingCompetition = await _dbContext.Competitions.FindAsync(competition.Id);
         if (existingCompetition == null)
         {
-            _logger.LogWarning("Attempted to update a non-existing competition with ID: {Id}", competition.Id);
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Competition with ID {competition.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         if (competition.Type != Post.Type.Solo.ToString() &&
             competition.Type != Post.Type.Team.ToString())

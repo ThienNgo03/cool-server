@@ -85,7 +85,13 @@ public class Controller : ControllerBase
         var existingWeekPlan = await _context.WeekPlans.FindAsync(payload.WeekPlanId);
         if (existingWeekPlan == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Week Plan not found",
+                Detail = $"Week Plan with ID {payload.WeekPlanId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var weekPlanSet = new Databases.Journal.Tables.WeekPlanSet.Table
@@ -126,7 +132,13 @@ public class Controller : ControllerBase
 
         var entity = await _context.WeekPlanSets.FindAsync(id, cancellationToken);
         if(entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Week Plan Set not found",
+                Detail = $"Week Plan Set with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -154,13 +166,25 @@ public class Controller : ControllerBase
         var weekPlanSet = await _context.WeekPlanSets.FindAsync(payload.Id);
         if (weekPlanSet == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Week Plan Set not found",
+                Detail = $"Week Plan Set with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var existingWeekPlan = await _context.WeekPlans.FindAsync(payload.WeekPlanId);
         if (existingWeekPlan == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Week Plan not found",
+                Detail = $"Week Plan with ID {payload.WeekPlanId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         weekPlanSet.WeekPlanId = payload.WeekPlanId;
         weekPlanSet.Value = payload.Value;
@@ -187,7 +211,13 @@ public class Controller : ControllerBase
         var weekPlanSet = await _context.WeekPlanSets.FindAsync(parameters.Id);
         if (weekPlanSet == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Week Plan Set not found",
+                Detail = $"Week Plan Set with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _context.WeekPlanSets.Remove(weekPlanSet);
