@@ -54,11 +54,10 @@ public class AppNavigator(IServiceProvider serviceProvider) : IAppNavigator
     {
         var options = new SnackbarOptions
         {
-            BackgroundColor = AppColors.Purple,
+            BackgroundColor = AppColors.Black,
             TextColor = AppColors.White,
-            ActionButtonTextColor = AppColors.Pink,
+            ActionButtonTextColor = AppColors.Cyan,
             CornerRadius = new CornerRadius(Dimens.ButtonCornerRadius),
-            CharacterSpacing = 0.5
         };
         var snackbar = Snackbar.Make(message, action, actionText ?? "OK", TimeSpan.FromSeconds(5), options);
         return snackbar.Show();

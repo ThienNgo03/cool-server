@@ -50,10 +50,13 @@ public partial class Page : ContentPage
     }
 
 
-    private void AddSetButton_Clicked(object sender, EventArgs e)
+    private async void AddSetButton_Clicked(object sender, EventArgs e)
     {
         if (viewModel.SelectedDayForSet is null)
+        {
+            await viewModel.ShowSnackBarAsync("Please select a day to add a set.");
             return;
+        }
 
         var newSet = new SetConfigItem
         {

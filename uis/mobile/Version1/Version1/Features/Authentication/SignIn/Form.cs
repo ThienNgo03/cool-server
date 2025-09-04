@@ -1,6 +1,7 @@
 ﻿
-using Mvvm;
 using UI;
+using Mvvm;
+using Version1.UI.Attributes;
 
 namespace Version1.Features.Authentication.SignIn;
 
@@ -8,8 +9,8 @@ public partial class Form : BaseFormModel
 {
 
     [ObservableProperty]
-    [Required(ErrorMessage = "Please enter your phone number")]
-    [Phone(ErrorMessage = "Please enter a valid phone number")]
+    [Required(ErrorMessage = "Please enter your phone number or email address")]
+    [PhoneOrEmail(ErrorMessage = "Please enter a valid phone number or email address")]
     [NotifyPropertyChangedFor(nameof(AccountErrors))]
     [NotifyDataErrorInfo]
     string account = "issacclark115@gmail.com";

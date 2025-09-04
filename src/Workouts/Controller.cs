@@ -167,12 +167,24 @@ public class Controller : ControllerBase
         var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
         if (existingExercise == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Exercise not found",
+                Detail = $"Exercise with ID {payload.ExerciseId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         var existingUser = await _context.Users.FindAsync(payload.UserId);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "User not found",
+                Detail = $"User with ID {payload.UserId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         var workout = new Databases.Journal.Tables.Workout.Table
         {

@@ -141,6 +141,7 @@
                             x:Name="RepsEntry"
                             BindingContext="{x:Binding Mode=OneWay}"
                             CustomFormat="N0"
+                            Minimum="1"
                             Placeholder="Reps"
                             ShowBorder="False"
                             ValueChanged="RepsEntry_ValueChanged"
