@@ -7,6 +7,13 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        Microsoft.Maui.Handlers.ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, view) =>
+        {
+#if ANDROID
+            handler.PlatformView.ContentInsetStartWithNavigation = 0;
+            handler.PlatformView.SetContentInsetsAbsolute(0, 0);
+#endif
+        });
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

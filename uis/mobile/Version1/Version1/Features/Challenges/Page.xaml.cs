@@ -1,4 +1,4 @@
-namespace Version1.Features.Home;
+namespace Version1.Features.Challenges;
 
 public partial class Page : ContentPage
 {

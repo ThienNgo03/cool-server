@@ -3,10 +3,14 @@
     x:Class="Version1.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:challenges="clr-namespace:Version1.Features.Challenges"
     xmlns:exercises="clr-namespace:Version1.Features.Exercises"
     xmlns:home="clr-namespace:Version1.Features.Home"
     xmlns:local="clr-namespace:Version1"
+    xmlns:profile="clr-namespace:Version1.Features.Profile"
     xmlns:signIn="clr-namespace:Version1.Features.Authentication.SignIn"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:ui="clr-namespace:UI"
     Title="Version1"
     Shell.TabBarBackgroundColor="#182026"
@@ -44,7 +48,57 @@
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
             Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_person_48_regular}"
             Color="Cyan" />
+        <FontImageSource
+            x:Key="AlertIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_alert_48_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="SettingIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_settings_48_regular}"
+            Color="White" />
     </Shell.Resources>
+
+    <Shell.TitleView>
+        <Grid Padding="16,0,16,0" BackgroundColor="#142126">
+            <Grid
+                ColumnDefinitions="40, 130"
+                ColumnSpacing="16"
+                RowDefinitions="*, *">
+                <toolkit:AvatarView
+                    Grid.RowSpan="2"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    ImageSource="https://totechsintranet.blob.core.windows.net/avatars/bob.jpg"
+                    Stroke="Cyan"
+                    WidthRequest="44" />
+                <Label
+                    Grid.Column="1"
+                    Text="Viet To Hoang"
+                    TextColor="Cyan"
+                    VerticalOptions="End" />
+                <Label
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="Days: 442"
+                    TextColor="White" />
+            </Grid>
+            <HorizontalStackLayout HorizontalOptions="End" Spacing="16">
+                <toolkit:AvatarView
+                    Padding="8"
+                    HeightRequest="44"
+                    ImageSource="{x:StaticResource SettingIcon}"
+                    WidthRequest="44" />
+                <toolkit:AvatarView
+                    Padding="8"
+                    BorderColor="Cyan"
+                    HeightRequest="44"
+                    ImageSource="{x:StaticResource AlertIcon}"
+                    WidthRequest="44" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.TitleView>
 
     <TabBar>
         <ShellContent
@@ -69,13 +123,13 @@
             Title="Challenges"
             Icon="{x:StaticResource TrophyIcon}"
             Route="exercises">
-            <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
+            <ShellContent ContentTemplate="{DataTemplate challenges:Page}" />
         </Tab>
         <Tab
             Title="Profile"
             Icon="{x:StaticResource ProfileIcon}"
             Route="exercises">
-            <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
+            <ShellContent ContentTemplate="{DataTemplate profile:Page}" />
         </Tab>
     </TabBar>
 
