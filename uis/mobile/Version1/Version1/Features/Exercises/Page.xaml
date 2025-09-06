@@ -4,7 +4,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:card="clr-namespace:Version1.Features.Exercises.ContentViews.Card"
-    xmlns:freakyEffects="clr-namespace:Maui.FreakyEffects.TouchEffects;assembly=Maui.FreakyEffects"
     xmlns:local="clr-namespace:Version1.Features.Exercises"
     xmlns:progress="clr-namespace:Plugin.Maui.MauiProgressView;assembly=Plugin.Maui.MauiProgressView"
     xmlns:signalR="clr-namespace:Version1.Features.WebSocket.SignalR"
@@ -13,14 +12,9 @@
     Title="Page"
     x:DataType="local:ViewModel"
     Loaded="ContentPage_Loaded"
-    Shell.NavBarIsVisible="False">
+    Shell.NavBarIsVisible="True">
 
     <ContentPage.Resources>
-        <LinearGradientBrush x:Key="GradientBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0.0" Color="Black" />
-            <GradientStop Offset="1.0" Color="Cyan" />
-        </LinearGradientBrush>
-
         <FontImageSource
             x:Key="SearchIcon"
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"

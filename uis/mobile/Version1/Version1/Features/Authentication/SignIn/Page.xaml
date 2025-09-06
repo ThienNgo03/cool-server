@@ -56,10 +56,20 @@
                         WidthRequest="40" />
                 </HorizontalStackLayout>
                 <VerticalStackLayout>
-                    <syncfusionToolkit:SfTextInputLayout ContainerType="Outlined" Hint="Email Or Phone Number">
+                    <syncfusionToolkit:SfTextInputLayout
+                        ContainerType="Outlined"
+                        EnableHintAnimation="True"
+                        Hint="Email Or Phone Number"
+                        IsEnabled="{x:Binding IsAccountEntryEnable,
+                                              Mode=OneWay}">
                         <Entry x:Name="AccountEntry" Text="{x:Binding Form.Account, Mode=TwoWay}" />
                     </syncfusionToolkit:SfTextInputLayout>
-                    <syncfusionToolkit:SfTextInputLayout ContainerType="Outlined" Hint="Password">
+                    <syncfusionToolkit:SfTextInputLayout
+                        ContainerType="Outlined"
+                        EnableHintAnimation="True"
+                        Hint="Password"
+                        IsEnabled="{x:Binding IsPasswordEntryEnable,
+                                              Mode=OneWay}">
                         <Entry
                             x:Name="PasswordEntry"
                             IsPassword="True"
@@ -88,20 +98,27 @@
                         </MultiBinding>
                     </Label.Text>
                 </Label>
+                <ActivityIndicator IsRunning="{x:Binding IsLoading, Mode=OneWay}" IsVisible="{x:Binding IsLoading, Mode=OneWay}" />
                 <Button
                     x:Name="SignInButton"
                     BackgroundColor="Black"
                     Clicked="SignInButton_Clicked"
                     Command="{x:Binding SignInCommand}"
+                    IsEnabled="{x:Binding IsLoginButtonEnable,
+                                          Mode=OneWay}"
                     Text="Login"
                     TextColor="White" />
                 <Button
                     BackgroundColor="Black"
                     Command="{x:Binding SignUpCommand}"
+                    IsEnabled="{x:Binding IsCreateAccountButtonEnable,
+                                          Mode=OneWay}"
                     Text="Create New Account"
                     TextColor="White" />
                 <Label
                     HorizontalOptions="Center"
+                    IsEnabled="{x:Binding IsForgotPasswordButtonEnable,
+                                          Mode=OneWay}"
                     Text="Forgot password?"
                     TextColor="#0078d4">
                     <Label.GestureRecognizers>
