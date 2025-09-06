@@ -58,7 +58,6 @@ public class Controller : ControllerBase
                 .Build();
 
         return Ok(paginationResults);
-
     }
 
     [HttpPost]

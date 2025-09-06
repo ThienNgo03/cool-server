@@ -1,3 +1,3 @@
 ﻿namespace Journal.Authentication.Register.Messager;
 
-public record Message(Guid id, Payload Payload);
+public record Message(Guid id, string? profilePicture, string name, string email, string phoneNumber);

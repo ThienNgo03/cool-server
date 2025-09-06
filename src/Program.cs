@@ -2,6 +2,7 @@
 using Journal.Wolverine;
 using Journal.Journeys;
 using Journal.Authentication;
+using Journal.Files;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,6 +15,7 @@ builder.Services.AddWolverines(builder.Configuration);
 builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
+builder.Services.AddFile(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

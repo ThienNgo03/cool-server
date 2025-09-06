@@ -25,6 +25,7 @@
         public DbSet<Tables.WeekPlanSet.Table> WeekPlanSets { get; set; }
         public DbSet<Tables.Muscle.Table> Muscles { get; set; }
         public DbSet<Tables.ExerciseMuscle.Table> ExerciseMuscles { get; set; }
+        public DbSet<Tables.Sport.Table> Sport { get; set; }
 
     }
 }
