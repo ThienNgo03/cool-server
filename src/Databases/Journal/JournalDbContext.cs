@@ -2,9 +2,10 @@
 {
     public class JournalDbContext : DbContext // database
     {
-        public JournalDbContext(DbContextOptions<JournalDbContext> options) : base(options)
-        {
 
+        public JournalDbContext(
+            DbContextOptions<JournalDbContext> options) : base(options)
+        {
         }
 
         public DbSet<Tables.Journey.Table> Journeys { get; set; } // table 
@@ -28,5 +29,7 @@
         public DbSet<Tables.Sport.Table> Sport { get; set; }
 
     }
+
+    
 }
 

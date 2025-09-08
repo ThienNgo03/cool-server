@@ -56,3 +56,18 @@ app.MapHub<Journal.Users.Hub>("users-hub");
 
 
 app.Run();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<JournalDbContext>();
+    var importer = new ImportExcel();
+    var exercises = await importer.ImportExercise();
+
+    if (!context.Exercises.Any())
+    {
+        context.Exercises.AddRange(exercises);
+        await context.SaveChangesAsync();
+    }
+
+}
