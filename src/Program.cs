@@ -56,3 +56,4 @@ app.MapHub<Journal.Users.Hub>("users-hub");
 
 
 app.Run();
+
