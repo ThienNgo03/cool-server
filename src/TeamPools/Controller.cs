@@ -78,7 +78,13 @@ public class Controller : ControllerBase
         var existingCompetition = await _dbContext.Competitions.FindAsync(payload.CompetitionId);
         if (existingCompetition == null)
         {
-            return NotFound($"Competition with ID {payload.CompetitionId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Competition with ID {payload.CompetitionId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         var refereeId = existingCompetition.RefereeId;
@@ -115,12 +121,24 @@ public class Controller : ControllerBase
         var teamPool = await _dbContext.TeamPools.FindAsync(payload.Id);
         if (teamPool == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Team Pool not found",
+                Detail = $"Team Pool with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         var existingCompetition = await _dbContext.Competitions.FindAsync(payload.CompetitionId);
         if (existingCompetition == null)
         {
-            return NotFound($"Competition with ID {payload.CompetitionId} not found.");
+            return NotFound(new ProblemDetails
+            {
+                Title = "Competition not found",
+                Detail = $"Competition with ID {payload.CompetitionId} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         teamPool.ParticipantId = payload.ParticipantId;
@@ -154,7 +172,13 @@ public class Controller : ControllerBase
 
         var entity = await _dbContext.TeamPools.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Team Pool not found",
+                Detail = $"Team Pool with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -178,7 +202,13 @@ public class Controller : ControllerBase
         var teamPool = await _dbContext.TeamPools.FindAsync(parameters.Id);
         if (teamPool == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Team Pool not found",
+                Detail = $"Team Pool with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         _dbContext.TeamPools.Remove(teamPool);
         await _dbContext.SaveChangesAsync();

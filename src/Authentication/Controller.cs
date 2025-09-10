@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,19 +16,21 @@ public class Controller:ControllerBase
     private readonly IMessageBus _messageBus;
     private readonly Databases.Identity.IdentityContext _context;
     private readonly UserManager<IdentityUser> _userManager;
-    
+    private readonly BlobContainerClient _blobContainerClient;
     private readonly IConfiguration _configuration;
     public Controller(ILogger<Controller> logger, 
         Databases.Identity.IdentityContext context, 
         UserManager<IdentityUser> userManager, 
         IConfiguration configuration,
-        IMessageBus messageBus)
+        IMessageBus messageBus,
+        BlobContainerClient blobContainerClient)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _configuration = configuration;
         _messageBus = messageBus;
+        _blobContainerClient = blobContainerClient;
     }
     [HttpGet]
     public async Task<IActionResult> Get()
@@ -42,25 +45,48 @@ public class Controller:ControllerBase
     [HttpPost]
     [Route("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> RegisterAsync([FromBody] Register.Payload payload)
+    public async Task<IActionResult> RegisterAsync([FromForm] Register.Payload form)
     {
         var newAccount = new IdentityUser
         {
-            UserName = payload.AccountName,
-            Email = payload.AccountEmail,
-            PhoneNumber = payload.PhoneNumber,
+            UserName = form.UserName,
+            Email = form.Email,
+            PhoneNumber = form.PhoneNumber,
         };
 
-        if (payload.Password != payload.ConfirmPassword)
+        if (form.Password != form.ConfirmPassword)
             return BadRequest("Passwords do not match.");
 
         newAccount.EmailConfirmed = true;
-        var result = await _userManager.CreateAsync(newAccount, payload.Password);
+        var result = await _userManager.CreateAsync(newAccount, form.Password);
 
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        await _messageBus.PublishAsync(new Register.Messager.Message(Guid.Parse(newAccount.Id), payload));
+        string? avatar = null;
+
+        if (form.ProfilePicture is not null && form.ProfilePicture.Length > 0)
+        {
+            var fileExtension = Path.GetExtension(form.ProfilePicture.FileName);
+            var uniqueFileName = $"avatars/{Guid.NewGuid()}{fileExtension}";
+
+            var blobClient = _blobContainerClient.GetBlobClient(uniqueFileName);
+
+            using (var stream = form.ProfilePicture.OpenReadStream())
+            {
+                await blobClient.UploadAsync(stream, overwrite: true);
+            }
+
+            avatar = blobClient.Uri.ToString();
+        }
+
+        await _messageBus.PublishAsync(new Register.Messager.Message(
+                                           Guid.Parse(newAccount.Id),
+                                           avatar,
+                                           form.FirstName + form.LastName,
+                                           form.Email,
+                                           form.PhoneNumber
+         ));
 
         return NoContent();
     }

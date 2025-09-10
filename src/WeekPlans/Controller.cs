@@ -78,7 +78,13 @@ namespace Journal.WeekPlans
             var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
             if (existingWorkout == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Workout not found",
+                    Detail = $"Workout with ID {payload.WorkoutId} does not exist.",
+                    Status = StatusCodes.Status404NotFound,
+                    Instance = HttpContext.Request.Path
+                });
             }
 
             var weekPlan = new Databases.Journal.Tables.WeekPlan.Table
@@ -112,13 +118,25 @@ namespace Journal.WeekPlans
             var weekPlan = await _context.WeekPlans.FindAsync(payload.Id);
             if (weekPlan == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Week Plan not found",
+                    Detail = $"Week Plan with ID {payload.Id} does not exist.",
+                    Status = StatusCodes.Status404NotFound,
+                    Instance = HttpContext.Request.Path
+                });
             }
 
             var existingWorkout = await _context.Workouts.FindAsync(payload.WorkoutId);
             if (existingWorkout == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Workout not found",
+                    Detail = $"Workout with ID {payload.WorkoutId} does not exist.",
+                    Status = StatusCodes.Status404NotFound,
+                    Instance = HttpContext.Request.Path
+                });
             }
 
             weekPlan.WorkoutId = payload.WorkoutId;
@@ -153,7 +171,13 @@ namespace Journal.WeekPlans
 
             var entity = await _context.WeekPlans.FindAsync(id, cancellationToken);
             if (entity == null)
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Week Plan not found",
+                    Detail = $"Week Plan with ID {id} does not exist.",
+                    Status = StatusCodes.Status404NotFound,
+                    Instance = HttpContext.Request.Path
+                });
 
             patchDoc.ApplyTo(entity);
 
@@ -180,7 +204,13 @@ namespace Journal.WeekPlans
             var weekPlan = await _context.WeekPlans.FindAsync(parameters.Id);
             if (weekPlan == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Week Plan not found",
+                    Detail = $"Week Plan with ID {parameters.Id} does not exist.",
+                    Status = StatusCodes.Status404NotFound,
+                    Instance = HttpContext.Request.Path
+                });
             }
 
             _context.WeekPlans.Remove(weekPlan);

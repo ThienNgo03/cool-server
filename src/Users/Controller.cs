@@ -58,7 +58,6 @@ public class Controller : ControllerBase
                 .Build();
 
         return Ok(paginationResults);
-
     }
 
     [HttpPost]
@@ -85,7 +84,13 @@ public class Controller : ControllerBase
         var user = await _context.Users.FindAsync(payload.Id);
         if (user == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "User not found",
+                Detail = $"User with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         user.Name = payload.Name;
         user.PhoneNumber = payload.PhoneNumber;
@@ -104,7 +109,13 @@ public class Controller : ControllerBase
         var user = await _context.Users.FindAsync(parameters.Id);
         if (user == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "User not found",
+                Detail = $"User with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
         _context.Users.Remove(user); //xóa data tìm được khỏi table hiện tại
         await _context.SaveChangesAsync();
@@ -132,7 +143,13 @@ public class Controller : ControllerBase
 
         var entity = await _context.Users.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "User not found",
+                Detail = $"User with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 

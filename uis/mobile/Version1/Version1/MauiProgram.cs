@@ -50,7 +50,7 @@ public static class MauiProgram
 
 
         Library.Config locaHostConfig = new("https://localhost:7011");
-        Library.Config devTunnelEnviroment = new("https://b48j3n3v-7011.asse.devtunnels.ms");
+        Library.Config devTunnelEnviroment = new("https://7nxtm91x-7011.asse.devtunnels.ms");
         builder.Services.AddEndpoints(devTunnelEnviroment);
         return builder;
     }

@@ -2,6 +2,8 @@
 using Journal.Wolverine;
 using Journal.Journeys;
 using Journal.Authentication;
+using Journal.Files;
+using Journal.Beta.Authentication.Login;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,11 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddNewtonsoftJson();
 
 //đăng ký service 
+builder.Services.AddGrpc();
 builder.Services.AddDatabases(builder.Configuration);
 builder.Services.AddWolverines(builder.Configuration);
 builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
+builder.Services.AddFile(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,6 +29,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+//app.MapGrpcService<Service>();
 
 app.MapHub<Journal.Competitions.Hub>("competitions-hub");
 
@@ -54,3 +60,4 @@ app.MapHub<Journal.Users.Hub>("users-hub");
 
 
 app.Run();
+

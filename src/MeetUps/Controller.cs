@@ -106,7 +106,13 @@ public class Controller : ControllerBase
         var meetUp = await _context.MeetUps.FindAsync(payload.Id);
         if (meetUp == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Meet Up not found",
+                Detail = $"Meet Up with ID {payload.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         meetUp.ParticipantIds = payload.ParticipantIds;
@@ -143,7 +149,13 @@ public class Controller : ControllerBase
 
         var entity = await _context.MeetUps.FindAsync(id, cancellationToken);
         if (entity == null)
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Meet Up not found",
+                Detail = $"Meet Up with ID {id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
 
         patchDoc.ApplyTo(entity);
 
@@ -170,7 +182,13 @@ public class Controller : ControllerBase
         var meetUp = await _context.MeetUps.FindAsync(parameters.Id);
         if (meetUp == null)
         {
-            return NotFound();
+            return NotFound(new ProblemDetails
+            {
+                Title = "Meet Up not found",
+                Detail = $"Meet Up with ID {parameters.Id} does not exist.",
+                Status = StatusCodes.Status404NotFound,
+                Instance = HttpContext.Request.Path
+            });
         }
 
         _context.MeetUps.Remove(meetUp);
