@@ -3,6 +3,7 @@ using Journal.Wolverine;
 using Journal.Journeys;
 using Journal.Authentication;
 using Journal.Files;
+using Journal.Beta.Authentication.Login;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -29,7 +30,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGrpcService<Journal.Beta.Authentication.Login.Services.Service>();
+app.MapGrpcService<Service>();
+
+app.MapGrpcService<Service>();
 
 app.MapHub<Journal.Competitions.Hub>("competitions-hub");
 

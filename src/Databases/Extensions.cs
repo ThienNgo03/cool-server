@@ -12,7 +12,7 @@ public static class Extensions
         services.AddDbContext<JournalDbContext>(x =>
         {
                 x.EnableSensitiveDataLogging();
-                x.UseSqlServer("Server=localhost;Database=JournalTest10;Trusted_Connection=True;TrustServerCertificate=True;")
+                x.UseSqlServer("Server=localhost;Database=JournalTest;Trusted_Connection=True;TrustServerCertificate=True;")
                     .UseSeeding((context, _) =>
                     {
                         var journalContext = (JournalDbContext)context;
