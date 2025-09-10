@@ -15,8 +15,7 @@ message Payload {
   string password = 5;
   string confirm_password = 6;
   string phone_number = 7;
-  bytes profile_picture = 8; // Optional: base64-encoded image
-  string profile_picture_filename = 9; // Optional: original filename
+  string profile_picture_path = 8;
 
 }
 

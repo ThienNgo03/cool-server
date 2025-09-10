@@ -16,11 +16,15 @@ public class Service:Method.MethodBase
     private readonly BlobContainerClient _blobContainerClient;
     public Service(ILogger<Service> logger,
         IdentityContext context,
-        UserManager<IdentityUser> userManager)
+        UserManager<IdentityUser> userManager,
+        IMessageBus messageBus, 
+        BlobContainerClient blobContainerClient)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
+        _messageBus = messageBus;
+        _blobContainerClient = blobContainerClient;
     }
     public override async Task<Result> Register(Payload request, ServerCallContext context)
     {
@@ -46,14 +50,15 @@ public class Service:Method.MethodBase
 
         string? avatar = null;
 
-        if (request.ProfilePicture.Length > 0)
+        if (!string.IsNullOrWhiteSpace(request.ProfilePicturePath) && File.Exists(request.ProfilePicturePath))
         {
-            var fileExtension = Path.GetExtension(request.ProfilePictureFilename);
+            var fileExtension = Path.GetExtension(request.ProfilePicturePath);
             var uniqueFileName = $"avatars/{Guid.NewGuid()}{fileExtension}";
             var blobClient = _blobContainerClient.GetBlobClient(uniqueFileName);
 
-            using var stream = new MemoryStream(request.ProfilePicture.ToByteArray());
+            using var stream = File.OpenRead(request.ProfilePicturePath);
             await blobClient.UploadAsync(stream, overwrite: true);
+
             avatar = blobClient.Uri.ToString();
         }
 
