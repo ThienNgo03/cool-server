@@ -29,7 +29,7 @@ public class Service:Method.MethodBase
 
     public override async Task<Result> Login(Payload payload, ServerCallContext context)
     {
-        var user = await _userManager.FindByEmailAsync(payload.Email) ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid email or password."));
+        var user = await _userManager.FindByEmailAsync(payload.Email) ?? throw new RpcException(new Status(StatusCode.InvalidArgument, "Email does not exists."));
         var result = await _userManager.CheckPasswordAsync(user, payload.Password);
         if (!result)
         {

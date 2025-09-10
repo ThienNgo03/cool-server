@@ -23,7 +23,7 @@ public static class Extensions
                         seedFactory.SeedExerciseMuscle(journalContext).Wait();
                     });
                 });
-        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity2;Trusted_Connection=True;TrustServerCertificate=True;")
+        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity;Trusted_Connection=True;TrustServerCertificate=True;")
         .UseSeeding((context, _) =>
         {
             var identityContext = (IdentityContext)context;
