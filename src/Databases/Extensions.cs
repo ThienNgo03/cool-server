@@ -12,7 +12,7 @@ public static class Extensions
         services.AddDbContext<JournalDbContext>(x =>
         {
                 x.EnableSensitiveDataLogging();
-                x.UseSqlServer("Server=localhost;Database=JournalTest2;Trusted_Connection=True;TrustServerCertificate=True;")
+                x.UseSqlServer("Server=localhost;Database=JournalTest;Trusted_Connection=True;TrustServerCertificate=True;")
                     .UseSeeding((context, _) =>
                     {
                         var journalContext = (JournalDbContext)context;
@@ -23,7 +23,7 @@ public static class Extensions
                         seedFactory.SeedExerciseMuscle(journalContext).Wait();
                     });
                 });
-        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity2;Trusted_Connection=True;TrustServerCertificate=True;")
+        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity;Trusted_Connection=True;TrustServerCertificate=True;")
         .UseSeeding((context, _) =>
         {
             var identityContext = (IdentityContext)context;

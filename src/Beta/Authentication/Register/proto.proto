@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "Journal.Beta.Authentication.Register";
+
+package register;
+service Method {
+  // Sends a greeting
+  rpc Register (Payload) returns (Result);
+}
+message Payload {
+  string first_name = 1;
+  string last_name = 2;
+  string user_name = 3;
+  string email = 4;
+  string password = 5;
+  string confirm_password = 6;
+  string phone_number = 7;
+  string profile_picture_path = 8;
+
+}
+
+// The response message containing the greetings.
+message Result {
+}
+

@@ -32,16 +32,6 @@ public class Controller:ControllerBase
         _messageBus = messageBus;
         _blobContainerClient = blobContainerClient;
     }
-    [HttpGet]
-    public async Task<IActionResult> Get()
-    {
-        var users = await _context.Users.ToListAsync();
-        if (users == null || users.Count == 0)
-        {
-            return NotFound("No users found.");
-        }
-        return Ok(users);   
-    }
     [HttpPost]
     [Route("register")]
     [AllowAnonymous]
@@ -116,7 +106,7 @@ public class Controller:ControllerBase
             //TokenType = "Bearer",
             //Scope = "read write",
         };
-        return CreatedAtAction(nameof(Get), response);
+        return NoContent();
     }
 
     private string GenerateToken(string email)

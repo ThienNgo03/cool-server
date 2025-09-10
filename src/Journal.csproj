@@ -55,12 +55,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Beta\Authentication\Login\Protos\" />
-  </ItemGroup>
 <ItemGroup>
-	<Protobuf Include="Beta\Authentication\Login\Protos\proto.proto" GrpcServices="Server" />
-	<Protobuf Include="Beta\Authentication\Register\Protos\proto.proto" GrpcServices="Server" />
+	<Protobuf Include="Beta\Authentication\Login\proto.proto" GrpcServices="Server" />
+	<Protobuf Include="Beta\Authentication\Register\proto.proto" GrpcServices="Server" />
 </ItemGroup>
 </Project>
