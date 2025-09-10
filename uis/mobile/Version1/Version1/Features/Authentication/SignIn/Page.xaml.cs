@@ -12,7 +12,6 @@ public partial class Page : ContentPage
     }
     #endregion
 
-
     private async void SignInButton_Clicked(object sender, EventArgs e)
     {
         await AccountEntry.HideSoftInputAsync(CancellationToken.None);

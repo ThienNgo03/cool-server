@@ -3,9 +3,13 @@
     x:Class="Version1.Features.Authentication.SignUp.Page"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Version1.Features.Authentication.SignUp"
     xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:ui="clr-namespace:UI"
     Title="Sign Up Page"
+    x:DataType="local:ViewModel"
+    Loaded="ContentPage_Loaded"
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
@@ -36,19 +40,31 @@
                 HorizontalOptions="Center"
                 RowDefinitions="*, *"
                 RowSpacing="16">
-                <Border Grid.RowSpan="2" StrokeShape="RoundRectangle 8">
-                    <Image HeightRequest="120" WidthRequest="120" />
-                </Border>
+                <toolkit:AvatarView
+                    Grid.RowSpan="2"
+                    CornerRadius="60"
+                    HeightRequest="120"
+                    HorizontalOptions="Start"
+                    ImageSource="{x:Binding AvatarSource,
+                                            Mode=OneWay}"
+                    Stroke="Cyan"
+                    WidthRequest="120" />
                 <Button
+                    x:Name="CameraButton"
                     Grid.Row="0"
                     Grid.Column="1"
                     BackgroundColor="Black"
-                    Text="Camera" />
+                    Clicked="CameraButton_Clicked"
+                    Text="Camera"
+                    TextColor="White" />
                 <Button
+                    x:Name="UploadButton"
                     Grid.Row="1"
                     Grid.Column="1"
                     BackgroundColor="Black"
-                    Text="Upload" />
+                    Command="{x:Binding PickAndShowCommand}"
+                    Text="Upload"
+                    TextColor="White" />
             </Grid>
 
             <Border
@@ -56,7 +72,7 @@
                 BackgroundColor="White"
                 StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="Information" />
+                    <Label Text="Information" TextColor="Black" />
                     <Grid ColumnDefinitions="* , *" ColumnSpacing="16">
                         <syncfusionToolkit:SfTextInputLayout
                             ContainerType="Outlined"
@@ -110,7 +126,7 @@
                 StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="24">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Gender" />
+                        <Label Text="Gender" TextColor="Black" />
                         <syncfusionToolkit:SfChipGroup
                             ChipStroke="Cyan"
                             ChipTextColor="Cyan"
@@ -122,7 +138,7 @@
                         </syncfusionToolkit:SfChipGroup>
                     </VerticalStackLayout>
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Date Of Birth" />
+                        <Label Text="Date Of Birth" TextColor="Black" />
                         <Border StrokeShape="RoundRectangle 8">
                             <syncfusionToolkit:SfDatePicker BackgroundColor="Transparent">
                                 <syncfusionToolkit:SfDatePicker.ColumnHeaderView>
@@ -149,7 +165,7 @@
                 BackgroundColor="White"
                 StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="Body" />
+                    <Label Text="Body" TextColor="Black" />
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
                         <syncfusionToolkit:SfTextInputLayout
                             ContainerType="Outlined"
