@@ -107,4 +107,19 @@ public class SeedFactory
         context.ExerciseMuscles.AddRange(exerciseMuscle);
         await context.SaveChangesAsync();
     }
+
+    public async Task SeedAdmins(JournalDbContext context)
+    {
+        var id = Guid.Parse("fdfa4136-ada3-41dc-b16e-8fd9556d4574");
+        var testAdmin = new Journal.Tables.User.Table
+        {
+            Id = id,
+            Name = "systemtester",
+            Email = "systemtester@journal.com",
+            PhoneNumber = "0564330462",
+            ProfilePicture = null
+        };
+        context.Users.Add(testAdmin);
+        await context.SaveChangesAsync();
+    }
 }

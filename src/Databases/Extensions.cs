@@ -12,17 +12,24 @@ public static class Extensions
         services.AddDbContext<JournalDbContext>(x =>
         {
                 x.EnableSensitiveDataLogging();
-                x.UseSqlServer("Server=localhost;Database=JournalTest10;Trusted_Connection=True;TrustServerCertificate=True;")
+                x.UseSqlServer("Server=localhost;Database=JournalTest2;Trusted_Connection=True;TrustServerCertificate=True;")
                     .UseSeeding((context, _) =>
                     {
                         var journalContext = (JournalDbContext)context;
-                        SeedFactory seedFactory = new SeedFactory();
+                        Journal.SeedFactory seedFactory = new ();
+                        seedFactory.SeedAdmins(journalContext).Wait();
                         seedFactory.SeedExercise(journalContext).Wait();
                         seedFactory.SeedMuscle(journalContext).Wait();
                         seedFactory.SeedExerciseMuscle(journalContext).Wait();
                     });
                 });
-        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity;Trusted_Connection=True;TrustServerCertificate=True;"));
+        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity2;Trusted_Connection=True;TrustServerCertificate=True;")
+        .UseSeeding((context, _) =>
+        {
+            var identityContext = (IdentityContext)context;
+            Identity.SeedFactory seedFactory = new ();
+            seedFactory.SeedAdmins(identityContext).Wait();
+        }));
 
         services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>()
