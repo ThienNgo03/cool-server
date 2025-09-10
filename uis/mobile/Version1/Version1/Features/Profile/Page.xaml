@@ -8,10 +8,19 @@
     xmlns:ui="clr-namespace:UI"
     Title="Page"
     x:DataType="local:ViewModel">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Welcome to Profile!"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+    <Grid>
+
+        <Border
+            Padding="16"
+            BackgroundColor="White"
+            StrokeShape="RoundRectangle 8">
+            <VerticalStackLayout Spacing="8">
+                <Button
+                    BackgroundColor="Red"
+                    Command="{x:Binding LogoutCommand}"
+                    Text="Log out"
+                    TextColor="White" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
 </ContentPage>
