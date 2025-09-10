@@ -31,6 +31,11 @@
 	<PackageReference Include="WolverineFx.EntityFrameworkCore" Version="4.5.1" />
 	<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.18" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.18" />
+	<PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+	<PackageReference Include="Grpc.Tools" Version="2.71.0">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -51,4 +56,11 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Beta\Authentication\Login\Protos\" />
+  </ItemGroup>
+<ItemGroup>
+	<Protobuf Include="Beta\Authentication\Login\Protos\proto.proto" GrpcServices="Server" />
+	<Protobuf Include="Beta\Authentication\Register\Protos\proto.proto" GrpcServices="Server" />
+</ItemGroup>
 </Project>

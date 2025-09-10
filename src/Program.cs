@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddNewtonsoftJson();
 
 //đăng ký service 
+builder.Services.AddGrpc();
 builder.Services.AddDatabases(builder.Configuration);
 builder.Services.AddWolverines(builder.Configuration);
 builder.Services.AddJourneys(builder.Configuration);
@@ -27,6 +28,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGrpcService<Journal.Beta.Authentication.Login.Services.Service>();
 
 app.MapHub<Journal.Competitions.Hub>("competitions-hub");
 
