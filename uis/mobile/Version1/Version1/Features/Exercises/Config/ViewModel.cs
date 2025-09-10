@@ -59,7 +59,7 @@ public partial class ViewModel(
         await workoutsBiz.CreateAsync(new Library.Workouts.Create.Payload
         {
             ExerciseId = Guid.Parse(Id),
-            UserId = Guid.Empty,
+            UserId = Guid.Parse("fdfa4136-ada3-41dc-b16e-8fd9556d4574"), // đang cứng data
             WeekPlans = WorkoutTimeItems?.Select(wti => new Library.Workouts.Create.WeekPlan
             {
                 DateOfWeek = wti.Content,
