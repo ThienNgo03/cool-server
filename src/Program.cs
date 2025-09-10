@@ -30,9 +30,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+<<<<<<< HEAD
 app.MapGrpcService<Service>();
 
 app.MapGrpcService<Service>();
+=======
+//app.MapGrpcService<Service>();
+>>>>>>> master
 
 app.MapHub<Journal.Competitions.Hub>("competitions-hub");
 

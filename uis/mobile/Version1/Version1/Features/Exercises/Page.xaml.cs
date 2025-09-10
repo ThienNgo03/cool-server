@@ -49,4 +49,24 @@ public partial class Page : ContentPage
                         { "Id", exerciseId }
                     });
     }
+
+    private void Filter_SelectionChanged(object sender, Syncfusion.Maui.Toolkit.Chips.SelectionChangedEventArgs e)
+    {
+        var addedItem = e.AddedItem;
+        var removedItem = e.RemovedItem;
+        if (addedItem is string addedTag)
+        {
+            viewModel.AddSelectedTag(addedTag);
+        }
+
+        if (removedItem is string removedTag)
+        {
+            viewModel.RemoveSelectedTag(removedTag);
+        }
+    }
+
+    private void ClearButton_Clicked(object sender, EventArgs e)
+    {
+        SearchEntry.Unfocus();
+    }
 }

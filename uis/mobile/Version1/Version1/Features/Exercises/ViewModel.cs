@@ -14,23 +14,7 @@ public partial class ViewModel(
     private readonly Library.Workouts.Interface workouts = workouts;
     private readonly Library.Exercises.Interface exercises = exercises;
     private readonly Library.WeekPlanSets.Interface weekplanSet = weekPlanSets;
-    #endregion
-
-    #region [ UI ]
-
-    [ObservableProperty]
-    ObservableCollection<string> tags = new()
-    {
-        "Chest",
-        "Back",
-        "Legs",
-        "Arms",
-        "Shoulders",
-        "Full body"
-    };
-
-    [ObservableProperty]
-    ObservableCollection<ContentViews.Card.Model> items = new()
+    private readonly ContentViews.Card.Model[] source = new ContentViews.Card.Model[]
     {
         new()
         {
@@ -112,98 +96,143 @@ public partial class ViewModel(
             BadgeBackgroundColor = "#fefcbf",
         },
     };
+    #endregion
+
+    #region [ UI ]
+
+    [ObservableProperty]
+    bool isLoading;
+
+    [ObservableProperty]
+    bool isClearButtonVisible;
+
+    [RelayCommand]
+    public void ClearSearch() => SearchTerm = string.Empty;
+
+    [ObservableProperty]
+    ObservableCollection<string> tags = new()
+    {
+        "Chest",
+        "Back",
+        "Legs",
+        "Arms",
+        "Core",
+        "Biceps",
+        "Triceps",
+        "Glutes",
+        "Flexibility"
+    };
+
+    [ObservableProperty]
+    ObservableCollection<ContentViews.Card.Model> items;
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        //var exercises = await LoadExercisesAsync();
-        //var testUser = Guid.Parse("84c361c8-eb0b-415e-a525-8c04992dec47");
-        //var workouts = await LoadWorkoutsAsync(userId: testUser,
-        //                                       isIncludeWeekPlans: true,
-        //                                       isIncludeWeekPlanSets: true);
+        if (IsLoading) return;
 
-        //foreach (var exercise in exercises)
-        //{
-        //    // Find matching workout for this exercise
-        //    var matchingWorkout = workouts.FirstOrDefault(w => w.ExerciseId == exercise.Id);
-
-        //    var cardModel = new ContentViews.Card.Model()
-        //    {
-        //        Id = exercise.Id.ToString(),
-        //        Title = exercise.Name,
-        //        Description = exercise.Description,
-        //        IconUrl = "dotnet_bot.png",
-        //        IsSelected = matchingWorkout != null, 
-        //        Sets = new ObservableCollection<ContentViews.Card.Set>(),
-        //        WeekPlans = new ObservableCollection<ContentViews.Card.WeekPlan>()
-        //    };
-
-        //    if (matchingWorkout != null)
-        //    {
-        //        // Map week plans
-        //        if (matchingWorkout.WeekPlans != null)
-        //        {
-        //            foreach (var weekPlan in matchingWorkout.WeekPlans)
-        //            {
-        //                cardModel.WeekPlans.Add(new ContentViews.Card.WeekPlan
-        //                {
-        //                    Id = weekPlan.Id,
-        //                    WorkoutId = weekPlan.WorkoutId,
-        //                    DateOfWeek = weekPlan.DateOfWeek,
-        //                    Time = weekPlan.Time,
-        //                    CreatedDate = weekPlan.CreatedDate,
-        //                    LastUpdated = weekPlan.LastUpdated
-        //                });
-
-        //                switch (weekPlan.DateOfWeek?.ToLower())
-        //                {
-        //                    case "monday":
-        //                        cardModel.IsMondaySelected = true;
-        //                        break;
-        //                    case "tuesday":
-        //                        cardModel.IsTuesdaySelected = true;
-        //                        break;
-        //                    case "wednesday":
-        //                        cardModel.IsWednesdaySelected = true;
-        //                        break;
-        //                    case "thursday":
-        //                        cardModel.IsThursdaySelected = true;
-        //                        break;
-        //                    case "friday":
-        //                        cardModel.IsFridaySelected = true;
-        //                        break;
-        //                    case "saturday":
-        //                        cardModel.IsSaturdaySelected = true;
-        //                        break;
-        //                    case "sunday":
-        //                        cardModel.IsSundaySelected = true;
-        //                        break;
-        //                }
-
-        //                if (weekPlan.WeekPlanSets != null)
-        //                {
-        //                    foreach (var weekPlanSet in weekPlan.WeekPlanSets)
-        //                    {
-        //                        cardModel.Sets.Add(new ContentViews.Card.Set
-        //                        {
-        //                            Id = weekPlanSet.Id,
-        //                            Text = $"Set {cardModel.Sets.Count + 1}",
-        //                            Value = weekPlanSet.Value
-        //                        });
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    Items.Add(cardModel);
-        //}
+        IsLoading = true;
+        Items = new(source);
+        IsLoading = false;
     }
 
     public async Task NavigateAsync(string route, object args)
         => await AppNavigator.NavigateAsync(route, args: args, animated: true);
-    
+
     #endregion
+
+    #region [ Search ]
+
+    [ObservableProperty]
+    string searchTerm = string.Empty;
+
+    private CancellationTokenSource? _searchCancellationTokenSource;
+
+    partial void OnSearchTermChanged(string value)
+    {
+        IsClearButtonVisible = !string.IsNullOrWhiteSpace(value);
+        ApplyFilters();
+    }
+
+
+    private static Func<ContentViews.Card.Model, bool> MatchesSearchTerm(string searchTerm) =>
+        item => new[] { item.Title, item.SubTitle, item.Description }
+            .Where(field => !string.IsNullOrEmpty(field))
+            .Any(field => field.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    #endregion
+
+    #region [ Filtering ]
+
+    [ObservableProperty]
+    private ObservableCollection<string> selectedTags = new();
+
+    private CancellationTokenSource? _filterCancellationTokenSource;
+
+    public void AddSelectedTag(string tag)
+    {
+        if (!SelectedTags.Contains(tag))
+        {
+            SelectedTags.Add(tag);
+            ApplyFilters();
+        }
+    }
+
+    public void RemoveSelectedTag(string tag)
+    {
+        if (SelectedTags.Contains(tag))
+        {
+            SelectedTags.Remove(tag);
+            ApplyFilters();
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        _filterCancellationTokenSource?.Cancel();
+        _filterCancellationTokenSource = new CancellationTokenSource();
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(100, _filterCancellationTokenSource.Token);
+
+                var filtered = source.AsEnumerable();
+
+                // Apply search filter if search term exists
+                if (!string.IsNullOrWhiteSpace(SearchTerm))
+                {
+                    filtered = filtered.Where(MatchesSearchTerm(SearchTerm));
+                }
+
+                // Apply tag filter if any tags are selected
+                if (SelectedTags?.Count > 0)
+                {
+                    filtered = filtered.Where(MatchesSelectedTags);
+                }
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Items = new ObservableCollection<ContentViews.Card.Model>(filtered);
+                });
+            }
+            catch (OperationCanceledException) { }
+        });
+    }
+
+    private bool MatchesSelectedTags(ContentViews.Card.Model item)
+    {
+        if (SelectedTags == null || SelectedTags.Count == 0)
+            return true;
+
+        // Check if the item's SubTitle contains any of the selected tags
+        return SelectedTags.Any(tag =>
+            item.SubTitle?.Contains(tag, StringComparison.OrdinalIgnoreCase) == true);
+    }
+
+    #endregion
+
 
     #region [ Utils ]
 

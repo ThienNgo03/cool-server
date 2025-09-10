@@ -13,6 +13,7 @@
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:ui="clr-namespace:UI"
     Title="Version1"
+    Loaded="Shell_Loaded"
     Shell.TabBarBackgroundColor="#182026"
     Shell.TabBarForegroundColor="Cyan"
     Shell.TabBarTitleColor="Cyan"
@@ -104,7 +105,7 @@
         <ShellContent
             Title="Authentication"
             ContentTemplate="{DataTemplate signIn:Page}"
-            Route="authentication" />
+            Route="sign-in" />
     </TabBar>
     <TabBar Route="main">
         <Tab
@@ -122,13 +123,13 @@
         <Tab
             Title="Challenges"
             Icon="{x:StaticResource TrophyIcon}"
-            Route="exercises">
+            Route="challenges">
             <ShellContent ContentTemplate="{DataTemplate challenges:Page}" />
         </Tab>
         <Tab
             Title="Profile"
             Icon="{x:StaticResource ProfileIcon}"
-            Route="exercises">
+            Route="profile">
             <ShellContent ContentTemplate="{DataTemplate profile:Page}" />
         </Tab>
     </TabBar>

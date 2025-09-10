@@ -27,7 +27,6 @@
             Color="#91cb89" />
     </ContentPage.Resources>
 
-
     <Grid Background="{x:StaticResource GradientBackground}" RowDefinitions="0, *, 30">
         <Border
             Grid.Row="1"
@@ -40,7 +39,8 @@
                     FontAttributes="Bold"
                     FontSize="Title"
                     HorizontalOptions="Center"
-                    Text="Welcome" />
+                    Text="Welcome"
+                    TextColor="Black" />
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="16">
                     <ImageButton
                         HeightRequest="40"
@@ -62,7 +62,11 @@
                         Hint="Email Or Phone Number"
                         IsEnabled="{x:Binding IsAccountEntryEnable,
                                               Mode=OneWay}">
-                        <Entry x:Name="AccountEntry" Text="{x:Binding Form.Account, Mode=TwoWay}" />
+                        <Entry
+                            x:Name="AccountEntry"
+                            Text="{x:Binding Form.Account,
+                                             Mode=TwoWay}"
+                            TextColor="Black" />
                     </syncfusionToolkit:SfTextInputLayout>
                     <syncfusionToolkit:SfTextInputLayout
                         ContainerType="Outlined"
@@ -75,7 +79,8 @@
                             IsPassword="True"
                             Placeholder="Password"
                             Text="{x:Binding Form.Password,
-                                             Mode=TwoWay}" />
+                                             Mode=TwoWay}"
+                            TextColor="Black" />
                     </syncfusionToolkit:SfTextInputLayout>
                 </VerticalStackLayout>
                 <Label
@@ -98,7 +103,12 @@
                         </MultiBinding>
                     </Label.Text>
                 </Label>
-                <ActivityIndicator IsRunning="{x:Binding IsLoading, Mode=OneWay}" IsVisible="{x:Binding IsLoading, Mode=OneWay}" />
+                <ActivityIndicator
+                    IsRunning="{x:Binding IsLoading,
+                                          Mode=OneWay}"
+                    IsVisible="{x:Binding IsLoading,
+                                          Mode=OneWay}"
+                    Color="Black" />
                 <Button
                     x:Name="SignInButton"
                     BackgroundColor="Black"
@@ -128,4 +138,5 @@
             </VerticalStackLayout>
         </Border>
     </Grid>
+
 </ContentPage>

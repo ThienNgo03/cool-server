@@ -2,11 +2,52 @@
 <ContentPage
     x:Class="Version1.Features.Home.Page"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
-    <VerticalStackLayout>
-        <Label
-            HorizontalOptions="Center"
-            Text="Welcome to Home!"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Padding="16"
+    Background="{x:StaticResource GradientBackground}">
+
+    <Grid>
+        <syncfusionToolkit:SfCardView
+            Padding="16"
+            BackgroundColor="White"
+            BorderColor="Black"
+            BorderWidth="2"
+            CornerRadius="8"
+            HeightRequest="220"
+            HorizontalOptions="Fill"
+            SwipeToDismiss="True"
+            VerticalOptions="Start">
+
+            <Grid
+                ColumnDefinitions="*, 120"
+                ColumnSpacing="16"
+                RowDefinitions="*, * , *"
+                RowSpacing="16">
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="Title"
+                    Text="Pull Up" />
+
+                <Ellipse
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    Fill="LightGray"
+                    HeightRequest="120"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Start"
+                    WidthRequest="120" />
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    BackgroundColor="Black"
+                    HorizontalOptions="Start"
+                    Text="WORK"
+                    TextColor="White"
+                    WidthRequest="120" />
+            </Grid>
+        </syncfusionToolkit:SfCardView>
+    </Grid>
 </ContentPage>

@@ -11,6 +11,7 @@
     xmlns:ui="clr-namespace:UI"
     Title="Page"
     x:DataType="local:ViewModel"
+    HideSoftInputOnTapped="True"
     Loaded="ContentPage_Loaded"
     Shell.NavBarIsVisible="True">
 
@@ -36,6 +37,7 @@
                 Grid.Row="1"
                 Padding="16"
                 BackgroundColor="White"
+                HeightRequest="195"
                 Stroke="White"
                 StrokeShape="RoundRectangle 8"
                 VerticalOptions="Start">
@@ -72,12 +74,14 @@
                         <Label
                             FontSize="9"
                             HorizontalOptions="Center"
-                            Text="45%"
                             VerticalOptions="Center">
                             <Label.FormattedText>
                                 <FormattedString>
-                                    <Span FontAttributes="Bold" Text="{x:Binding Progress}" />
-                                    <Span Text="%" />
+                                    <Span
+                                        FontAttributes="Bold"
+                                        Text="{x:Binding Progress}"
+                                        TextColor="Black" />
+                                    <Span Text="%" TextColor="Black" />
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>
@@ -139,18 +143,20 @@
         <LinearItemsLayout
             x:Key="ItemsLayout"
             ItemSpacing="16"
-            Orientation="Vertical" />
+            Orientation="Vertical"
+            SnapPointsType="None" />
     </ContentPage.Resources>
 
     <Grid Background="{x:StaticResource GradientBackground}" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="54" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="60" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
         <ScrollView Margin="16,16,16,0" Orientation="Horizontal">
             <syncfusionToolkit:SfChipGroup
+                x:Name="Filter"
                 ChipStroke="Cyan"
                 ChipTextColor="Cyan"
                 ChipType="Filter"
@@ -158,42 +164,67 @@
                 ItemsSource="{x:Binding Tags,
                                         Mode=TwoWay}"
                 SelectedChipBackground="Cyan"
-                SelectedChipTextColor="Black" />
+                SelectedChipTextColor="Black"
+                SelectionChanged="Filter_SelectionChanged" />
         </ScrollView>
 
-        <CollectionView
+        <RefreshView
             Grid.Row="1"
             Grid.RowSpan="2"
             Margin="16,0,16,0"
-            FooterTemplate="{x:StaticResource ItemsFooterTemplate}"
-            HorizontalOptions="Center"
-            ItemTemplate="{x:StaticResource ItemTemplate}"
-            ItemsLayout="{x:StaticResource ItemsLayout}"
-            ItemsSource="{x:Binding Items,
-                                    Mode=OneWay}" />
+            Command="{x:Binding LoadCommand,
+                                Mode=OneWay}"
+            HorizontalOptions="Fill"
+            IsRefreshing="{x:Binding IsLoading,
+                                     Mode=OneWay}"
+            RefreshColor="Black">
+            <CollectionView
+                FooterTemplate="{x:StaticResource ItemsFooterTemplate}"
+                ItemTemplate="{x:StaticResource ItemTemplate}"
+                ItemsLayout="{x:StaticResource ItemsLayout}"
+                ItemsSource="{x:Binding Items,
+                                        Mode=OneWay}"
+                ItemsUpdatingScrollMode="KeepScrollOffset" />
+        </RefreshView>
 
         <Border
             Grid.Row="2"
             Padding="8"
             BackgroundColor="#182026"
             StrokeThickness="0">
-            <syncfusionToolkit:SfTextInputLayout
-                ContainerType="Outlined"
-                Hint="Search"
-                InputViewPadding="14,0,0,0"
-                ReserveSpaceForAssistiveLabels="False"
-                Stroke="Cyan">
-                <syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
-                    <syncfusionToolkit:LabelStyle TextColor="Cyan" />
-                </syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
-                <syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
-                    <syncfusionToolkit:LabelStyle TextColor="Cyan" />
-                </syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
-                <Entry TextColor="Cyan" />
-                <syncfusionToolkit:SfTextInputLayout.LeadingView>
-                    <Image Source="{x:StaticResource SearchIcon}" />
-                </syncfusionToolkit:SfTextInputLayout.LeadingView>
-            </syncfusionToolkit:SfTextInputLayout>
+            <VerticalStackLayout Spacing="16">
+                <Button
+                    x:Name="ClearButton"
+                    BackgroundColor="Black"
+                    Clicked="ClearButton_Clicked"
+                    Command="{x:Binding ClearSearchCommand,
+                                        Mode=OneWay}"
+                    IsVisible="{x:Binding IsClearButtonVisible,
+                                          Mode=OneWay}"
+                    Text="Clear"
+                    TextColor="White" />
+                <syncfusionToolkit:SfTextInputLayout
+                    ContainerType="Outlined"
+                    Hint="Search"
+                    InputViewPadding="14,0,0,0"
+                    ReserveSpaceForAssistiveLabels="False"
+                    Stroke="Cyan">
+                    <syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
+                        <syncfusionToolkit:LabelStyle TextColor="Cyan" />
+                    </syncfusionToolkit:SfTextInputLayout.HintLabelStyle>
+                    <syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
+                        <syncfusionToolkit:LabelStyle TextColor="Cyan" />
+                    </syncfusionToolkit:SfTextInputLayout.ErrorLabelStyle>
+                    <Entry
+                        x:Name="SearchEntry"
+                        Text="{x:Binding SearchTerm,
+                                         Mode=TwoWay}"
+                        TextColor="Cyan" />
+                    <syncfusionToolkit:SfTextInputLayout.LeadingView>
+                        <Image Source="{x:StaticResource SearchIcon}" />
+                    </syncfusionToolkit:SfTextInputLayout.LeadingView>
+                </syncfusionToolkit:SfTextInputLayout>
+            </VerticalStackLayout>
         </Border>
         <signalR:Component
             BaseUrl="wss://localhost:7011"
