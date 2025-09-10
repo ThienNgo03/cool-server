@@ -1,15 +1,10 @@
-﻿
-namespace Library.Exercises.Implementations.Version1.Models.Refit.GET;
+﻿namespace Library.Muscles.All;
 
 public class Parameters
 {
     public Guid? Id { get; set; }
 
     public string? Name { get; set; }
-
-    public string? Description { get; set; }
-
-    public string? Type { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 
@@ -19,5 +14,4 @@ public class Parameters
 
     public int? PageIndex { get; set; }
 
-    public bool IsIncludeMuscles { get; set; }
 }

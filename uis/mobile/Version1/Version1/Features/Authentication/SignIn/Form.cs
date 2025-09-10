@@ -13,7 +13,7 @@ public partial class Form : BaseFormModel
     [PhoneOrEmail(ErrorMessage = "Please enter a valid phone number or email address")]
     [NotifyPropertyChangedFor(nameof(AccountErrors))]
     [NotifyDataErrorInfo]
-    string account = "issacclark115@gmail.com";
+    string account = "systemtester@journal.com";
 
     [ObservableProperty]
     [Required(ErrorMessage = "Please enter a password")]

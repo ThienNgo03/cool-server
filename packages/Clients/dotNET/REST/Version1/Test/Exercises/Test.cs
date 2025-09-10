@@ -150,5 +150,19 @@ public class Test : BaseTest
     }
     #endregion
 
-    
+    [Fact]
+    public async Task Get_Muscles()
+    {
+        var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Muscles.Interface>();
+        var result = await exercisesEndpoint.AllAsync(new()
+        { 
+        });
+
+        Assert.NotNull(result);
+        Assert.NotNull(result.Data);
+        Assert.NotNull(result.Data.Items);
+        Assert.True(result.Data.Items.Count > 0, "Expected at least one muscle in result.");
+    }
+
+
 }

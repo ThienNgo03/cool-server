@@ -10,6 +10,7 @@ using Library.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Library.WeekPlanSets;
 using Library.WorkoutLogSets;
+using Library.Muscles;
 
 namespace Library;
 
@@ -30,6 +31,7 @@ public static class Extensions
         services.RegisterMeetUps(config);
         services.RegisterWeekPlanSets(config);
         services.RegisterWorkoutLogSets(config);
+        services.RegisterMuscles(config);
         return services;
     }
 }
