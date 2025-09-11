@@ -21,7 +21,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="D:\Project\cool-server\src\Beta\Authentication\Register\register.proto" GrpcServices="Client" />
-		<Protobuf Include="D:\Project\cool-server\src\Beta\Authentication\Login\login.proto" GrpcServices="Client" />
+		<Protobuf Include="..\..\..\..\..\..\src\Beta\Authentication\Register\register.proto" GrpcServices="Client" />
+		<Protobuf Include="..\..\..\..\..\..\src\Beta\Authentication\Login\login.proto" GrpcServices="Client" />
 	</ItemGroup>
 </Project>
