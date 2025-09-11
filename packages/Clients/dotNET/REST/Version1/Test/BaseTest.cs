@@ -34,6 +34,7 @@ public class BaseTest
     }
 
     #endregion
+
     public string? GetBearerToken()
     {
         var client = new HttpClient();

@@ -1,4 +1,4 @@
-﻿namespace Journal.Users.Post;
+﻿namespace Library.Users.Create;
 
 public class Payload
 {
@@ -7,5 +7,4 @@ public class Payload
     public string Email { get; set; }
 
     public string PhoneNumber { get; set; }
-
 }

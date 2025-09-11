@@ -2,7 +2,7 @@
 
 public partial class App : Application
 {
-    public CurrentUser.Model? CurrentUser { get; set; }
+    public CurrentUser.Model? CurrentUser { get; set; } = new();
 
     public App()
     {

@@ -4,14 +4,16 @@ using Navigation;
 namespace Version1.Features.Authentication.SignIn;
 
 public partial class ViewModel(
+    Library.Users.Interface usersBiz,
     Library.Token.Service tokenService,
-    Library.Authentication.Interface authInterface,
+    Library.Authentication.Interface authBiz,
     IAppNavigator appNavigator) : BaseViewModel(appNavigator)
 {
     #region [ Fields ]
 
+    private readonly Library.Users.Interface usersBiz = usersBiz;
     private readonly Library.Token.Service tokenService = tokenService;
-    private readonly Library.Authentication.Interface authInterface = authInterface;
+    private readonly Library.Authentication.Interface authBiz = authBiz;
     #endregion
 
     #region [ UI ]
@@ -57,7 +59,7 @@ public partial class ViewModel(
             return;
         }
 
-        var result = await authInterface.SignInAsync(new()
+        var result = await authBiz.SignInAsync(new()
         {
             Account = Form.Account,
             Password = Form.Password
@@ -71,8 +73,29 @@ public partial class ViewModel(
         };
 
         tokenService.SetToken(result.Token);
+
+        var currentUserInfo = await usersBiz.AllAsync(new() { IsSelf = true });
+
+        if (currentUserInfo is null || currentUserInfo.Data is null || currentUserInfo.Data.Items is null || !currentUserInfo.Data.Items.Any())
+        {
+            await AppNavigator.ShowSnackbarAsync("Failed to retrieve user information");
+            IsLoading = false;
+            return;
+        }
+
+        if (MyApp is null)
+            return;
+
+        MyApp.SetCurrentUser(
+            id: currentUserInfo.Data.Items.First().Id,
+            name: currentUserInfo.Data.Items.First().Name,
+            age: 0,
+            avatarUrl: currentUserInfo.Data.Items.First().ProfilePicture,
+            bio: string.Empty,
+            token: result.Token
+        );
+
         IsLoading = false;
-        //Set App.CurrentUser to easily access current user credentials
 
         await GoHomeAsync();
     }

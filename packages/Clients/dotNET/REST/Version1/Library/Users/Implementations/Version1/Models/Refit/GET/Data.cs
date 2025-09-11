@@ -1,6 +1,6 @@
-﻿namespace Journal.Users.Update;
+﻿namespace Library.Users.Implementations.Version1.Models.Refit.GET;
 
-public class Payload
+public class Data
 {
     public Guid Id { get; set; }
 
@@ -9,4 +9,6 @@ public class Payload
     public string Email { get; set; }
 
     public string PhoneNumber { get; set; }
+
+    public string? ProfilePicture { get; set; }
 }

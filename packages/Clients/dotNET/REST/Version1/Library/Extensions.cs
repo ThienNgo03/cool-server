@@ -4,13 +4,15 @@ using Library.WeekPlans;
 using Library.Workouts;
 using Library.SoloPools;
 using Library.TeamPools;
+using Library.Users;
 using Library.WorkoutLogs;
 using Library.MeetUps;
 using Library.Authentication;
-using Microsoft.Extensions.DependencyInjection;
 using Library.WeekPlanSets;
 using Library.WorkoutLogSets;
 using Library.Muscles;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Library;
 
@@ -27,6 +29,7 @@ public static class Extensions
         services.RegisterCompetitions(config);
         services.RegisterSoloPools(config);
         services.RegisterTeamPools(config);
+        services.RegisterUsers(config);
         services.RegisterWorkoutLogs(config);
         services.RegisterMeetUps(config);
         services.RegisterWeekPlanSets(config);

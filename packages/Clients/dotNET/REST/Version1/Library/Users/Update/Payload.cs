@@ -1,7 +1,9 @@
-﻿namespace Journal.Users.Post;
+﻿namespace Library.Users.Update;
 
 public class Payload
 {
+    public Guid Id { get; set; }
+
     public string Name { get; set; }
 
     public string Email { get; set; }
