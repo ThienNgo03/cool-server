@@ -26,7 +26,10 @@ public class Implementation : Interface
 
         Models.Refit.GET.Parameters refitParameters;
         if (parameters is null)
-            refitParameters = new();
+            refitParameters = new()
+            {
+                IsIncludeMuscles = true
+            };
         else
             refitParameters = new()
             {

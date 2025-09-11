@@ -1,7 +1,5 @@
-﻿using ExcelDataReader;
-using Journal.Databases.Identity;
+﻿using Journal.Databases.Identity;
 using Microsoft.AspNetCore.Identity;
-using System.Data;
 
 namespace Journal.Databases;
 
@@ -12,7 +10,7 @@ public static class Extensions
         services.AddDbContext<JournalDbContext>(x =>
         {
                 x.EnableSensitiveDataLogging();
-                x.UseSqlServer("Server=localhost;Database=JournalTest;Trusted_Connection=True;TrustServerCertificate=True;")
+                x.UseSqlServer("Server=localhost,1433;Database=Journal;User Id=sa;Password=SqlServer2022!;TrustServerCertificate=true;")
                     .UseSeeding((context, _) =>
                     {
                         var journalContext = (JournalDbContext)context;
@@ -23,13 +21,13 @@ public static class Extensions
                         seedFactory.SeedExerciseMuscle(journalContext).Wait();
                     });
                 });
-        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity;Trusted_Connection=True;TrustServerCertificate=True;")
-        .UseSeeding((context, _) =>
-        {
-            var identityContext = (IdentityContext)context;
-            Identity.SeedFactory seedFactory = new ();
-            seedFactory.SeedAdmins(identityContext).Wait();
-        }));
+        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost,1433;Database=Identity;User Id=sa;Password=SqlServer2022!;TrustServerCertificate=true;")
+                                                        .UseSeeding((context, _) =>
+                                                        {
+                                                            var identityContext = (IdentityContext)context;
+                                                            Identity.SeedFactory seedFactory = new ();
+                                                            seedFactory.SeedAdmins(identityContext).Wait();
+                                                        }));
 
         services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>()

@@ -5,15 +5,17 @@ namespace Version1.Features.Exercises;
 
 public partial class ViewModel(
     IAppNavigator appNavigator,
+    Library.Muscles.Interface muscles,
     Library.Workouts.Interface workouts,
-    Library.Exercises.Interface exercises,
-    Library.WeekPlanSets.Interface weekPlanSets) : BaseViewModel(appNavigator)
+    Library.WeekPlanSets.Interface weekplanSet,
+    Library.Exercises.Interface exercises) : BaseViewModel(appNavigator)
 {
     #region [ Fields ]
 
-    private readonly Library.Workouts.Interface workouts = workouts;
+    private readonly Library.Muscles.Interface muscles = muscles;
     private readonly Library.Exercises.Interface exercises = exercises;
-    private readonly Library.WeekPlanSets.Interface weekplanSet = weekPlanSets;
+    private readonly Library.Workouts.Interface workouts = workouts;
+    private readonly Library.WeekPlanSets.Interface weekplanSet = weekplanSet;
     private readonly ContentViews.Card.Model[] source = new ContentViews.Card.Model[]
     {
         new()
@@ -110,18 +112,8 @@ public partial class ViewModel(
     public void ClearSearch() => SearchTerm = string.Empty;
 
     [ObservableProperty]
-    ObservableCollection<string> tags = new()
-    {
-        "Chest",
-        "Back",
-        "Legs",
-        "Arms",
-        "Core",
-        "Biceps",
-        "Triceps",
-        "Glutes",
-        "Flexibility"
-    };
+    ObservableCollection<string> tags = new();
+
 
     [ObservableProperty]
     ObservableCollection<ContentViews.Card.Model> items;
@@ -130,10 +122,53 @@ public partial class ViewModel(
     public async Task LoadAsync()
     {
         if (IsLoading) return;
+        try
+        {
+            IsLoading = true;
 
-        IsLoading = true;
-        Items = new(source);
-        IsLoading = false;
+            var response = await exercises.AllAsync();
+            Items = new();
+
+            if (response?.Data?.Items == null)
+            {
+                return;
+            }
+            foreach (var ex in response.Data.Items)
+            {
+                var card = new ContentViews.Card.Model
+                {
+                    Id = ex.Id.ToString(),
+                    Title = ex.Name,
+                    SubTitle = ex.Muscles != null && ex.Muscles.Any()
+                        ? string.Join(", ", ex.Muscles.Select(m => m.Name))
+                        : string.Empty,
+                    Description = ex.Description,
+                    IconUrl = "dotnet_bot.png",
+                    Badge = "Easy",
+                    BadgeTextColor = "#2b6cb0",
+                    BadgeBackgroundColor = "#ebf8ff",
+                    Progress = 50,
+                };
+                Items.Add(card);
+            }
+
+            var tagResponse = await muscles.AllAsync();
+            if (tagResponse?.Data?.Items == null)
+                return;
+            Tags = new ObservableCollection<string>(
+                    tagResponse.Data.Items
+                        .Select(m => m.Name)
+            );
+        }
+        catch (Exception ex)
+        {
+            await AppNavigator.ShowSnackbarAsync($"Failed to load exercises");
+            System.Diagnostics.Debug.WriteLine($"LoadAsync Error");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     public async Task NavigateAsync(string route, object args)

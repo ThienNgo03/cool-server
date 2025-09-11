@@ -20,7 +20,7 @@ public class BaseTest
         if (string.IsNullOrEmpty(token))
             throw new InvalidOperationException("Failed to retrieve authentication token.");
 
-        Library.Config locaHostConfig = new("https://localhost:7011");
+        Library.Config locaHostConfig = new("https://n66lsgdb-7011.asse.devtunnels.ms");
         var services = new ServiceCollection();
         services.AddEndpoints(locaHostConfig);
 
@@ -34,10 +34,11 @@ public class BaseTest
     }
 
     #endregion
+
     public string? GetBearerToken()
     {
         var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://n66lsgdb-7011.asse.devtunnels.ms/api/authentication/login");
 
         var jsonPayload = @"{
             ""account"": ""systemtester@journal.com"",

@@ -55,11 +55,16 @@ public partial class ViewModel(
             await ShowSnackBarAsync("Set configurations are missing.");
             return;
         }
+        if(MyApp is null || MyApp.CurrentUser is null)
+        {
+            await ShowSnackBarAsync("User credentials are missing");
+            return;
+        }
 
         await workoutsBiz.CreateAsync(new Library.Workouts.Create.Payload
         {
             ExerciseId = Guid.Parse(Id),
-            UserId = Guid.Empty,
+            UserId = MyApp.CurrentUser.Id,
             WeekPlans = WorkoutTimeItems?.Select(wti => new Library.Workouts.Create.WeekPlan
             {
                 DateOfWeek = wti.Content,

@@ -19,5 +19,5 @@ public class Parameters
 
     public int? PageIndex { get; set; }
 
-    public bool IsIncludeMuscles { get; set; } 
+    public bool IsIncludeMuscles { get; set; }
 }

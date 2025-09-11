@@ -31,28 +31,37 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
+        if (User.Identity is null)
+            return Unauthorized();
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User ID not found");
+
         var query = _context.Users.AsQueryable();
 
-        if (parameters.id.HasValue)
-            query = query.Where(x => x.Id == parameters.id);
+        Guid? id = parameters.IsSelf ? Guid.Parse(userId) : parameters.Id;
 
-        if (!string.IsNullOrEmpty(parameters.name))
-            query = query.Where(x => x.Name.Contains(parameters.name));
+        if (id is not null)
+            query = query.Where(u => u.Id == id.Value);
 
-        if (!string.IsNullOrEmpty(parameters.email))
-            query = query.Where(x => x.Email.Contains(parameters.email));
+        if (!string.IsNullOrEmpty(parameters.Name))
+            query = query.Where(x => x.Name.Contains(parameters.Name));
 
-        if (!string.IsNullOrEmpty(parameters.phoneNumber))
-            query = query.Where(x => x.PhoneNumber.Contains(parameters.phoneNumber));
+        if (!string.IsNullOrEmpty(parameters.Email))
+            query = query.Where(x => x.Email.Contains(parameters.Email));
 
-        if (parameters.pageSize.HasValue && parameters.pageIndex.HasValue && parameters.pageSize > 0 && parameters.pageIndex >= 0)
-            query = query.Skip(parameters.pageIndex.Value * parameters.pageSize.Value).Take(parameters.pageSize.Value);
+        if (!string.IsNullOrEmpty(parameters.PhoneNumber))
+            query = query.Where(x => x.PhoneNumber.Contains(parameters.PhoneNumber));
+
+        if (parameters.PageIndex.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
+            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
         var result = await query.AsNoTracking().ToListAsync();
 
         var paginationResults = new Builder<Databases.Journal.Tables.User.Table>()
-                .WithIndex(parameters.pageIndex)
-                .WithSize(parameters.pageSize)
+                .WithIndex(parameters.PageIndex)
+                .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
                 .WithItems(result)
                 .Build();
