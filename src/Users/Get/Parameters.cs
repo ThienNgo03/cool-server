@@ -1,12 +1,9 @@
-﻿namespace Journal.Users.Get
+﻿namespace Journal.Users.Get;
+
+public class Parameters : Models.PaginationParameters.Model
 {
-    public class Parameters
-    {
-        public Guid? id { get; set; }
-        public string? name { get; set; }
-        public string? email { get; set; }
-        public string? phoneNumber { get; set; }
-        public int? pageSize { get; set; }
-        public int? pageIndex { get; set; }
-    }
+    public string? Name { get; set; }
+    public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
+    public bool IsSelf { get; set; }
 }
