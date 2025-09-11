@@ -3,7 +3,6 @@ using Journal.Wolverine;
 using Journal.Journeys;
 using Journal.Authentication;
 using Journal.Files;
-using Journal.Beta.Authentication.Login;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

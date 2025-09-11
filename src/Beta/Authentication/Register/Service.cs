@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Journal.Beta.Authentication.Register;
 using Journal.Databases.Identity;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Identity.Data;
 
 namespace Journal.Beta.Authentication.Register;
 
-public class Service:Method.MethodBase
+public class Service : RegisterMethod.RegisterMethodBase
 {
     private readonly IdentityContext _context;
     private readonly ILogger<Service> _logger;
@@ -17,7 +18,7 @@ public class Service:Method.MethodBase
     public Service(ILogger<Service> logger,
         IdentityContext context,
         UserManager<IdentityUser> userManager,
-        IMessageBus messageBus, 
+        IMessageBus messageBus,
         BlobContainerClient blobContainerClient)
     {
         _logger = logger;
@@ -26,7 +27,7 @@ public class Service:Method.MethodBase
         _messageBus = messageBus;
         _blobContainerClient = blobContainerClient;
     }
-    public override async Task<Result> Register(Payload request, ServerCallContext context)
+    public override async Task<Empty> Register(Payload request, ServerCallContext context)
     {
         if (request.Password != request.ConfirmPassword)
         {
@@ -70,7 +71,7 @@ public class Service:Method.MethodBase
             request.PhoneNumber
         ));
 
-        return new Result { };
+        return new Empty { };
     }
 
 }
