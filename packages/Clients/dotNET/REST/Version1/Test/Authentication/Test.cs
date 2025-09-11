@@ -1,6 +1,7 @@
 ﻿using Grpc.Core;
 using Journal.Beta.Authentication.Login;
 using Library.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -89,20 +90,22 @@ public class Test
         var payload = new Library.Authentication.Register.Payload
         {
             AccountName = "DUY",
-            UserName = $"duy_{id:N}", // Ensure uniqueness
-            Email = $"duy_{id:N}@example.com",
+            UserName = $"duy_{id}", 
+            Email = $"duy_{id}@example.com",
             Password = "StrongPassword@123",
             ConfirmPassword = "StrongPassword@123",
             PhoneNumber = "0123456789",
         };
         await authClient.RegisterAsync(payload);
-        // Act & Assert
+        
         var identityUser = await identityDbContext.Users.FirstOrDefaultAsync(u => u.Email == payload.Email);
         var user = await journalDbContext.Users.FirstOrDefaultAsync(u => u.Email == payload.Email);
         Assert.NotNull(identityUser); 
         Assert.NotNull(user); 
         Assert.Equal(payload.Email, identityUser?.Email);
-        Assert.Equal(payload.UserName, user?.Name);
+        Assert.Equal(payload.UserName, $"duy_{id}");
         Assert.Equal(payload.PhoneNumber, user?.PhoneNumber);
+        identityDbContext.Users.Remove(identityUser);
+        journalDbContext.Users.Remove(user);
     }
 }

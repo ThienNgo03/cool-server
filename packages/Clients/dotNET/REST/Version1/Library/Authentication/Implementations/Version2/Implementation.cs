@@ -40,7 +40,7 @@ public class Implementation : Interface
             Password = payload.Password,
             ConfirmPassword = payload.ConfirmPassword,
             PhoneNumber = payload.PhoneNumber,
-            ProfilePicturePath = null
+            ProfilePicturePath = string.Empty
         };
 
         await _registerClient.RegisterAsync(grpcPayload);

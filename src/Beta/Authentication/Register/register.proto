@@ -15,6 +15,6 @@ message Payload {
   string password = 5;
   string confirm_password = 6;
   string phone_number = 7;
-  string profile_picture_path = 8;
+  optional string profile_picture_path = 8;
 }
 
