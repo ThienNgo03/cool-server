@@ -3,7 +3,7 @@ syntax = "proto3";
 option csharp_namespace = "Journal.Beta.Authentication.Login";
 
 package login;
-service Method {
+service LoginMethod {
   // Sends a greeting
   rpc Login (Payload) returns (Result);
 }

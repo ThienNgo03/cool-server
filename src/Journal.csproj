@@ -56,7 +56,7 @@
     </None>
   </ItemGroup>
 <ItemGroup>
-	<Protobuf Include="Beta\Authentication\Login\proto.proto" GrpcServices="Server" />
-	<Protobuf Include="Beta\Authentication\Register\proto.proto" GrpcServices="Server" />
+	<Protobuf Include="Beta\Authentication\Login\login.proto" GrpcServices="Server" />
+	<Protobuf Include="Beta\Authentication\Register\register.proto" GrpcServices="Server" />
 </ItemGroup>
 </Project>

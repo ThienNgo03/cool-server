@@ -10,13 +10,13 @@ using System.Text;
 
 namespace Journal.Beta.Authentication.Login;
 
-public class Service:Method.MethodBase
+public class Service : LoginMethod.LoginMethodBase
 {
     private readonly IdentityContext _context;
     private readonly ILogger<Service> _logger;
     private readonly IConfiguration _configuration;
     private readonly UserManager<IdentityUser> _userManager;
-    public Service(ILogger<Service> logger, 
+    public Service(ILogger<Service> logger,
         UserManager<IdentityUser> userManager,
         IConfiguration configuration,
         IdentityContext context)
