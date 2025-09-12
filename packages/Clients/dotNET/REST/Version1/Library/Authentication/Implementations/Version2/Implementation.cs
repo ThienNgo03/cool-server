@@ -3,18 +3,18 @@ namespace Library.Authentication.Implementations.Version2;
 
 public class Implementation : Interface
 {
-    private readonly Authentication.Signin.Protos.LoginMethod.LoginMethodClient _loginClient;
-    private readonly Authentication.Register.Protos.RegisterMethod.RegisterMethodClient _registerClient;
+    private readonly Signin.Protos.LoginMethod.LoginMethodClient _loginClient;
+    private readonly Register.Protos.RegisterMethod.RegisterMethodClient _registerClient;
     public Implementation(
-        Authentication.Signin.Protos.LoginMethod.LoginMethodClient loginClient,
-        Authentication.Register.Protos.RegisterMethod.RegisterMethodClient registerClient)
+        Signin.Protos.LoginMethod.LoginMethodClient loginClient,
+        Register.Protos.RegisterMethod.RegisterMethodClient registerClient)
     {
         _loginClient = loginClient;
         _registerClient = registerClient;
     }
     public async Task<Signin.Response?> SignInAsync(Signin.Payload payload)
     {
-        var grpcPayload = new Authentication.Signin.Protos.Payload
+        var grpcPayload = new Signin.Protos.Payload
         {
             Email = payload.Account,
             Password = payload.Password
@@ -30,7 +30,7 @@ public class Implementation : Interface
 
     public async Task RegisterAsync(Register.Payload payload)
     {
-        var grpcPayload = new Authentication.Register.Protos.Payload
+        var grpcPayload = new Register.Protos.Payload
         {
             FirstName = payload.AccountName,
             LastName = payload.AccountName,
