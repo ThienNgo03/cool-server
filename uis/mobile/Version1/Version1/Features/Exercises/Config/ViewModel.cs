@@ -69,12 +69,16 @@ public partial class ViewModel(
             {
                 DateOfWeek = wti.Content,
                 Time = wti.Time,
-                WeekPlanSets = SetConfigItems?.Select(sci => new Library.Workouts.Create.WeekPlanSet
-                {
-                    Value = sci.Reps
-                }).ToList()
+                WeekPlanSets = TotalSets?
+                    .Where(ts => string.Equals(ts.Day, wti.Content, StringComparison.OrdinalIgnoreCase))
+                    .Select(sci => new Library.Workouts.Create.WeekPlanSet
+                    {
+                        Value = sci.Reps
+                    }).ToList()
             }).ToList()
         });
+
+        await AppNavigator.GoBackAsync(true);
     }
 
     public async Task ShowSnackBarAsync(string message)
