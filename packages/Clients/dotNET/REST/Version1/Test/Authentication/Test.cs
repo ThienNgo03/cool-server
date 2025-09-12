@@ -19,6 +19,7 @@ public class Test : BaseTest
 
     }
     #endregion
+
     #region [ Endpoints ]
     [Fact]
     public async Task POST_SignIn_StandaloneTest_ReturnsToken()
@@ -40,7 +41,7 @@ public class Test : BaseTest
             PhoneNumber = "0123456789",
         };
         await authClient.GrpcRegisterAsync(newUser);
-
+        
         var payload = new Library.Authentication.Signin.Protos.Payload
         {
             Email = $"duy_nguyen_{id}@example.com",
@@ -77,7 +78,7 @@ public class Test : BaseTest
             PhoneNumber = "0123456789",
         };
         await authClient.GrpcRegisterAsync(newUser);
-
+        var config = new Library.Config("https://localhost:7011");
         var payload = new Library.Authentication.Signin.Protos.Payload
         {
             Email = $"duy_nguyen_{id}@example.com",
@@ -126,5 +127,6 @@ public class Test : BaseTest
         //Clean up
         identityDbContext.Users.Remove(expectedIdentityUser);
         journalDbContext.Users.Remove(expectedUser);
+    
     }
 }
