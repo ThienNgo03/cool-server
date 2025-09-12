@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Databases\Journal\Tables\Event\**" />
-    <Content Remove="Databases\Journal\Tables\Event\**" />
-    <EmbeddedResource Remove="Databases\Journal\Tables\Event\**" />
-    <None Remove="Databases\Journal\Tables\Event\**" />
-  </ItemGroup>
-
-  <ItemGroup>
 	<PackageReference Include="Azure.Storage.Blobs" Version="12.20.0" />
 	<PackageReference Include="ExcelDataReader" Version="3.7.0" />
 	<PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
@@ -38,25 +31,8 @@
 	</PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Calisthenic.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Excel1.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ExerciseMuscle.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Exercises.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Muscle.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-<ItemGroup>
-	<Protobuf Include="Beta\Authentication\Login\login.proto" GrpcServices="Server" />
-	<Protobuf Include="Beta\Authentication\Register\register.proto" GrpcServices="Server" />
-</ItemGroup>
+	<ItemGroup>
+		<Protobuf Include="Beta\Authentication\Login\login.proto" GrpcServices="Server" />
+		<Protobuf Include="Beta\Authentication\Register\register.proto" GrpcServices="Server" />
+	</ItemGroup>
 </Project>

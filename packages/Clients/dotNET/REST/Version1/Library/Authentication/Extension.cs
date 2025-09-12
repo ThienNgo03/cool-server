@@ -8,7 +8,6 @@ public static class Extensions
     public static void RegisterAuthentication(this IServiceCollection services, Config config)
     {
         services.AddTransient<Implementations.Version1.RefitHttpClientHandler>();
-        services.AddTransient<Interface, Implementations.Version1.Implementation>();
 
         string baseUrl = config.Url;
 
@@ -16,8 +15,10 @@ public static class Extensions
                 .ConfigurePrimaryHttpMessageHandler<Implementations.Version1.RefitHttpClientHandler>()
                 .ConfigureHttpClient(x => x.BaseAddress = new Uri(baseUrl));
 
-        //services.AddGrpcClient<LoginMethod.LoginMethodClient>(o => o.Address = new Uri(baseUrl));
-        //services.AddGrpcClient<RegisterMethod.RegisterMethodClient>(o => o.Address = new Uri(baseUrl));
+        services.AddGrpcClient<Signin.Protos.LoginMethod.LoginMethodClient>(o => o.Address = new Uri(baseUrl));
+        services.AddGrpcClient<Register.Protos.RegisterMethod.RegisterMethodClient>(o => o.Address = new Uri(baseUrl));
+        services.AddTransient<Interface, Implementations.Version2.Implementation>();
+
     }
 }
 

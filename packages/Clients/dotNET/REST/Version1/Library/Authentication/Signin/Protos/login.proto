@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "Library.Authentication.Signin.Protos";
+
+package login;
+service LoginMethod {
+  // Sends a greeting
+  rpc Login (Payload) returns (Result);
+}
+message Payload {
+  string email = 1;
+  string password=2;
+}
+
+// The response message containing the greetings.
+message Result {
+  string token = 1;
+}
+

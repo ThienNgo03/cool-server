@@ -6,12 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Authentication\Implementations\Version2\**" />
-    <EmbeddedResource Remove="Authentication\Implementations\Version2\**" />
-    <None Remove="Authentication\Implementations\Version2\**" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Refit" Version="8.0.0" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
@@ -23,5 +17,12 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Authentication\Register\Protos\register.proto" GrpcServices="Client"/>
+		<Protobuf Include="Authentication\Signin\Protos\login.proto" GrpcServices="Client"/>
+	</ItemGroup>
+
 </Project>

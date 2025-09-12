@@ -1,21 +1,20 @@
-﻿using Library.Authentication.Signin;
-
+﻿
 namespace Library.Authentication.Implementations.Version2;
 
 public class Implementation : Interface
 {
-    private readonly Journal.Beta.Authentication.Login.LoginMethod.LoginMethodClient _loginClient;
-    private readonly Journal.Beta.Authentication.Register.RegisterMethod.RegisterMethodClient _registerClient;
+    private readonly Signin.Protos.LoginMethod.LoginMethodClient _loginClient;
+    private readonly Register.Protos.RegisterMethod.RegisterMethodClient _registerClient;
     public Implementation(
-        Journal.Beta.Authentication.Login.LoginMethod.LoginMethodClient loginClient,
-        Journal.Beta.Authentication.Register.RegisterMethod.RegisterMethodClient registerClient)
+        Signin.Protos.LoginMethod.LoginMethodClient loginClient,
+        Register.Protos.RegisterMethod.RegisterMethodClient registerClient)
     {
         _loginClient = loginClient;
         _registerClient = registerClient;
     }
-    public async Task<Response?> SignInAsync(Signin.Payload payload)
+    public async Task<Signin.Response?> SignInAsync(Signin.Payload payload)
     {
-        var grpcPayload = new Journal.Beta.Authentication.Login.Payload
+        var grpcPayload = new Signin.Protos.Payload
         {
             Email = payload.Account,
             Password = payload.Password
@@ -23,7 +22,7 @@ public class Implementation : Interface
 
         var result = await _loginClient.LoginAsync(grpcPayload);
 
-        return new Response
+        return new Signin.Response
         {
             Token = result.Token
         };
@@ -31,7 +30,7 @@ public class Implementation : Interface
 
     public async Task RegisterAsync(Register.Payload payload)
     {
-        var grpcPayload = new Journal.Beta.Authentication.Register.Payload
+        var grpcPayload = new Register.Protos.Payload
         {
             FirstName = payload.AccountName,
             LastName = payload.AccountName,
@@ -45,5 +44,4 @@ public class Implementation : Interface
 
         await _registerClient.RegisterAsync(grpcPayload);
     }
-
 }

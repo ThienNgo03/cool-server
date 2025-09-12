@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using local = Test.Constant;
 using Test.Databases.Journal;
+using Test.Databases.Identity;
 
 namespace Test;
 
@@ -20,12 +21,14 @@ public class BaseTest
         if (string.IsNullOrEmpty(token))
             throw new InvalidOperationException("Failed to retrieve authentication token.");
 
-        Library.Config locaHostConfig = new("https://n66lsgdb-7011.asse.devtunnels.ms");
+        Library.Config locaHostConfig = new("https://localhost:7011");
         var services = new ServiceCollection();
         services.AddEndpoints(locaHostConfig);
 
         services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer(local.Config.ConnectionString));
+           options.UseSqlServer(local.Config.JournalConnectionString));
+        services.AddDbContext<IdentityContext>(options =>
+           options.UseSqlServer(local.Config.IdentityConnectionString));
 
         serviceProvider = services.BuildServiceProvider();
 
@@ -38,7 +41,7 @@ public class BaseTest
     public string? GetBearerToken()
     {
         var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://n66lsgdb-7011.asse.devtunnels.ms/api/authentication/login");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
 
         var jsonPayload = @"{
             ""account"": ""systemtester@journal.com"",
