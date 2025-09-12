@@ -21,7 +21,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="..\..\..\..\..\..\src\Beta\Authentication\Register\register.proto" GrpcServices="Client" />
-		<Protobuf Include="..\..\..\..\..\..\src\Beta\Authentication\Login\login.proto" GrpcServices="Client" />
+	<Protobuf Include="Authentication\Register\Protos\register.proto" GrpcServices="Client" OutputDir="Authentication\generated-proto-output" />
+	<Protobuf Include="Authentication\Signin\Protos\login.proto" GrpcServices="Client" OutputDir="Authentication\generated-proto-output" />
 	</ItemGroup>
+
+	<Target Name="DeleteGeneratedProtoFiles" BeforeTargets="BeforeBuild">
+	<Message Text="Cleaning up old generated proto files..." Importance="high" />
+	<Delete Files="@(FilesToDelete)" />
+	</Target>
 </Project>

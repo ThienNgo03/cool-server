@@ -1,5 +1,4 @@
-﻿
-
+﻿using Library.Authentication.Signin.Protos;
 using Refit;
 using System.Diagnostics;
 
@@ -73,5 +72,14 @@ public class Implementation : Interface
             stopwatch.Stop();
             return null;
         }
+    }
+    public Task GrpcRegisterAsync(Register.Protos.Payload payload)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result?> GrpcSignInAsync(Signin.Protos.Payload payload)
+    {
+        throw new NotImplementedException();
     }
 }

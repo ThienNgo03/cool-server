@@ -4,37 +4,37 @@ namespace Library.Authentication.Implementations.Version2;
 
 public class Implementation : Interface
 {
-    private readonly Journal.Beta.Authentication.Login.LoginMethod.LoginMethodClient _loginClient;
-    private readonly Journal.Beta.Authentication.Register.RegisterMethod.RegisterMethodClient _registerClient;
+    private readonly Authentication.Signin.Protos.LoginMethod.LoginMethodClient _loginClient;
+    private readonly Authentication.Register.Protos.RegisterMethod.RegisterMethodClient _registerClient;
     public Implementation(
-        Journal.Beta.Authentication.Login.LoginMethod.LoginMethodClient loginClient,
-        Journal.Beta.Authentication.Register.RegisterMethod.RegisterMethodClient registerClient)
+        Authentication.Signin.Protos.LoginMethod.LoginMethodClient loginClient,
+        Authentication.Register.Protos.RegisterMethod.RegisterMethodClient registerClient)
     {
         _loginClient = loginClient;
         _registerClient = registerClient;
     }
-    public async Task<Response?> SignInAsync(Signin.Payload payload)
+    public async Task<Signin.Protos.Result?> GrpcSignInAsync(Signin.Protos.Payload payload)
     {
-        var grpcPayload = new Journal.Beta.Authentication.Login.Payload
+        var grpcPayload = new Authentication.Signin.Protos.Payload
         {
-            Email = payload.Account,
+            Email = payload.Email,
             Password = payload.Password
         };
 
         var result = await _loginClient.LoginAsync(grpcPayload);
 
-        return new Response
+        return new Signin.Protos.Result
         {
             Token = result.Token
         };
     }
 
-    public async Task RegisterAsync(Register.Payload payload)
+    public async Task GrpcRegisterAsync(Register.Protos.Payload payload)
     {
-        var grpcPayload = new Journal.Beta.Authentication.Register.Payload
+        var grpcPayload = new Authentication.Register.Protos.Payload
         {
-            FirstName = payload.AccountName,
-            LastName = payload.AccountName,
+            FirstName = payload.FirstName,
+            LastName = payload.LastName,
             UserName = payload.UserName,
             Email = payload.Email,
             Password = payload.Password,
@@ -46,4 +46,13 @@ public class Implementation : Interface
         await _registerClient.RegisterAsync(grpcPayload);
     }
 
+    public Task<Response?> SignInAsync(Signin.Payload payload)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task RegisterAsync(Register.Payload payload)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using local = Test.Constant;
 using Test.Databases.Journal;
+using Test.Databases.Identity;
 
 namespace Test;
 
@@ -25,7 +26,9 @@ public class BaseTest
         services.AddEndpoints(locaHostConfig);
 
         services.AddDbContext<JournalDbContext>(options =>
-           options.UseSqlServer(local.Config.ConnectionString));
+           options.UseSqlServer(local.Config.JournalConnectionString));
+        services.AddDbContext<IdentityContext>(options =>
+           options.UseSqlServer(local.Config.IdentityConnectionString));
 
         serviceProvider = services.BuildServiceProvider();
 
