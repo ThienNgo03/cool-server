@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Test.Databases.Identity;
@@ -23,18 +24,32 @@ public class Test : BaseTest
         var journalDbContext = serviceProvider.GetRequiredService<JournalDbContext>();
         var authClient = serviceProvider.GetRequiredService<Library.Authentication.Interface>();
         //Data
-        var id = Guid.NewGuid();    
-        var newUser = new Library.Authentication.Register.Payload
+        var id = Guid.NewGuid();
+        var hasher = new PasswordHasher<IdentityUser>();
+        var password = "StrongPassword@123";
+        var newUser = new IdentityUser
         {
-            AccountName="DUY NGUYEN",
+            Id = Guid.NewGuid().ToString(),
             UserName = $"duy_nguyen_{id}",
             Email = $"duy_nguyen_{id}@example.com",
-            Password = "StrongPassword@123",
-            ConfirmPassword = "StrongPassword@123",
-            PhoneNumber = "0123456789",
+            NormalizedEmail = $"duy_nguyen_{id}@example.com".ToUpper(),
+            EmailConfirmed = true,
+            PhoneNumber = "0564330462",
+            PhoneNumberConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString()
         };
-        await authClient.RegisterAsync(newUser);
-        
+        newUser.PasswordHash = hasher.HashPassword(newUser, password);
+        identityDbContext.Users.Add(newUser);
+        await identityDbContext.SaveChangesAsync();
+        journalDbContext.Users.Add(new Databases.Journal.Tables.User.Table
+        {
+            Id = Guid.NewGuid(),
+            Name = newUser.UserName,
+            Email = newUser.Email,
+            PhoneNumber = newUser.PhoneNumber,
+        });
+        await journalDbContext.SaveChangesAsync();
         var payload = new Library.Authentication.Signin.Payload
         {
             Account = $"duy_nguyen_{id}@example.com",
@@ -61,16 +76,31 @@ public class Test : BaseTest
         var authClient = serviceProvider.GetRequiredService<Library.Authentication.Interface>();
         //Data
         var id = Guid.NewGuid();
-        var newUser = new Library.Authentication.Register.Payload
+        var hasher = new PasswordHasher<IdentityUser>();
+        var password = "StrongPassword@123";
+        var newUser = new IdentityUser
         {
-            AccountName = "DUY NGUYEN",
+            Id = Guid.NewGuid().ToString(),
             UserName = $"duy_nguyen_{id}",
             Email = $"duy_nguyen_{id}@example.com",
-            Password = "StrongPassword@123",
-            ConfirmPassword = "StrongPassword@123",
-            PhoneNumber = "0123456789",
+            NormalizedEmail = $"duy_nguyen_{id}@example.com".ToUpper(),
+            EmailConfirmed = true,
+            PhoneNumber = "0564330462",
+            PhoneNumberConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString()
         };
-        await authClient.RegisterAsync(newUser);
+        newUser.PasswordHash = hasher.HashPassword(newUser, password);
+        identityDbContext.Users.Add(newUser);
+        await identityDbContext.SaveChangesAsync();
+        journalDbContext.Users.Add(new Databases.Journal.Tables.User.Table
+        {
+            Id = Guid.NewGuid(),
+            Name = newUser.UserName,
+            Email = newUser.Email,
+            PhoneNumber = newUser.PhoneNumber,
+        });
+        await journalDbContext.SaveChangesAsync();
         var payload = new Library.Authentication.Signin.Payload
         {
             Account = $"duy_nguyen_{id}@example.com",
