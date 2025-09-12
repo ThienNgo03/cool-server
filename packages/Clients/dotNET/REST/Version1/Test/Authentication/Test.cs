@@ -1,10 +1,6 @@
 ﻿using Grpc.Core;
-using Library.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using Test.Constant;
 using Test.Databases.Identity;
 using Test.Databases.Journal;
 
@@ -14,13 +10,11 @@ public class Test : BaseTest
 {
     #region [ CTors ]
 
-    public Test()
-    {
-
-    }
+    public Test() : base() { }   
     #endregion
 
     #region [ Endpoints ]
+
     [Fact]
     public async Task POST_SignIn_StandaloneTest_ReturnsToken()
     {
@@ -30,25 +24,24 @@ public class Test : BaseTest
         var authClient = serviceProvider.GetRequiredService<Library.Authentication.Interface>();
         //Data
         var id = Guid.NewGuid();    
-        var newUser = new Library.Authentication.Register.Protos.Payload
+        var newUser = new Library.Authentication.Register.Payload
         {
-            FirstName = "DUY",
-            LastName = "NGUYEN",
+            AccountName="DUY NGUYEN",
             UserName = $"duy_nguyen_{id}",
             Email = $"duy_nguyen_{id}@example.com",
             Password = "StrongPassword@123",
             ConfirmPassword = "StrongPassword@123",
             PhoneNumber = "0123456789",
         };
-        await authClient.GrpcRegisterAsync(newUser);
+        await authClient.RegisterAsync(newUser);
         
-        var payload = new Library.Authentication.Signin.Protos.Payload
+        var payload = new Library.Authentication.Signin.Payload
         {
-            Email = $"duy_nguyen_{id}@example.com",
+            Account = $"duy_nguyen_{id}@example.com",
             Password = "StrongPassword@123"
         };
         //Act
-        var result = await authClient.GrpcSignInAsync(payload);
+        var result = await authClient.SignInAsync(payload);
         //Assert
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.Token));
@@ -58,6 +51,7 @@ public class Test : BaseTest
         identityDbContext.Users.Remove(expectedIdentityUser);
         journalDbContext.Users.Remove(expectedUser);
     }
+
     [Fact]
     public async Task POST_SignIn_StandaloneTest_InvalidPassword()
     {
@@ -67,35 +61,33 @@ public class Test : BaseTest
         var authClient = serviceProvider.GetRequiredService<Library.Authentication.Interface>();
         //Data
         var id = Guid.NewGuid();
-        var newUser = new Library.Authentication.Register.Protos.Payload
+        var newUser = new Library.Authentication.Register.Payload
         {
-            FirstName = "DUY",
-            LastName = "NGUYEN",
+            AccountName = "DUY NGUYEN",
             UserName = $"duy_nguyen_{id}",
             Email = $"duy_nguyen_{id}@example.com",
             Password = "StrongPassword@123",
             ConfirmPassword = "StrongPassword@123",
             PhoneNumber = "0123456789",
         };
-        await authClient.GrpcRegisterAsync(newUser);
-        var config = new Library.Config("https://localhost:7011");
-        var payload = new Library.Authentication.Signin.Protos.Payload
+        await authClient.RegisterAsync(newUser);
+        var payload = new Library.Authentication.Signin.Payload
         {
-            Email = $"duy_nguyen_{id}@example.com",
+            Account = $"duy_nguyen_{id}@example.com",
             Password = "StrongPassword@1234"
         };
         //Act
-        var ex = await Assert.ThrowsAsync<RpcException>(() => authClient.GrpcSignInAsync(payload));
+        var ex = await Assert.ThrowsAsync<RpcException>(() => authClient.SignInAsync(payload));
         //Assert
         Assert.Equal(StatusCode.Unauthenticated, ex.StatusCode);
         Assert.Contains("Invalid email or password", ex.Status.Detail, StringComparison.OrdinalIgnoreCase);
         //Clean up
         var expectedIdentityUser = await identityDbContext.Users.FirstOrDefaultAsync(u => u.Email == newUser.Email);
         var expectedUser = await journalDbContext.Users.FirstOrDefaultAsync(u => u.Email == newUser.Email);
-        identityDbContext.Users.Remove(expectedIdentityUser);
-        journalDbContext.Users.Remove(expectedUser);
+        identityDbContext.Users.Remove(expectedIdentityUser!);
+        journalDbContext.Users.Remove(expectedUser!);
     }
-    #endregion
+    
     [Fact]
     public async Task POST_Register_ValidPayload_Succeeds()
     {
@@ -105,17 +97,16 @@ public class Test : BaseTest
         var authClient = serviceProvider.GetRequiredService<Library.Authentication.Interface>();
         //Data
         var id = Guid.NewGuid();
-        var payload = new Library.Authentication.Register.Protos.Payload
+        var payload = new Library.Authentication.Register.Payload
         {
-            FirstName = "DUY",
-            LastName = "NGUYEN",
+            AccountName = "DUY NGUYEN",
             UserName = $"duy_nguyen_{id}",
             Email = $"duy_nguyen_{id}@example.com",
             Password = "StrongPassword@123",
             ConfirmPassword = "StrongPassword@123",
             PhoneNumber = "0123456789",
         };
-        await authClient.GrpcRegisterAsync(payload);
+        await authClient.RegisterAsync(payload);
         //Act
         var expectedIdentityUser = await identityDbContext.Users.FirstOrDefaultAsync(u => u.Email == payload.Email);
         var expectedUser = await journalDbContext.Users.FirstOrDefaultAsync(u => u.Email == payload.Email);
@@ -125,8 +116,9 @@ public class Test : BaseTest
         Assert.Equal(payload.UserName, $"duy_nguyen_{id}");
         Assert.Equal(payload.PhoneNumber, expectedUser?.PhoneNumber);
         //Clean up
-        identityDbContext.Users.Remove(expectedIdentityUser);
-        journalDbContext.Users.Remove(expectedUser);
-    
+        identityDbContext.Users.Remove(expectedIdentityUser!);
+        journalDbContext.Users.Remove(expectedUser!);
     }
+
+    #endregion
 }

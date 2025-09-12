@@ -8,7 +8,6 @@ public static class Extensions
     public static void RegisterAuthentication(this IServiceCollection services, Config config)
     {
         services.AddTransient<Implementations.Version1.RefitHttpClientHandler>();
-        services.AddTransient<Interface, Implementations.Version1.Implementation>();
 
         string baseUrl = config.Url;
 

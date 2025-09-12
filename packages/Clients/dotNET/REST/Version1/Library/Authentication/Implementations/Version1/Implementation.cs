@@ -73,13 +73,4 @@ public class Implementation : Interface
             return null;
         }
     }
-    public Task GrpcRegisterAsync(Register.Protos.Payload payload)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result?> GrpcSignInAsync(Signin.Protos.Payload payload)
-    {
-        throw new NotImplementedException();
-    }
 }

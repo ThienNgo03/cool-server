@@ -1,5 +1,4 @@
-﻿using Library.Authentication.Signin;
-
+﻿
 namespace Library.Authentication.Implementations.Version2;
 
 public class Implementation : Interface
@@ -13,28 +12,28 @@ public class Implementation : Interface
         _loginClient = loginClient;
         _registerClient = registerClient;
     }
-    public async Task<Signin.Protos.Result?> GrpcSignInAsync(Signin.Protos.Payload payload)
+    public async Task<Signin.Response?> SignInAsync(Signin.Payload payload)
     {
         var grpcPayload = new Authentication.Signin.Protos.Payload
         {
-            Email = payload.Email,
+            Email = payload.Account,
             Password = payload.Password
         };
 
         var result = await _loginClient.LoginAsync(grpcPayload);
 
-        return new Signin.Protos.Result
+        return new Signin.Response
         {
             Token = result.Token
         };
     }
 
-    public async Task GrpcRegisterAsync(Register.Protos.Payload payload)
+    public async Task RegisterAsync(Register.Payload payload)
     {
         var grpcPayload = new Authentication.Register.Protos.Payload
         {
-            FirstName = payload.FirstName,
-            LastName = payload.LastName,
+            FirstName = payload.AccountName,
+            LastName = payload.AccountName,
             UserName = payload.UserName,
             Email = payload.Email,
             Password = payload.Password,
@@ -44,15 +43,5 @@ public class Implementation : Interface
         };
 
         await _registerClient.RegisterAsync(grpcPayload);
-    }
-
-    public Task<Response?> SignInAsync(Signin.Payload payload)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task RegisterAsync(Register.Payload payload)
-    {
-        throw new NotImplementedException();
     }
 }
