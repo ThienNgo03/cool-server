@@ -1,5 +1,4 @@
-﻿using Journal.Exercises.Get;
-using Journal.Models.PaginationResults;
+﻿using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;

@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Beta\**" />
+    <Content Remove="Beta\**" />
+    <EmbeddedResource Remove="Beta\**" />
+    <None Remove="Beta\**" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Azure.Storage.Blobs" Version="12.20.0" />
 	<PackageReference Include="ExcelDataReader" Version="3.7.0" />
 	<PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
@@ -32,7 +39,14 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Beta\Authentication\Login\login.proto" GrpcServices="Server" />
-		<Protobuf Include="Beta\Authentication\Register\register.proto" GrpcServices="Server" />
+	  <None Update="Databases\Journal\Tables\ExerciseMuscle\ExerciseMuscle.xlsx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Databases\Journal\Tables\Exercise\Exercises.xlsx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Databases\Journal\Tables\Muscle\Muscle.xlsx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>

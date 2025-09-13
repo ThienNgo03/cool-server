@@ -12,6 +12,7 @@ public class Implementation : Interface
         _loginClient = loginClient;
         _registerClient = registerClient;
     }
+
     public async Task<Signin.Response?> SignInAsync(Signin.Payload payload)
     {
         var grpcPayload = new Protos.LoginPayload

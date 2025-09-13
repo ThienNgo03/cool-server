@@ -8,7 +8,7 @@ public class SeedFactory
     public async Task SeedExercise(JournalDbContext context)
     {
 
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exercises.xlsx");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases/Journal/Tables/Exercise/Exercises.xlsx");
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 
@@ -44,7 +44,7 @@ public class SeedFactory
     public async Task SeedMuscle(JournalDbContext context)
     {
 
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Muscle.xlsx");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases/Journal/Tables/Muscle/Muscle.xlsx");
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 
@@ -76,7 +76,7 @@ public class SeedFactory
     public async Task SeedExerciseMuscle(JournalDbContext context)
     {
 
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExerciseMuscle.xlsx");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases/Journal/Tables/ExerciseMuscle/ExerciseMuscle.xlsx");
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 

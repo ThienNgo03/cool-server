@@ -21,7 +21,7 @@ public class BaseTest
         if (string.IsNullOrEmpty(token))
             throw new InvalidOperationException("Failed to retrieve authentication token.");
 
-        Library.Config locaHostConfig = new("https://localhost:7011");
+        Library.Config locaHostConfig = new("https://storm-ergshka6h7a0bngn.southeastasia-01.azurewebsites.net");
         var services = new ServiceCollection();
         services.AddEndpoints(locaHostConfig);
 
