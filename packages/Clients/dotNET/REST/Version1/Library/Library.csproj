@@ -21,8 +21,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Authentication\Register\Protos\register.proto" GrpcServices="Client"/>
-		<Protobuf Include="Authentication\Signin\Protos\login.proto" GrpcServices="Client"/>
+		<Protobuf Include="Authentication\Implementations\Version2\Protos\register.proto" GrpcServices="Client" />
+		<Protobuf Include="Authentication\Implementations\Version2\Protos\login.proto" GrpcServices="Client" />
 	</ItemGroup>
 
 </Project>
