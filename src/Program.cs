@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
-//builder.Services.AddGrpc();
+builder.Services.AddGrpc();
 builder.Services.AddDatabases(builder.Configuration);
 builder.Services.AddWolverines(builder.Configuration);
 builder.Services.AddJourneys(builder.Configuration);
@@ -25,6 +25,8 @@ app.MapControllers();
 
 //app.MapGrpcService<Journal.Beta.Authentication.Login.Service>();
 //app.MapGrpcService<Journal.Beta.Authentication.Register.Service>();
+app.MapGrpcService<Journal.Notes.Create.Service>();
+app.MapGrpcService<Journal.Notes.Search.Service>();
 
 app.MapHub<Journal.Competitions.Hub>("competitions-hub");
 app.MapHub<Journal.Exercises.Hub>("exercises-hub");
