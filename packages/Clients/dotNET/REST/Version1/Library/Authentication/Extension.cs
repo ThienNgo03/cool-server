@@ -15,8 +15,8 @@ public static class Extensions
                 .ConfigurePrimaryHttpMessageHandler<Implementations.Version1.RefitHttpClientHandler>()
                 .ConfigureHttpClient(x => x.BaseAddress = new Uri(baseUrl));
 
-        services.AddGrpcClient<Signin.Protos.LoginMethod.LoginMethodClient>(o => o.Address = new Uri(baseUrl));
-        services.AddGrpcClient<Register.Protos.RegisterMethod.RegisterMethodClient>(o => o.Address = new Uri(baseUrl));
+        services.AddGrpcClient<Authentication.Implementations.Version2.Protos.LoginMethod.LoginMethodClient>(o => o.Address = new Uri(baseUrl));
+        services.AddGrpcClient<Authentication.Implementations.Version2.Protos.RegisterMethod.RegisterMethodClient>(o => o.Address = new Uri(baseUrl));
         services.AddTransient<Interface, Implementations.Version2.Implementation>();
 
     }

@@ -41,6 +41,16 @@ public class Service : RegisterMethod.RegisterMethodBase
             PhoneNumber = request.PhoneNumber,
             EmailConfirmed = true
         };
+        var existingUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        if (existingUserByEmail != null)
+        {
+            throw new RpcException(new Status(StatusCode.AlreadyExists, "Email already in use"));
+        }
+        var existingUserByPhone = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber);
+        if (existingUserByPhone != null)
+        {
+            throw new RpcException(new Status(StatusCode.AlreadyExists, "Phone number already in use"));
+        }
 
         var result = await _userManager.CreateAsync(newAccount, request.Password);
         if (!result.Succeeded)

@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Journal.Beta.Authentication.Login;
 
@@ -16,6 +17,8 @@ public class Service : LoginMethod.LoginMethodBase
     private readonly ILogger<Service> _logger;
     private readonly IConfiguration _configuration;
     private readonly UserManager<IdentityUser> _userManager;
+    private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+    private static readonly Regex VietnamesePhoneRegex = new(@"^(?:\+84|0)(?:3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$", RegexOptions.Compiled);
     public Service(ILogger<Service> logger,
         UserManager<IdentityUser> userManager,
         IConfiguration configuration,
@@ -29,14 +32,23 @@ public class Service : LoginMethod.LoginMethodBase
 
     public override async Task<Result> Login(Payload payload, ServerCallContext context)
     {
-        var user = await _userManager.FindByEmailAsync(payload.Email) ?? throw new RpcException(new Status(StatusCode.InvalidArgument, "Email does not exists."));
+        IdentityUser user = new();
+        if (EmailRegex.IsMatch(payload.Account))
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.Email == payload.Account) ?? throw new RpcException(new Status(StatusCode.Unavailable, "Email does not exist"));
+        }
+        if (VietnamesePhoneRegex.IsMatch(payload.Account))
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == payload.Account) ?? throw new RpcException(new Status(StatusCode.Unavailable, "Phone number does not exist"));
+        }
+
         var result = await _userManager.CheckPasswordAsync(user, payload.Password);
         if (!result)
         {
             throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid email or password."));
         }
 
-        var token = GenerateToken(payload.Email);
+        var token = GenerateToken(user.Email!);
         Result response = new()
         {
             Token=token,

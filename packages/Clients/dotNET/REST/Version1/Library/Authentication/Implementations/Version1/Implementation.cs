@@ -1,5 +1,4 @@
-﻿using Library.Authentication.Signin.Protos;
-using Refit;
+﻿using Refit;
 using System.Diagnostics;
 
 namespace Library.Authentication.Implementations.Version1;

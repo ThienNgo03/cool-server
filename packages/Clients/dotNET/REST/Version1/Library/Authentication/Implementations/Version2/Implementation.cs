@@ -3,20 +3,20 @@ namespace Library.Authentication.Implementations.Version2;
 
 public class Implementation : Interface
 {
-    private readonly Signin.Protos.LoginMethod.LoginMethodClient _loginClient;
-    private readonly Register.Protos.RegisterMethod.RegisterMethodClient _registerClient;
+    private readonly Protos.LoginMethod.LoginMethodClient _loginClient;
+    private readonly Protos.RegisterMethod.RegisterMethodClient _registerClient;
     public Implementation(
-        Signin.Protos.LoginMethod.LoginMethodClient loginClient,
-        Register.Protos.RegisterMethod.RegisterMethodClient registerClient)
+        Protos.LoginMethod.LoginMethodClient loginClient,
+        Protos.RegisterMethod.RegisterMethodClient registerClient)
     {
         _loginClient = loginClient;
         _registerClient = registerClient;
     }
     public async Task<Signin.Response?> SignInAsync(Signin.Payload payload)
     {
-        var grpcPayload = new Signin.Protos.Payload
+        var grpcPayload = new Protos.LoginPayload
         {
-            Email = payload.Account,
+            Account = payload.Account,
             Password = payload.Password
         };
 
@@ -30,7 +30,7 @@ public class Implementation : Interface
 
     public async Task RegisterAsync(Register.Payload payload)
     {
-        var grpcPayload = new Register.Protos.Payload
+        var grpcPayload = new Version2.Protos.RegisterPayload
         {
             FirstName = payload.AccountName,
             LastName = payload.AccountName,
@@ -44,4 +44,5 @@ public class Implementation : Interface
 
         await _registerClient.RegisterAsync(grpcPayload);
     }
+
 }
