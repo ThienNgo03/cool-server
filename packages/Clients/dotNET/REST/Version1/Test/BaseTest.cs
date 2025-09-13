@@ -41,7 +41,7 @@ public class BaseTest
     public string? GetBearerToken()
     {
         var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7011/api/authentication/login");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://storm-ergshka6h7a0bngn.southeastasia-01.azurewebsites.net/api/authentication/login");
 
         var jsonPayload = @"{
             ""account"": ""systemtester@journal.com"",
