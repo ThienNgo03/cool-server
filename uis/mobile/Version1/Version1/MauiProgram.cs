@@ -2,7 +2,6 @@
 using Mvvm;
 using Library;
 using Navigation;
-using Maui.FreakyEffects;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
@@ -14,7 +13,7 @@ namespace Version1;
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
-    {
+    {       
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -49,9 +48,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAppNavigator, AppNavigator>();
 
 
-        Library.Config locaHostConfig = new("https://localhost:7011");
-        Library.Config devTunnelEnviroment = new("https://4hcqlw1b-7011.asse.devtunnels.ms/");
-        builder.Services.AddEndpoints(devTunnelEnviroment);
+        Library.Config locaHostConfig = new("https://localhost:7011/");
+        Library.Config devTunnelEnviroment = new("https://j4z5g49z-7011.asse.devtunnels.ms/");
+        Library.Config productionEnviroment = new("https://storm-ergshka6h7a0bngn.southeastasia-01.azurewebsites.net/");
+        builder.Services.AddEndpoints(productionEnviroment);
         return builder;
     }
 
