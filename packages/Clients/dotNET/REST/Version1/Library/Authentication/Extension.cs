@@ -19,7 +19,7 @@ public static class Extensions
         services.AddGrpcClient<Implementations.Version2.Protos.RegisterMethod.RegisterMethodClient>(o => o.Address = new Uri(baseUrl));
 
 
-        services.AddTransient<Interface, Implementations.Version2.Implementation>();
+        services.AddTransient<Interface, Implementations.Version1.Implementation>();
 
     }
 }

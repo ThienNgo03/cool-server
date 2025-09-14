@@ -16,4 +16,9 @@ public partial class Page : ContentPage
         BindingContext = this.viewModel = viewModel;
     }
     #endregion
+
+    private async void ContentPage_Loaded(object sender, EventArgs e)
+    {
+        await this.viewModel.OnAppearingAsync();
+    }
 }

@@ -16,100 +16,14 @@ public partial class ViewModel(
     private readonly Library.Exercises.Interface exercises = exercises;
     private readonly Library.Workouts.Interface workouts = workouts;
     private readonly Library.WeekPlanSets.Interface weekplanSet = weekplanSet;
-    private readonly ContentViews.Card.Model[] source = new ContentViews.Card.Model[]
-    {
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Squat",
-            SubTitle = "Legs",
-            Description = "A squat is a strength exercise in which the trainee lowers their hips from a standing position and then stands back up. During the descent, the hip and knee joints flex while the ankle joint dorsiflexes; conversely the hip and knee joints extend and the ankle joint plantarflexes when standing up.",
-            IconUrl = "squat_64.png",
-            Badge = "Easy",
-            BadgeTextColor = "#2f8557",
-            BadgeBackgroundColor = "#dbfce7",
-            Progress = 45
-        },
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Lunges",
-            SubTitle = "Legs & Glutes",
-            Description = "Lunges strengthen the lower body by targeting the quads, hamstrings, and glutes. They also improve balance and coordination.",
-            IconUrl = "lunges_64.png",
-            Badge = "Easy",
-            BadgeTextColor = "#2f8557",
-            BadgeBackgroundColor = "#dbfce7",
-            Progress = 90
-        },
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Triceps Extension",
-            SubTitle = "Arms",
-            Description = "Triceps extensions isolate and strengthen the triceps muscles, helping to tone the back of the arms and improve upper body strength.",
-            IconUrl = "triceps_64.png",
-            Badge = "Medium",
-            BadgeTextColor = "#2b6cb0",
-            BadgeBackgroundColor = "#ebf8ff",
-        },
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Pull-Up",
-            SubTitle = "Back & Biceps",
-            Description = "Pull-ups are a compound upper-body exercise that build strength in the lats, biceps, and shoulders by lifting your body over a bar.",
-            IconUrl = "pullup_64.png",
-            Badge = "Hard",
-            BadgeTextColor = "#c53030",
-            BadgeBackgroundColor = "#fed7d7",
-        },
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Push-Up",
-            SubTitle = "Chest & Triceps",
-            Description = "Push-ups are a classic bodyweight exercise that target the chest, shoulders, and triceps while also engaging the core.",
-            IconUrl = "pushup_64.png",
-            Badge = "Easy",
-            BadgeTextColor = "#2b6cb0",
-            BadgeBackgroundColor = "#ebf8ff",
-        },
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Plank",
-            SubTitle = "Core",
-            Description = "The plank is an isometric hold that strengthens the core, shoulders, and glutes while improving posture and stability.",
-            IconUrl = "plank_64.png",
-            Badge = "Medium",
-            BadgeTextColor = "#b7791f",
-            BadgeBackgroundColor = "#fefcbf",
-        },
-        new()
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "Pilates",
-            SubTitle = "Core & Flexibility",
-            Description = "Pilates is a low-impact exercise that focuses on core strength, flexibility, and mindful movement. It improves posture and body awareness.",
-            IconUrl = "pilates_64.png",
-            Badge = "Medium",
-            BadgeTextColor = "#b7791f",
-            BadgeBackgroundColor = "#fefcbf",
-        },
-    };
     #endregion
 
     #region [ UI ]
 
+    private ContentViews.Card.Model[] source = Array.Empty<ContentViews.Card.Model>();
+
     [ObservableProperty]
     bool isLoading;
-
-    [ObservableProperty]
-    bool isClearButtonVisible;
-
-    [RelayCommand]
-    public void ClearSearch() => SearchTerm = string.Empty;
 
     [ObservableProperty]
     ObservableCollection<string> tags = new();
@@ -133,6 +47,9 @@ public partial class ViewModel(
             {
                 return;
             }
+
+            var serverData = new List<ContentViews.Card.Model>();
+
             foreach (var ex in response.Data.Items)
             {
                 var card = new ContentViews.Card.Model
@@ -149,8 +66,11 @@ public partial class ViewModel(
                     BadgeBackgroundColor = "#ebf8ff",
                     Progress = 50,
                 };
-                Items.Add(card);
+                serverData.Add(card);
             }
+            
+            source = serverData.ToArray();
+            Items = new ObservableCollection<ContentViews.Card.Model>(source);
 
             var tagResponse = await muscles.AllAsync();
             if (tagResponse?.Data?.Items == null)
@@ -181,14 +101,19 @@ public partial class ViewModel(
     [ObservableProperty]
     string searchTerm = string.Empty;
 
-    private CancellationTokenSource? _searchCancellationTokenSource;
-
     partial void OnSearchTermChanged(string value)
     {
         IsClearButtonVisible = !string.IsNullOrWhiteSpace(value);
         ApplyFilters();
     }
 
+    [ObservableProperty]
+    bool isClearButtonVisible;
+
+    [RelayCommand]
+    public void ClearSearch() => SearchTerm = string.Empty;
+
+    private CancellationTokenSource? _searchCancellationTokenSource;
 
     private static Func<ContentViews.Card.Model, bool> MatchesSearchTerm(string searchTerm) =>
         item => new[] { item.Title, item.SubTitle, item.Description }
@@ -232,16 +157,13 @@ public partial class ViewModel(
             try
             {
                 await Task.Delay(100, _filterCancellationTokenSource.Token);
-
                 var filtered = source.AsEnumerable();
 
-                // Apply search filter if search term exists
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
                 {
                     filtered = filtered.Where(MatchesSearchTerm(SearchTerm));
                 }
 
-                // Apply tag filter if any tags are selected
                 if (SelectedTags?.Count > 0)
                 {
                     filtered = filtered.Where(MatchesSelectedTags);
