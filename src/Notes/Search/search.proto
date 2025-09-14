@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "Journal.Notes.Search";
+
+package search;
+service SearchMethod {
+  // Sends a greeting
+  rpc Search (Parameter) returns (ListResult);
+}
+message Parameter {
+  optional string id = 1;
+  optional string journeyId=2;
+  optional string userId=3;
+  optional string content=4;
+  optional string mood=5;
+  optional string date=6;
+  optional int32 pageNumber=7;
+  optional int32 pageSize=8;
+}
+message ListResult{
+	  repeated Result results = 1;
+}
+// The response message containing the greetings.
+message Result {
+  string id = 1;
+  string journeyId=2;
+  string userId=3;
+  string content=4;
+  string mood=5;
+  string date=6;
+}

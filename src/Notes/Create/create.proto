@@ -1,0 +1,16 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option csharp_namespace = "Journal.Notes.Create";
+
+package create;
+service CreateMethod {
+  // Sends a greeting
+  rpc Create (Payload) returns (google.protobuf.Empty);
+}
+message Payload {
+  string journeyId=1;
+  string userId=2;
+  string content=3;
+  string mood=4;
+}
+

@@ -49,4 +49,12 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Notes\Create\" />
+	</ItemGroup>
+	<ItemGroup>
+		<Protobuf Include="Notes\Create\create.proto" GrpcServices="Server" />
+		<Protobuf Include="Notes\Search\search.proto" GrpcServices="Server" />
+	</ItemGroup>
 </Project>
