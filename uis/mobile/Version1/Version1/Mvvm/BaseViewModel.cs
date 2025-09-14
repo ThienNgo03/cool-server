@@ -8,6 +8,9 @@ public abstract partial class BaseViewModel : ObservableRecipient
     protected App? MyApp { get; }
     protected IAppNavigator AppNavigator { get; }
 
+    [ObservableProperty]
+    bool isFuckingBusy;
+
     protected BaseViewModel(IAppNavigator appNavigator)
     {
         MyApp = Application.Current as App;
