@@ -13,6 +13,7 @@ using Library.WorkoutLogSets;
 using Library.Muscles;
 
 using Microsoft.Extensions.DependencyInjection;
+using Library.Files.Identifiers;
 
 namespace Library;
 
@@ -35,6 +36,7 @@ public static class Extensions
         services.RegisterWeekPlanSets(config);
         services.RegisterWorkoutLogSets(config);
         services.RegisterMuscles(config);
+        services.RegisterFilesIdentifiers(config);
         return services;
     }
 }

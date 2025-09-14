@@ -1,0 +1,161 @@
+{
+	"info": {
+		"_postman_id": "0446a2e3-f9e1-4c4a-bf3f-65ba3688766b",
+		"name": "Exercises 🏋️",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-0446a2e3-f9e1-4c4a-bf3f-65ba3688766b?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": ".",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "{{dev-url}}/api/exercises",
+					"host": [
+						"{{dev-url}}"
+					],
+					"path": [
+						"api",
+						"exercises"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Dip\",\r\n    \"description\": \"abcde\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercises",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercises"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    { \"op\": \"replace\", \"path\": \"/\", \"value\": \"\"}\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{dev-url}}/api/exercises",
+					"host": [
+						"{{dev-url}}"
+					],
+					"path": [
+						"api",
+						"exercises"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"7304fa54-0587-4b42-8b43-a544a3fd7fe0\",\r\n    \"name\": \"Pull Up\",\r\n    \"description\": \"abcde\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercises",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercises"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "🗑️",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"59a21357-11f7-4047-8680-4b73b4ba4f79\",\r\n        \"journeyId\": \"3e3af948-0893-43d4-b34c-0b242c548b1f\",\r\n        \"userId\": \"c3f8857a-cf9c-40d5-8980-edce1bc140f3\",\r\n        \"content\": \"test\",\r\n        \"mood\": \"fun\",\r\n        \"date\": \"2025-07-15T00:00:00\"\r\n    }"
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercises?id=7304fa54-0587-4b42-8b43-a544a3fd7fe0",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercises"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "7304fa54-0587-4b42-8b43-a544a3fd7fe0"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

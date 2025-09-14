@@ -1,0 +1,226 @@
+{
+	"info": {
+		"_postman_id": "fd2dfd4a-a550-4423-9ea2-48e2dabd0e61",
+		"name": "Competition",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-fd2dfd4a-a550-4423-9ea2-48e2dabd0e61?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7011/api/Competitions",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"Competitions"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": "c27060a2-c2e1-424c-ad29-40f96f01b75c",
+							"disabled": true
+						},
+						{
+							"key": "PageSize",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "PageIndex",
+							"value": "1",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"New competition\",\r\n    \"description\": \"New description\",\r\n    \"location\": \"New location\",\r\n    \"dateTime\": \"2024-01-01\",\r\n    \"exerciseId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"type\": \"Solo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/competitions",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"competitions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/Competitions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"Competitions"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": "c061777e-04d1-4a6c-8b58-b725a65147a8",
+							"disabled": true
+						},
+						{
+							"key": "DeleteSoloPool",
+							"value": "true",
+							"disabled": true
+						},
+						{
+							"key": "DeleteTeamPool",
+							"value": "true",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"382d26bc-00fd-45e7-ace2-0a834647b746\",\r\n    \"title\": \"New competition\",\r\n    \"description\": \"New description\",\r\n    \"location\": \"New location\",\r\n    \"dateTime\": \"2024-01-01\",\r\n    \"exerciseId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"type\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/Competitions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"Competitions"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

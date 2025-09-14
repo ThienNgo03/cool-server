@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "e565a693-e2fb-4380-8ef7-9a85528850b5",
+		"name": "ExerciseMuscles",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-e565a693-e2fb-4380-8ef7-9a85528850b5?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ExerciseId\": \"d1800069-b444-4ced-adfd-08dbe2a43ea4\",\r\n    \"MuscleId\": \"3c7c4d1a-d975-4951-8506-8a8be0dc24d6\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Id\": \"79081904-814f-4cb6-a66e-ed67d7daed04\",\r\n    \"ExerciseId\": \"81491e20-fb69-46d1-aa51-8117eccfb0f0\",\r\n    \"MuscleId\": \"075e7293-27b7-43a1-a3bf-2e872e9dd477\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN_JOURNAL}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7011/api/exercise-muscles?id=79081904-814f-4cb6-a66e-ed67d7daed04",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"exercise-muscles"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "79081904-814f-4cb6-a66e-ed67d7daed04"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -307,6 +307,11 @@ public class Controller : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId is null)
             return Unauthorized("User Id not found");
+        if (parameters.IsDeleteAll)
+        {
+            await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE Workouts");
+            return NoContent();
+        }
 
         var workout = await _context.Workouts.FindAsync(parameters.Id);
         if (workout == null)

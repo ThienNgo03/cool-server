@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "1429a144-dfbd-4bdc-b02d-50c80a9dd52c",
+		"name": "SoloPool",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-1429a144-dfbd-4bdc-b02d-50c80a9dd52c?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/solo-pools",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"solo-pools"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"winnerId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"loserId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"competitionId\": \"3897195a-48a2-4ee8-9ac3-0d13ec5b5439\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7011/api/solo-pools",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7011",
+					"path": [
+						"api",
+						"solo-pools"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\":\"\",\r\n    \"winnerId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"loserId\": \"00000000-0000-0000-0000-000000000000\",\r\n    \"competitionId\": \"382d26bc-00fd-45e7-ace2-0a834647b746\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/SoloPools",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"SoloPools"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5059/api/SoloPools",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5059",
+					"path": [
+						"api",
+						"SoloPools"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

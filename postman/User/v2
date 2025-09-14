@@ -1,0 +1,122 @@
+{
+	"info": {
+		"_postman_id": "0fd1a214-17d2-4b7b-baeb-5e86b6bb3abd",
+		"name": "Users",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-0fd1a214-17d2-4b7b-baeb-5e86b6bb3abd?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{dev-url}}/api/users?PageSize=2&PageIndex=0",
+					"host": [
+						"{{dev-url}}"
+					],
+					"path": [
+						"api",
+						"users"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": "832d797c-10ee-41ae-868d-0f7caefaa877",
+							"disabled": true
+						},
+						{
+							"key": "Name",
+							"value": "Thien",
+							"disabled": true
+						},
+						{
+							"key": "PageSize",
+							"value": "2"
+						},
+						{
+							"key": "PageIndex",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{production}}/api/users",
+					"host": [
+						"{{production}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{production}}/api/users",
+					"host": [
+						"{{production}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{production}}/api/users",
+					"host": [
+						"{{production}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,185 @@
+{
+	"info": {
+		"_postman_id": "75a900df-b707-40a0-a7e5-f019440221ec",
+		"name": "Blob",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45965065",
+		"_collection_link": "https://ngongocthien.postman.co/workspace/Ngo-Ngoc-Thien's-Workspace~bb2a4730-9591-479a-86ca-ea81434baf03/collection/45965065-75a900df-b707-40a0-a7e5-f019440221ec?action=share&source=collection_link&creator=45965065"
+	},
+	"item": [
+		{
+			"name": "Sas Token",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwYjAzYjVjMi0yMzAzLTRmODMtOGQ5Ny01ODk1ZDVmN2M0NTYiLCJlbWFpbCI6InN5c3RlbXRlc3RlckBqb3VybmFsLmNvbSIsImp0aSI6ImNhZDdhYTMxLTIwOTItNDQ0NS04Mjc1LTg1ODNmZjYyNjJkMyIsImV4cCI6MTc1NTYyNDM2MywiaXNzIjoiQXV0aENvb2xTZXJ2ZXIiLCJhdWQiOiJBdXRoQ29vbENsaWVudCJ9.7Qbzc_nMIQTqq4iewOdKLMGkKDbMaa3EyBFeXXedSxU",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"0b03b5c2-2303-4f83-8d97-5895d5f7c456\",\r\n    \"exerciseId\": \"0dba3844-4fc1-4cee-9cb9-3932b6758303\",\r\n    \"weekPlans\": [\r\n        {\r\n            \"dateOfWeek\": \"Monday\",\r\n            \"time\": \"2025-07-20\",\r\n            \"weekPlanSets\": [\r\n                {\r\n                    \"value\": 12\r\n                },\r\n                {\r\n                    \"value\": 10\r\n                },\r\n                {\r\n                    \"value\": 8\r\n                }\r\n            ]\r\n        }\r\n    ]\r\n}"
+				},
+				"url": {
+					"raw": "{{dev-tunnel-url}}/api/blob",
+					"host": [
+						"{{dev-tunnel-url}}"
+					],
+					"path": [
+						"api",
+						"blob"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{dev-url}}/api/files/identifiers",
+					"host": [
+						"{{dev-url}}"
+					],
+					"path": [
+						"api",
+						"files",
+						"identifiers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Id\": \"my-identifier-id-5\",\r\n  \"AccessPolicy\": {\r\n    \"Permissions\": \"lcwr\", \r\n    \"PolicyStartsOn\": \"2025-09-13T16:45:00Z\",\r\n    \"PolicyExpiresOn\": \"2025-09-14T16:45:00Z\"\r\n  }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/files/identifiers",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"files",
+						"identifiers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"my-identifier-id-4\",\r\n    \"accessPolicy\": {\r\n        \"policyStartsOn\": \"2025-09-13T16:45:00+00:00\",\r\n        \"policyExpiresOn\": \"2025-09-16T16:45:00+00:00\",\r\n        \"permissions\": \"rcwl\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/files/identifiers",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"files",
+						"identifiers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{localhost}}/api/files/policies?policyId=test full permissions",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"files",
+						"policies"
+					],
+					"query": [
+						{
+							"key": "policyId",
+							"value": "test full permissions"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    { \"op\": \"replace\", \"path\": \"/Permissions\", \"value\": \"rwc\"}\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/files/identifiers?identifierId=my-identifier-id-5",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"files",
+						"identifiers"
+					],
+					"query": [
+						{
+							"key": "identifierId",
+							"value": "my-identifier-id-5"
+						},
+						{
+							"key": "expiry",
+							"value": "5",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,11 +1,12 @@
-﻿using Library;
+﻿using Azure.Storage.Blobs;
+using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Text.Json;
-using local = Test.Constant;
-using Test.Databases.Journal;
 using Test.Databases.Identity;
+using Test.Databases.Journal;
+using local = Test.Constant;
 
 namespace Test;
 
@@ -21,7 +22,7 @@ public class BaseTest
         if (string.IsNullOrEmpty(token))
             throw new InvalidOperationException("Failed to retrieve authentication token.");
 
-        Library.Config locaHostConfig = new("https://storm-ergshka6h7a0bngn.southeastasia-01.azurewebsites.net");
+        Library.Config locaHostConfig = new("https://localhost:7011");
         var services = new ServiceCollection();
         services.AddEndpoints(locaHostConfig);
 
@@ -29,6 +30,11 @@ public class BaseTest
            options.UseSqlServer(local.Config.JournalConnectionString));
         services.AddDbContext<IdentityContext>(options =>
            options.UseSqlServer(local.Config.IdentityConnectionString));
+
+        var connectionString = "UseDevelopmentStorage=true";
+        var containerName = "container1";
+
+        services.AddSingleton(new BlobContainerClient(connectionString, containerName));
 
         serviceProvider = services.BuildServiceProvider();
 

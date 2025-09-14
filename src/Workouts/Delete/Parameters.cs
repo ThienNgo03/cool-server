@@ -7,4 +7,6 @@ public class Parameters
     public bool IsWeekPlanDelete { get; set; }
 
     public bool IsWeekPlanSetDelete { get; set; }
+
+    public bool IsDeleteAll { get; set; }
 }
