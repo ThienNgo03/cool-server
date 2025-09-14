@@ -12,6 +12,8 @@ public class Model
 
     public DateTime LastUpdated { get; set; }
 
+    public Exercise? Exercise { get; set; }
+
     public ICollection<WeekPlan>? WeekPlans { get; set; }
 }
 
@@ -41,4 +43,33 @@ public class WeekPlanSet
     public Guid UpdatedBy { get; set; }
     public Guid WeekPlanId { get; set; }
     public int Value { get; set; }
+}
+
+public class Exercise
+{
+    public Guid Id { get; set; }
+
+    public string Name { get; set; }
+
+    public string Description { get; set; }
+
+    public string Type { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime LastUpdated { get; set; }
+
+    public ICollection<ExerciseMuscle>? ExerciseMuscles { get; set; }
+
+}
+
+public class ExerciseMuscle
+{
+    public Guid Id { get; set; }
+
+    public string Name { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime LastUpdated { get; set; }
 }

@@ -36,6 +36,8 @@ public class Implementation : Interface
             LastUpdated = parameters.LastUpdated,
             IsIncludeWeekPlans = parameters.IsIncludeWeekPlans,
             IsIncludeWeekPlanSets = parameters.IsIncludeWeekPlanSets,
+            IsIncludeExercises = parameters.IsIncludeExercises,
+            IsIncludeExerciseMuscles = parameters.IsIncludeExerciseMuscles
         };
 
         try
@@ -100,6 +102,22 @@ public class Implementation : Interface
                     UserId = item.UserId,
                     CreatedDate = item.CreatedDate,
                     LastUpdated = item.LastUpdated,
+                    Exercise = item.Exercise is null ? null : new Exercise
+                    {
+                        Id = item.Exercise.Id,
+                        Name = item.Exercise.Name,
+                        Description = item.Exercise.Description,
+                        Type = item.Exercise.Type,
+                        CreatedDate = item.Exercise.CreatedDate,
+                        LastUpdated = item.Exercise.LastUpdated,
+                        ExerciseMuscles = item.Exercise.ExerciseMuscles?.Select(em => new ExerciseMuscle
+                        {
+                            Id = em.Id,
+                            Name = em.Name,
+                            CreatedDate = em.CreatedDate,
+                            LastUpdated = em.LastUpdated
+                        }).ToList()
+                    },
                     WeekPlans = item.WeekPlans?.Select(wp => new WeekPlan
                     {
                         Id = wp.Id,

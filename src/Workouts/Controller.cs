@@ -25,6 +25,134 @@ public class Controller : ControllerBase
         _hubContext = hubContext;
     }
 
+    //[HttpGet]
+    //public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
+    //{
+    //    var query = _context.Workouts.AsQueryable();
+
+    //    if (parameters.Id.HasValue)
+    //        query = query.Where(x => x.Id == parameters.Id);
+    //    if (parameters.ExerciseId.HasValue)
+    //        query = query.Where(x => x.ExerciseId == parameters.ExerciseId);
+    //    if (parameters.UserId.HasValue)
+    //        query = query.Where(x => x.UserId == parameters.UserId);
+    //    if (parameters.CreatedDate.HasValue)
+    //        query = query.Where(x => x.CreatedDate == parameters.CreatedDate);
+    //    if (parameters.LastUpdated.HasValue)
+    //        query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
+
+    //    if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex.Value >= 0)
+    //        query = query.Skip(parameters.PageSize.Value * parameters.PageIndex.Value).Take(parameters.PageSize.Value);
+
+    //    var result = await query.AsNoTracking().ToListAsync();
+
+    //    // Pre-fetch all related data in single queries
+    //    var workoutIds = result.Select(w => w.Id).ToList();
+    //    var exerciseIds = result.Select(w => w.ExerciseId).Distinct().ToList();
+
+    //    // Get all related exercises in one query
+    //    var exercises = await _context.Exercises
+    //        .Where(e => exerciseIds.Contains(e.Id))
+    //        .ToDictionaryAsync(e => e.Id);
+
+    //    // Get all related week plans and sets in single queries if requested
+    //    Dictionary<Guid, List<Get.WeekPlan>> workoutWeekPlans = new();
+    //    if (parameters.IsIncludeWeekPlans)
+    //    {
+    //        var weekPlans = await _context.WeekPlans
+    //            .Where(wp => workoutIds.Contains(wp.WorkoutId))
+    //            .ToListAsync();
+
+    //        var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
+
+    //        // Only fetch WeekPlanSets if IsIncludeWeekPlanSets is true
+    //        Dictionary<Guid, List<Get.WeekPlanSet>> weekPlanSetsByWeekPlanId = new();
+    //        if (parameters.IsIncludeWeekPlanSets)
+    //        {
+    //            var weekPlanSets = await _context.WeekPlanSets
+    //                .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
+    //                .ToListAsync();
+
+    //            foreach (var set in weekPlanSets)
+    //            {
+    //                if (!weekPlanSetsByWeekPlanId.ContainsKey(set.WeekPlanId))
+    //                    weekPlanSetsByWeekPlanId[set.WeekPlanId] = new List<Get.WeekPlanSet>();
+
+    //                weekPlanSetsByWeekPlanId[set.WeekPlanId].Add(new Get.WeekPlanSet
+    //                {
+    //                    Id = set.Id,
+    //                    Value = set.Value,
+    //                    WeekPlanId = set.WeekPlanId,
+    //                    InsertedBy = set.InsertedBy,
+    //                    UpdatedBy = set.UpdatedBy,
+    //                    LastUpdated = set.LastUpdated,
+    //                    CreatedDate = set.CreatedDate
+    //                });
+    //            }
+    //        }
+
+    //        // Group week plans by workout ID
+    //        foreach (var weekPlan in weekPlans)
+    //        {
+    //            if (!workoutWeekPlans.ContainsKey(weekPlan.WorkoutId))
+    //                workoutWeekPlans[weekPlan.WorkoutId] = new List<Get.WeekPlan>();
+
+    //            var weekPlanModel = new Get.WeekPlan
+    //            {
+    //                Id = weekPlan.Id,
+    //                DateOfWeek = weekPlan.DateOfWeek,
+    //                Time = weekPlan.Time,
+    //                WorkoutId = weekPlan.WorkoutId,
+    //                CreatedDate = weekPlan.CreatedDate,
+    //                LastUpdated = weekPlan.LastUpdated,
+    //                WeekPlanSets = parameters.IsIncludeWeekPlanSets &&
+    //                              weekPlanSetsByWeekPlanId.ContainsKey(weekPlan.Id)
+    //                              ? weekPlanSetsByWeekPlanId[weekPlan.Id]
+    //                              : null
+    //            };
+    //            workoutWeekPlans[weekPlan.WorkoutId].Add(weekPlanModel);
+    //        }
+    //    }
+
+    //    // Build responses using pre-fetched data
+    //    List<Get.Response> responses = result.Select(item => {
+    //        var response = new Get.Response
+    //        {
+    //            Id = item.Id,
+    //            ExerciseId = item.ExerciseId,
+    //            UserId = item.UserId,
+    //            CreatedDate = item.CreatedDate,
+    //            LastUpdated = item.LastUpdated
+    //        };
+
+    //        if (exercises.TryGetValue(item.ExerciseId, out var exercise))
+    //        {
+    //            response.Exercise = new Get.Exercise
+    //            {
+    //                Id = exercise.Id,
+    //                Name = exercise.Name,
+    //                Description = exercise.Description
+    //            };
+    //        }
+
+    //        if (parameters.IsIncludeWeekPlans && workoutWeekPlans.TryGetValue(item.Id, out var weekPlans))
+    //        {
+    //            response.WeekPlans = weekPlans;
+    //        }
+
+    //        return response;
+    //    }).ToList();
+
+    //    var paginationResults = new Builder<Get.Response>()
+    //        .WithIndex(parameters.PageIndex)
+    //        .WithSize(parameters.PageSize)
+    //        .WithTotal(responses.Count)
+    //        .WithItems(responses)
+    //        .Build();
+
+    //    return Ok(paginationResults);
+    //}
+
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
@@ -54,6 +182,40 @@ public class Controller : ControllerBase
         var exercises = await _context.Exercises
             .Where(e => exerciseIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id);
+
+        // Fetch exercise muscles if requested
+        Dictionary<Guid, List<Get.ExerciseMuscle>> exerciseMuscles = new();
+        if (parameters.IsIncludeExerciseMuscles)
+        {
+            var exerciseMuscleRelations = await _context.ExerciseMuscles
+                .Where(em => exerciseIds.Contains(em.ExerciseId))
+                .ToListAsync();
+
+            var muscleIds = exerciseMuscleRelations.Select(em => em.MuscleId).Distinct().ToList();
+
+            // Get all muscles in one query
+            var muscles = await _context.Muscles
+                .Where(m => muscleIds.Contains(m.Id))
+                .ToDictionaryAsync(m => m.Id);
+
+            // Group muscles by exercise ID
+            foreach (var relation in exerciseMuscleRelations)
+            {
+                if (!exerciseMuscles.ContainsKey(relation.ExerciseId))
+                    exerciseMuscles[relation.ExerciseId] = new List<Get.ExerciseMuscle>();
+
+                if (muscles.TryGetValue(relation.MuscleId, out var muscle))
+                {
+                    exerciseMuscles[relation.ExerciseId].Add(new Get.ExerciseMuscle
+                    {
+                        Id = muscle.Id,
+                        Name = muscle.Name,
+                        CreatedDate = muscle.CreatedDate,
+                        LastUpdated = muscle.LastUpdated
+                    });
+                }
+            }
+        }
 
         // Get all related week plans and sets in single queries if requested
         Dictionary<Guid, List<Get.WeekPlan>> workoutWeekPlans = new();
@@ -125,14 +287,23 @@ public class Controller : ControllerBase
                 LastUpdated = item.LastUpdated
             };
 
-            if (exercises.TryGetValue(item.ExerciseId, out var exercise))
+            if (parameters.IsIncludeExercises && exercises.TryGetValue(item.ExerciseId, out var exercise))
             {
                 response.Exercise = new Get.Exercise
                 {
                     Id = exercise.Id,
                     Name = exercise.Name,
-                    Description = exercise.Description
+                    Description = exercise.Description,
+                    Type = exercise.Type,
+                    CreatedDate = exercise.CreatedDate,
+                    LastUpdated = exercise.LastUpdated
                 };
+
+                // Add muscles to exercise if requested
+                if (parameters.IsIncludeExerciseMuscles && exerciseMuscles.TryGetValue(exercise.Id, out var muscles))
+                {
+                    response.Exercise.ExerciseMuscles = muscles;
+                }
             }
 
             if (parameters.IsIncludeWeekPlans && workoutWeekPlans.TryGetValue(item.Id, out var weekPlans))
