@@ -3,8 +3,11 @@ using Navigation;
 
 namespace Version1.Features.Home;
 
-public partial class ViewModel(IAppNavigator appNavigator) : BaseViewModel(appNavigator)
+public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Interface workouts) : BaseViewModel(appNavigator)
 {
+    
+    private readonly Library.Workouts.Interface workouts = workouts;
+
     [ObservableProperty]
     List<CarouselItem> items = new();
 
@@ -13,39 +16,53 @@ public partial class ViewModel(IAppNavigator appNavigator) : BaseViewModel(appNa
         await base.OnAppearingAsync();
         IsFuckingBusy = true;
         await Task.Delay(2000); 
-        Items = new List<CarouselItem>
+
+        var response = await workouts.AllAsync( new Library.Workouts.All.Parameters {
+            UserId = MyApp?.CurrentUser?.Id,
+            IsIncludeWeekPlans = true,
+            IsIncludeWeekPlanSets = true,
+            IsIncludeExercises = true,
+            IsIncludeExerciseMuscles = true,
+        });
+
+        if (response.Data?.Items == null)
         {
-            new CarouselItem
+            IsFuckingBusy = false;
+            return;
+        }
+
+        var serverData = new List<CarouselItem>();
+        var dateOfWeek = DateTime.Today.DayOfWeek.ToString();
+        foreach (var workout in response.Data.Items)
+        {
+            var weekPlans = workout.WeekPlans?.Where(wp => wp.DateOfWeek == dateOfWeek).ToList();
+            if (weekPlans != null && weekPlans.Any())
             {
-                Id = Guid.NewGuid(),
-                Title = "Pull Up",
-                Subtitle = "Legs and shoulders",
-                Time = "17:00 PM",
-                Set = 3,
-                Reps = 10,
-                Icon = "pullup_64.png"
-            },
-            new CarouselItem
-            {
-                Id = Guid.NewGuid(),
-                Title = "Push Up",
-                Subtitle = "Chests, frontdell and triceps",
-                Time = "17:00 PM",
-                Set = 4,
-                Reps = 12,
-                Icon = "pushup_64.png"
-            },
-            new CarouselItem
-            {
-                Id = Guid.NewGuid(),
-                Title = "Squat",
-                Subtitle = "Glutes and Quadriceps",
-                Time = "17:00 PM",
-                Set = 5,
-                Reps = 8,
-                Icon = "squat_64.png"
+                var carouselItem = new CarouselItem { Id = workout.Id };
+                foreach (var weekPlan in weekPlans)
+                {
+                    carouselItem.Time = weekPlan.Time.ToString(@"hh\:mm");
+                    if (weekPlan.WeekPlanSets != null)
+                    {
+                        var setIndex = 1;
+                        foreach (var weekPlanSet in weekPlan.WeekPlanSets)
+                        {
+                            carouselItem.Set = setIndex++;
+                            carouselItem.Reps = weekPlanSet.Value;
+                        }
+                    }
+                }
+                if (workout.Exercise != null)
+                {
+                    carouselItem.Title = workout.Exercise.Name;
+                    carouselItem.Subtitle = string.Join(", ", workout.Exercise.ExerciseMuscles?.Select(m => m.Name) ?? new List<string> { "" });
+                    carouselItem.Icon = "dotnet_bot.png";
+                }
+                serverData.Add(carouselItem);
             }
-        };
+        }
+
+        Items = serverData;
         IsFuckingBusy = false;
     }
 }
