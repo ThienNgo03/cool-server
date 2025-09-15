@@ -33,8 +33,8 @@ public class Implementation : Interface
     {
         var grpcPayload = new Version2.Protos.RegisterPayload
         {
-            FirstName = payload.AccountName,
-            LastName = payload.AccountName,
+            FirstName = payload.FirstName,
+            LastName = payload.LastName,
             UserName = payload.UserName,
             Email = payload.Email,
             Password = payload.Password,
