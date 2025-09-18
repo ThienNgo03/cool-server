@@ -184,8 +184,8 @@ public class Controller : ControllerBase
             .ToDictionaryAsync(e => e.Id);
 
         // Fetch exercise muscles if requested
-        Dictionary<Guid, List<Get.ExerciseMuscle>> exerciseMuscles = new();
-        if (parameters.IsIncludeExerciseMuscles)
+        Dictionary<Guid, List<Get.Muscle>> exerciseMuscles = new();
+        if (parameters.IsIncludeMuscles)
         {
             var exerciseMuscleRelations = await _context.ExerciseMuscles
                 .Where(em => exerciseIds.Contains(em.ExerciseId))
@@ -202,11 +202,11 @@ public class Controller : ControllerBase
             foreach (var relation in exerciseMuscleRelations)
             {
                 if (!exerciseMuscles.ContainsKey(relation.ExerciseId))
-                    exerciseMuscles[relation.ExerciseId] = new List<Get.ExerciseMuscle>();
+                    exerciseMuscles[relation.ExerciseId] = new List<Get.Muscle>();
 
                 if (muscles.TryGetValue(relation.MuscleId, out var muscle))
                 {
-                    exerciseMuscles[relation.ExerciseId].Add(new Get.ExerciseMuscle
+                    exerciseMuscles[relation.ExerciseId].Add(new Get.Muscle
                     {
                         Id = muscle.Id,
                         Name = muscle.Name,
@@ -300,9 +300,9 @@ public class Controller : ControllerBase
                 };
 
                 // Add muscles to exercise if requested
-                if (parameters.IsIncludeExerciseMuscles && exerciseMuscles.TryGetValue(exercise.Id, out var muscles))
+                if (parameters.IsIncludeMuscles && exerciseMuscles.TryGetValue(exercise.Id, out var muscles))
                 {
-                    response.Exercise.ExerciseMuscles = muscles;
+                    response.Exercise.Muscles = muscles;
                 }
             }
 

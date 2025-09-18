@@ -17,5 +17,5 @@ public class Parameters
     public bool IsIncludeWeekPlans { get; set; } = false;
     public bool IsIncludeWeekPlanSets { get; set; } = false;
     public bool IsIncludeExercises { get; set; } = false;
-    public bool IsIncludeExerciseMuscles { get; set; } = false;
+    public bool IsIncludeMuscles { get; set; } = false;
 }

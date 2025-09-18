@@ -37,7 +37,7 @@ public class Implementation : Interface
             IsIncludeWeekPlans = parameters.IsIncludeWeekPlans,
             IsIncludeWeekPlanSets = parameters.IsIncludeWeekPlanSets,
             IsIncludeExercises = parameters.IsIncludeExercises,
-            IsIncludeExerciseMuscles = parameters.IsIncludeExerciseMuscles
+            IsIncludeMuscles = parameters.IsIncludeMuscles
         };
 
         try
@@ -110,7 +110,7 @@ public class Implementation : Interface
                         Type = item.Exercise.Type,
                         CreatedDate = item.Exercise.CreatedDate,
                         LastUpdated = item.Exercise.LastUpdated,
-                        ExerciseMuscles = item.Exercise.ExerciseMuscles?.Select(em => new ExerciseMuscle
+                        Muscles = item.Exercise.Muscles?.Select(em => new Muscle
                         {
                             Id = em.Id,
                             Name = em.Name,

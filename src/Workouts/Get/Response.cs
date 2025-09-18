@@ -8,10 +8,10 @@ public class Response : Databases.Journal.Tables.Workout.Table
 
 public class Exercise : Databases.Journal.Tables.Exercise.Table
 {
-    public ICollection<ExerciseMuscle>? ExerciseMuscles { get; set; }
+    public ICollection<Muscle>? Muscles { get; set; }
 }
 
-public class ExerciseMuscle : Databases.Journal.Tables.Muscle.Table
+public class Muscle : Databases.Journal.Tables.Muscle.Table
 {
 }
 

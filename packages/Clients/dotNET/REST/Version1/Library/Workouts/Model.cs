@@ -59,11 +59,11 @@ public class Exercise
 
     public DateTime LastUpdated { get; set; }
 
-    public ICollection<ExerciseMuscle>? ExerciseMuscles { get; set; }
+    public ICollection<Muscle>? Muscles { get; set; }
 
 }
 
-public class ExerciseMuscle
+public class Muscle
 {
     public Guid Id { get; set; }
 

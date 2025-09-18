@@ -22,6 +22,6 @@ public class Parameters
 
     public bool IsIncludeExercises { get; set; } = false;
 
-    public bool IsIncludeExerciseMuscles { get; set; } = false;
+    public bool IsIncludeMuscles { get; set; } = false;
 
 }
