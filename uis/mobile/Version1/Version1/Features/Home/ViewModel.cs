@@ -9,7 +9,7 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
     private readonly Library.Workouts.Interface workouts = workouts;
 
     [ObservableProperty]
-    List<CarouselItem> items = new();
+    ObservableCollection<ContentViews.CarouselItem.Model> items = new();
 
     public override async Task OnAppearingAsync()
     {
@@ -31,14 +31,14 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
             return;
         }
 
-        var serverData = new List<CarouselItem>();
+        var serverData = new List<ContentViews.CarouselItem.Model>();
         var dateOfWeek = DateTime.Today.DayOfWeek.ToString();
         foreach (var workout in response.Data.Items)
         {
             var weekPlans = workout.WeekPlans?.Where(wp => wp.DateOfWeek == dateOfWeek).ToList();
             if (weekPlans != null && weekPlans.Any())
             {
-                var carouselItem = new CarouselItem { Id = workout.Id };
+                var carouselItem = new ContentViews.CarouselItem.Model { Id = workout.Id };
                 foreach (var weekPlan in weekPlans)
                 {
                     carouselItem.Time = weekPlan.Time.ToString(@"hh\:mm");
@@ -62,31 +62,11 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
             }
         }
 
-        Items = serverData;
+        Items = new(serverData);
         IsFuckingBusy = false;
     }
-}
 
-public partial class CarouselItem : BaseModel
-{
-    [ObservableProperty]
-    Guid id;
-
-    [ObservableProperty]
-    string title;
-
-    [ObservableProperty]
-    string subtitle;
-
-    [ObservableProperty]
-    string time;
-
-    [ObservableProperty]
-    int set;
-
-    [ObservableProperty]
-    int reps;
-
-    [ObservableProperty]
-    string icon;
+    [RelayCommand]
+    async Task RefreshAsync()
+        => await OnAppearingAsync();
 }
