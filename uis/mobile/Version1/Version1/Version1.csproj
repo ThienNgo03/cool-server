@@ -105,6 +105,9 @@
 	  <MauiXaml Update="Features\Exercises\Page.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Features\Home\ContentViews\CarouselItem\Component.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Features\Home\Page.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

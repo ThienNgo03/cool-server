@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="Version1.Features.Home.ContentViews.CarouselItem.Component"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Version1.Features.Home.ContentViews.CarouselItem"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:ui="clr-namespace:UI"
+    x:DataType="local:Model"
+    Loaded="ContentView_Loaded">
+
+    <ContentView.Resources>
+        <FontImageSource
+            x:Key="AddIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_add_circle_32_regular}"
+            Color="White" />
+        <FontImageSource
+            x:Key="SubtractIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_subtract_circle_32_regular}"
+            Color="White" />
+
+        <FontImageSource
+            x:Key="NextIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_next_32_regular}"
+            Color="White" />
+        <FontImageSource
+            x:Key="PreviousIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_previous_32_regular}"
+            Color="White" />
+        <FontImageSource
+            x:Key="ConfigIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_data_usage_settings_20_regular}"
+            Color="White" />
+    </ContentView.Resources>
+
+    <syncfusionToolkit:SfCardView
+        BackgroundColor="White"
+        BorderColor="Black"
+        BorderWidth="2"
+        CornerRadius="8"
+        HeightRequest="288"
+        HorizontalOptions="Center"
+        SwipeToDismiss="True">
+        <Grid
+            Padding="16"
+            ColumnDefinitions="254, *"
+            ColumnSpacing="16"
+            RowDefinitions="90, 65 , 65"
+            RowSpacing="16">
+            <VerticalStackLayout>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="Title"
+                    Text="{x:Binding Title,
+                                     Mode=OneTime}"
+                    TextColor="Black" />
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="Body"
+                    Text="{x:Binding Subtitle,
+                                     Mode=OneTime}"
+                    TextColor="Gray" />
+                <Border
+                    Grid.ColumnSpan="3"
+                    Margin="0,4,0,0"
+                    Padding="15,4,15,4"
+                    BackgroundColor="#dbfce7"
+                    HorizontalOptions="Start"
+                    StrokeShape="RoundRectangle 4"
+                    VerticalOptions="Start">
+                    <Label Text="{x:Binding Time, Mode=OneTime}" TextColor="#2f8557" />
+                </Border>
+            </VerticalStackLayout>
+            <HorizontalStackLayout Grid.Row="1" Spacing="8">
+                <ImageButton
+                    x:Name="PreviousButton"
+                    Padding="18"
+                    BackgroundColor="Black"
+                    Clicked="PreviousButton_Clicked"
+                    CornerRadius="4"
+                    Source="{x:StaticResource PreviousIcon}"
+                    WidthRequest="70" />
+                <Border
+                    Padding="8"
+                    BackgroundColor="White"
+                    MinimumWidthRequest="98"
+                    StrokeShape="RoundRectangle 4">
+                    <VerticalStackLayout>
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Title"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            Text="{x:Binding Set,
+                                             Mode=OneWay}"
+                            TextColor="Black"
+                            VerticalOptions="Center"
+                            VerticalTextAlignment="Center" />
+                        <Label
+                            FontAttributes="None"
+                            FontSize="Micro"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            Text="SET"
+                            TextColor="Gray"
+                            VerticalOptions="Center"
+                            VerticalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <ImageButton
+                    x:Name="NextButton"
+                    Padding="18"
+                    BackgroundColor="Black"
+                    Clicked="NextButton_Clicked"
+                    CornerRadius="4"
+                    Source="{x:StaticResource NextIcon}"
+                    WidthRequest="70" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                <ImageButton
+                    x:Name="SubtractButton"
+                    Padding="18"
+                    BackgroundColor="Black"
+                    Clicked="SubtractButton_Clicked"
+                    CornerRadius="4"
+                    Source="{x:StaticResource SubtractIcon}"
+                    WidthRequest="70" />
+                <Border
+                    Padding="8"
+                    BackgroundColor="White"
+                    MinimumWidthRequest="98"
+                    StrokeShape="RoundRectangle 4">
+                    <VerticalStackLayout>
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Title"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            Text="{x:Binding Reps,
+                                             Mode=OneWay}"
+                            TextColor="Black"
+                            VerticalOptions="Center"
+                            VerticalTextAlignment="Center" />
+                        <Label
+                            FontAttributes="None"
+                            FontSize="Micro"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            Text="REPS"
+                            TextColor="Gray"
+                            VerticalOptions="Center"
+                            VerticalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <ImageButton
+                    x:Name="AddButton"
+                    Padding="18"
+                    BackgroundColor="Black"
+                    Clicked="AddButton_Clicked"
+                    CornerRadius="4"
+                    Source="{x:StaticResource AddIcon}"
+                    WidthRequest="70" />
+            </HorizontalStackLayout>
+
+            <toolkit:AvatarView
+                Grid.Column="1"
+                Padding="8"
+                BackgroundColor="LightGray"
+                CornerRadius="40"
+                HeightRequest="80"
+                HorizontalOptions="End"
+                ImageSource="{x:Binding Icon,
+                                        Mode=OneTime}"
+                VerticalOptions="Start"
+                WidthRequest="80" />
+            <Grid
+                Grid.Row="1"
+                Grid.RowSpan="2"
+                Grid.Column="1">
+
+                <ImageButton
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Padding="8"
+                    BackgroundColor="Black"
+                    CornerRadius="4"
+                    HorizontalOptions="Fill"
+                    Source="{x:StaticResource ConfigIcon}"
+                    VerticalOptions="Fill" />
+            </Grid>
+        </Grid>
+    </syncfusionToolkit:SfCardView>
+</ContentView>
