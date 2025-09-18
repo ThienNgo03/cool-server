@@ -186,7 +186,8 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var payload = new Library.Authentication.Register.Payload
         {
-            AccountName = "DUY NGUYEN",
+            FirstName = "DUY",
+            LastName="NGUYEN",
             UserName = $"duy_nguyen_{id}",
             Email = $"duy_nguyen_{id}@example.com",
             Password = "StrongPassword@123",

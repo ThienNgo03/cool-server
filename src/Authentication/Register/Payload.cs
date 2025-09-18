@@ -19,6 +19,5 @@ public class Payload: IdentityUser
     public string ConfirmPassword { get; set; } = string.Empty;
     [Required]
     public string PhoneNumber { get; set; } = string.Empty;
-    public IFormFile? ProfilePicture { get; set; }
 
 }

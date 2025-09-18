@@ -25,11 +25,13 @@ public class Implementation : Interface
         {
             var refitPayload = new Models.Refit.Register.Payload
             {
-                AccountName = payload.AccountName,
-                AccountEmail = payload.AccountEmail,
+                FirstName= payload.FirstName,
+                LastName = payload.LastName,
+                UserName = payload.UserName,
+                Email = payload.Email,
                 Password = payload.Password,
                 ConfirmPassword = payload.ConfirmPassword,
-                PhoneNumber = payload.PhoneNumber
+                PhoneNumber = payload.PhoneNumber,
             };
 
             var response = await this.refitInterface.Register(refitPayload);

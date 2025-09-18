@@ -65,27 +65,10 @@ public class Controller:ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        string? avatar = null;
-
-        if (form.ProfilePicture is not null && form.ProfilePicture.Length > 0)
-        {
-            var fileExtension = Path.GetExtension(form.ProfilePicture.FileName);
-            var uniqueFileName = $"avatars/{Guid.NewGuid()}{fileExtension}";
-
-            var blobClient = _blobContainerClient.GetBlobClient(uniqueFileName);
-
-            using (var stream = form.ProfilePicture.OpenReadStream())
-            {
-                await blobClient.UploadAsync(stream, overwrite: true);
-            }
-
-            avatar = blobClient.Uri.ToString();
-        }
-
         await _messageBus.PublishAsync(new Register.Messager.Message(
                                            Guid.Parse(newAccount.Id),
-                                           avatar,
-                                           form.FirstName + form.LastName,
+                                           null,
+                                           form.UserName,
                                            form.Email,
                                            form.PhoneNumber
          ));

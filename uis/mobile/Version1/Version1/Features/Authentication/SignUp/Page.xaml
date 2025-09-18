@@ -79,7 +79,8 @@
                             Hint="First Name"
                             InputViewPadding="14,0,0,0"
                             ReserveSpaceForAssistiveLabels="False">
-                            <Entry />
+                            <Entry Text="{x:Binding Form.FirstName, Mode=TwoWay}"
+                                   TextColor="Black"/>
                         </syncfusionToolkit:SfTextInputLayout>
                         <syncfusionToolkit:SfTextInputLayout
                             Grid.Column="1"
@@ -87,7 +88,8 @@
                             Hint="Last Name"
                             InputViewPadding="14,0,0,0"
                             ReserveSpaceForAssistiveLabels="False">
-                            <Entry />
+                            <Entry Text="{x:Binding Form.LastName, Mode=TwoWay}"
+                                   TextColor="Black"/>
                         </syncfusionToolkit:SfTextInputLayout>
                     </Grid>
                     <syncfusionToolkit:SfTextInputLayout
@@ -95,28 +97,34 @@
                         HelperText="ex: +84 348164682"
                         Hint="Phone Number"
                         InputViewPadding="14,0,0,0">
-                        <Entry />
+                        <Entry Text="{x:Binding Form.PhoneNumber, Mode=TwoWay}"
+                               TextColor="Black"/>
                     </syncfusionToolkit:SfTextInputLayout>
                     <syncfusionToolkit:SfTextInputLayout
                         ContainerType="Outlined"
                         HelperText="ex: abc@gmail.com"
                         Hint="Email"
                         InputViewPadding="14,0,0,0">
-                        <Entry />
+                        <Entry Text="{x:Binding Form.Email, Mode=TwoWay}"
+                               TextColor="Black"/>
                     </syncfusionToolkit:SfTextInputLayout>
                     <syncfusionToolkit:SfTextInputLayout
                         ContainerType="Outlined"
                         HelperText="required: "
                         Hint="Password"
                         InputViewPadding="14,0,0,0">
-                        <Entry />
+                        <Entry Text="{x:Binding Form.Password, Mode=TwoWay}"
+                               TextColor="Black"
+                               IsPassword="True"/>
                     </syncfusionToolkit:SfTextInputLayout>
                     <syncfusionToolkit:SfTextInputLayout
                         ContainerType="Outlined"
                         HelperText="required: "
                         Hint="Confirm Password"
                         InputViewPadding="14,0,0,0">
-                        <Entry />
+                        <Entry Text="{x:Binding Form.ConfirmPassword, Mode=TwoWay}"
+                               TextColor="Black"
+                               IsPassword="True"/>
                     </syncfusionToolkit:SfTextInputLayout>
                 </VerticalStackLayout>
             </Border>
@@ -171,14 +179,14 @@
                             ContainerType="Outlined"
                             HelperText="ex: 170 cm"
                             Hint="Height (cm)">
-                            <syncfusionToolkit:SfNumericUpDown />
+                            <syncfusionToolkit:SfNumericUpDown Value="{x:Binding Form.Height, Mode=TwoWay}"/>
                         </syncfusionToolkit:SfTextInputLayout>
                         <syncfusionToolkit:SfTextInputLayout
                             Grid.Column="1"
                             ContainerType="Outlined"
                             HelperText="ex: 108 kg"
                             Hint="Weight (kg)">
-                            <syncfusionToolkit:SfNumericUpDown />
+                            <syncfusionToolkit:SfNumericUpDown Value="{x:Binding Form.Weight, Mode=TwoWay}"/>
                         </syncfusionToolkit:SfTextInputLayout>
                     </Grid>
                 </VerticalStackLayout>
@@ -193,6 +201,8 @@
                         Command="{x:Binding SignUpCommand}"
                         Text="Create New Account"
                         TextColor="White" />
+                    <syncfusionToolkit:SfLinearProgressBar
+                        IsIndeterminate="{x:Binding IsFuckingBusy, Mode=OneWay}" />
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>
