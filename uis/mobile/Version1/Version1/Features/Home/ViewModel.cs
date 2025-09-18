@@ -22,7 +22,7 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
             IsIncludeWeekPlans = true,
             IsIncludeWeekPlanSets = true,
             IsIncludeExercises = true,
-            IsIncludeExerciseMuscles = true,
+            IsIncludeMuscles = true,
         });
 
         if (response.Data?.Items == null)
@@ -55,7 +55,7 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
                 if (workout.Exercise != null)
                 {
                     carouselItem.Title = workout.Exercise.Name;
-                    carouselItem.Subtitle = string.Join(", ", workout.Exercise.ExerciseMuscles?.Select(m => m.Name) ?? new List<string> { "" });
+                    carouselItem.Subtitle = string.Join(", ", workout.Exercise.Muscles?.Select(m => m.Name) ?? new List<string> { "" });
                     carouselItem.Icon = "dotnet_bot.png";
                 }
                 serverData.Add(carouselItem);
