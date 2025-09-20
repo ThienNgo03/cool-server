@@ -21,7 +21,7 @@ public interface IIncludable<TEntity, TProperty>
     /// .Include(x => x.Exercise)  // Start new include chain from root
     /// </code>
     /// </example>
-    IIncludable<TEntity, TNewProperty> Include<TNewProperty>(Expression<Func<TEntity, TNewProperty>> navigationPropertyPath);
+    IIncludable<TEntity, TNewProperty?> Include<TNewProperty>(Expression<Func<TEntity, TNewProperty>> navigationPropertyPath);
 
     /// <summary>
     /// Includes a related entity from the previously included property, continuing the current include chain
@@ -35,7 +35,7 @@ public interface IIncludable<TEntity, TProperty>
     ///     .ThenInclude(x => x.Muscles)  // Continue from Exercise to Muscles
     /// </code>
     /// </example>
-    IIncludable<TEntity, TNewProperty> ThenInclude<TNewProperty>(Expression<Func<TProperty, TNewProperty>> navigationPropertyPath);
+    IIncludable<TEntity, TNewProperty?> ThenInclude<TNewProperty>(Expression<Func<TProperty, TNewProperty>> navigationPropertyPath);
 
     /// <summary>
     /// Collection ThenInclude for navigating from a collection property to another collection
@@ -44,7 +44,7 @@ public interface IIncludable<TEntity, TProperty>
     /// <typeparam name="TNewProperty">The type of the collection elements to include</typeparam>
     /// <param name="navigationPropertyPath">Expression pointing to the collection navigation property</param>
     /// <returns>An includable interface for chaining additional includes</returns>
-    IIncludable<TEntity, ICollection<TNewProperty>> ThenInclude<TNewProperty>(Expression<Func<TProperty, IEnumerable<TNewProperty>>> navigationPropertyPath)
+    IIncludable<TEntity, ICollection<TNewProperty>?> ThenInclude<TNewProperty>(Expression<Func<TProperty, IEnumerable<TNewProperty>>> navigationPropertyPath)
         where TNewProperty : class;
 
     /// <summary>

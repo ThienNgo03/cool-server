@@ -19,8 +19,8 @@ public static class CollectionExtensions
     /// <param name="includable">The current includable instance</param>
     /// <param name="navigationPropertyPath">Expression pointing to the property on each collection element</param>
     /// <returns>An includable interface for chaining additional includes</returns>
-    public static IIncludable<TEntity, ICollection<TProperty>> ThenInclude<TEntity, TElement, TProperty>(
-        this IIncludable<TEntity, ICollection<TElement>> includable,
+    public static IIncludable<TEntity, ICollection<TProperty>?> ThenInclude<TEntity, TElement, TProperty>(
+        this IIncludable<TEntity, ICollection<TElement>?> includable,
         Expression<Func<TElement, TProperty>> navigationPropertyPath)
     {
         // Create an ICollection-specific expression
