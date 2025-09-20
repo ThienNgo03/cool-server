@@ -51,6 +51,8 @@ public class Controller : ControllerBase
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
+
+
         var result = await query.AsNoTracking().ToListAsync();
         var exerciseIds = result.Select(x => x.Id).ToList();
 
@@ -64,44 +66,59 @@ public class Controller : ControllerBase
             CreatedDate = exercise.CreatedDate,
             LastUpdated = exercise.LastUpdated
         }).ToList();
+        // Split the include parameter into a list
 
-        if (parameters.IsIncludeMuscles && exerciseIds.Any())
+        // Dynamically apply Include for valid navigation properties    mm    
+        if (!string.IsNullOrEmpty(parameters.Include))
         {
-            // Get all related exercise muscles in one query
-            var exerciseMuscles = await _context.ExerciseMuscles
-                .Where(x => exerciseIds.Contains(x.ExerciseId))
-                .ToListAsync();
+            // Split the include parameter into a list
+            var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(i => i.Trim().ToLower())
+                                 .ToList();
 
-            var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
-
-            // Get all related muscles in one query
-            var muscles = await _context.Muscles
-                .Where(x => muscleIds.Contains(x.Id))
-                .ToDictionaryAsync(x => x.Id);
-
-            // Group exercise muscles by exercise ID
-            var exerciseMuscleGroups = exerciseMuscles
-                .GroupBy(x => x.ExerciseId)
-                .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
-
-            // Attach muscles to each response
-            foreach (var response in responses)
+            // Dynamically apply Include for valid navigation properties
+            foreach (var inc in includes)
             {
-                if (exerciseMuscleGroups.TryGetValue(response.Id, out var responseMuscleIds))
+                if (inc.Split(".")[0] == "muscles" && exerciseIds.Any())
                 {
-                    response.Muscles = responseMuscleIds
-                        .Where(muscleId => muscles.ContainsKey(muscleId))
-                        .Select(muscleId => new Get.Muscle
+                    // Get all related exercise muscles in one query
+                    var exerciseMuscles = await _context.ExerciseMuscles
+                        .Where(x => exerciseIds.Contains(x.ExerciseId))
+                        .ToListAsync();
+
+                    var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
+
+                    // Get all related muscles in one query
+                    var muscles = await _context.Muscles
+                        .Where(x => muscleIds.Contains(x.Id))
+                        .ToDictionaryAsync(x => x.Id);
+
+                    // Group exercise muscles by exercise ID
+                    var exerciseMuscleGroups = exerciseMuscles
+                        .GroupBy(x => x.ExerciseId)
+                        .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
+
+                    // Attach muscles to each response
+                    foreach (var response in responses)
+                    {
+                        if (exerciseMuscleGroups.TryGetValue(response.Id, out var responseMuscleIds))
                         {
-                            Id = muscles[muscleId].Id,
-                            Name = muscles[muscleId].Name,
-                            CreatedDate = muscles[muscleId].CreatedDate,
-                            LastUpdated = muscles[muscleId].LastUpdated
-                        })
-                        .ToList();
+                            response.Muscles = responseMuscleIds
+                                .Where(muscleId => muscles.ContainsKey(muscleId))
+                                .Select(muscleId => new Get.Muscle
+                                {
+                                    Id = muscles[muscleId].Id,
+                                    Name = muscles[muscleId].Name,
+                                    CreatedDate = muscles[muscleId].CreatedDate,
+                                    LastUpdated = muscles[muscleId].LastUpdated
+                                })
+                                .ToList();
+                        }
+                    }
                 }
             }
         }
+        
 
         var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
