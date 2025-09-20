@@ -1,11 +1,14 @@
 ﻿using Library.Workouts.All;
 using Library.Workouts.Create;
+using Library.Queryable;
+using Library.Queryable.Include;
 using Refit;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace Library.Workouts.Implementations.Version1;
 
-public class Implementation : Interface
+public class Implementation : ResourceQueryableBase<Model>, Interface
 {
 
     #region [ Fields ]
@@ -22,6 +25,16 @@ public class Implementation : Interface
     #endregion
 
     #region [ Methods ]
+
+    /// <summary>
+    /// Override to return our specific WorkoutIncludeBuilder
+    /// </summary>
+    public override IIncludable<Model, TProperty> Include<TProperty>(Expression<Func<Model, TProperty>> navigationProperty)
+    {
+        var builder = new WorkoutIncludeBuilder<TProperty>(this);
+        return builder.Include(navigationProperty);
+    }
+
     public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(Parameters parameters)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -34,6 +47,8 @@ public class Implementation : Interface
             UserId = parameters.UserId,
             CreatedDate = parameters.CreatedDate,
             LastUpdated = parameters.LastUpdated,
+            Include = parameters.Include, // New include string parameter
+            // Legacy boolean parameters (deprecated but kept for compatibility)
             IsIncludeWeekPlans = parameters.IsIncludeWeekPlans,
             IsIncludeWeekPlanSets = parameters.IsIncludeWeekPlanSets,
             IsIncludeExercises = parameters.IsIncludeExercises,
@@ -230,5 +245,6 @@ public class Implementation : Interface
             throw new NotImplementedException();
         }
     }
+
     #endregion
 }

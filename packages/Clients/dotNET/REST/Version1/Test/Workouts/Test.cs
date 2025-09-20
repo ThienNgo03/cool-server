@@ -1,7 +1,10 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Library.Workouts;
+using Library.Workouts.All;
 using Test.Databases.Journal;
+using Microsoft.EntityFrameworkCore;
+using Library.Queryable.Include.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Test.Workouts;
 
@@ -43,6 +46,54 @@ public class Test : BaseTest
 
         dbContext.Workouts.Remove(workout); 
         await dbContext.SaveChangesAsync();
+    }
+
+
+    [Fact]
+    public async Task FluentIncludeAPI()
+    {
+        var workoutService = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
+        try
+        {
+            var result = await workoutService
+                .Include(x => x.Exercise)
+                    .ThenInclude(x => x.Muscles!)
+                .AllAsync<Parameters>(new()
+                {
+                    PageIndex = 0,
+                    PageSize = 5
+                });
+
+            var result1 = await workoutService
+                .Include(x => x.WeekPlans)
+                    .ThenInclude(x => x.WeekPlanSets!)
+                .AllAsync<Parameters>(new()
+                {
+                    PageIndex = 0,
+                    PageSize = 5
+                });
+
+
+            var result2 = await workoutService
+                .Include(x => x.Exercise)
+                    .ThenInclude(x => x.Muscles)
+                .Include(x => x.WeekPlans)
+                    .ThenInclude(x => x.WeekPlanSets!)
+                .AllAsync<Parameters>(new()
+                {
+                    PageIndex = 0,
+                    PageSize = 5
+                });
+
+            Assert.NotNull(result);
+            Assert.NotNull(result1);
+            Assert.NotNull(result2);
+        }
+        catch (Exception ex)
+        {
+            // If test fails, provide useful error message
+            Assert.Fail($"Fluent Include API failed: {ex.Message}");
+        }
     }
 
     [Fact]
