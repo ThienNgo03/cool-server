@@ -56,7 +56,7 @@ public class Test : BaseTest
         {
             var result = await workoutService
                 .Include(x => x.Exercise)
-                    .ThenInclude(x => x.Muscles!)
+                    .ThenInclude(x => x.Muscles)
                 .AllAsync<Library.Workouts.All.Parameters>(new()
                 {
                     PageIndex = 0,
@@ -65,7 +65,7 @@ public class Test : BaseTest
 
             var result1 = await workoutService
                 .Include(x => x.WeekPlans)
-                    .ThenInclude(x => x.WeekPlanSets!)
+                    .ThenInclude(x => x.WeekPlanSets)
                 .AllAsync<Library.Workouts.All.Parameters>(new()
                 {
                     PageIndex = 0,
@@ -77,7 +77,7 @@ public class Test : BaseTest
                 .Include(x => x.Exercise)
                     .ThenInclude(x => x.Muscles)
                 .Include(x => x.WeekPlans)
-                    .ThenInclude(x => x.WeekPlanSets!)
+                    .ThenInclude(x => x.WeekPlanSets)
                 .AllAsync<Library.Workouts.All.Parameters>(new()
                 {
                     PageIndex = 0,
