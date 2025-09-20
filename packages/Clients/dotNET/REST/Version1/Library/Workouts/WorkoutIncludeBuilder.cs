@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Library.Queryable.Include;
-using Library.Workouts.All;
 
 namespace Library.Workouts;
 
@@ -49,9 +48,9 @@ internal class WorkoutIncludeBuilder<TProperty> : IncludeBuilder<Model, TPropert
     public override async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync<TParameters>(TParameters parameters)
     {
         // Cast parameters to workout-specific parameters
-        if (parameters is not Parameters workoutParams)
+        if (parameters is not All.Parameters workoutParams)
         {
-            throw new ArgumentException($"Expected {typeof(Parameters).Name} but got {typeof(TParameters).Name}", nameof(parameters));
+            throw new ArgumentException($"Expected {typeof(All.Parameters).Name} but got {typeof(TParameters).Name}", nameof(parameters));
         }
 
         // Build include string from tracked expressions
