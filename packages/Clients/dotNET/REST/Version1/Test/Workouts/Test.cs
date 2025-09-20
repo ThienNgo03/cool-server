@@ -1,10 +1,9 @@
 ﻿
-using Library.Workouts;
-using Library.Workouts.All;
 using Test.Databases.Journal;
 using Microsoft.EntityFrameworkCore;
 using Library.Queryable.Include.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Library.Competitions.All;
 
 namespace Test.Workouts;
 
@@ -16,10 +15,10 @@ public class Test : BaseTest
     public Test() : base() { }
     #endregion
 
-    #region [ Endpoints ]
+    #region [ Actions ]
 
     [Fact]
-    public async Task GET()
+    public async Task All()
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var workout = new Databases.Journal.Tables.Workout.Table()
@@ -34,7 +33,7 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
-        var result = await workoutsEndpoint.AllAsync(new() 
+        var result = await workoutsEndpoint.AllAsync<Library.Workouts.All.Parameters>(new() 
         {
             PageIndex = 0,
             PageSize = 10
@@ -50,7 +49,7 @@ public class Test : BaseTest
 
 
     [Fact]
-    public async Task FluentIncludeAPI()
+    public async Task All_Includes()
     {
         var workoutService = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
         try
@@ -58,7 +57,7 @@ public class Test : BaseTest
             var result = await workoutService
                 .Include(x => x.Exercise)
                     .ThenInclude(x => x.Muscles!)
-                .AllAsync<Parameters>(new()
+                .AllAsync<Library.Workouts.All.Parameters>(new()
                 {
                     PageIndex = 0,
                     PageSize = 5
@@ -67,7 +66,7 @@ public class Test : BaseTest
             var result1 = await workoutService
                 .Include(x => x.WeekPlans)
                     .ThenInclude(x => x.WeekPlanSets!)
-                .AllAsync<Parameters>(new()
+                .AllAsync<Library.Workouts.All.Parameters>(new()
                 {
                     PageIndex = 0,
                     PageSize = 5
@@ -79,7 +78,7 @@ public class Test : BaseTest
                     .ThenInclude(x => x.Muscles)
                 .Include(x => x.WeekPlans)
                     .ThenInclude(x => x.WeekPlanSets!)
-                .AllAsync<Parameters>(new()
+                .AllAsync<Library.Workouts.All.Parameters>(new()
                 {
                     PageIndex = 0,
                     PageSize = 5
@@ -97,7 +96,7 @@ public class Test : BaseTest
     }
 
     [Fact]
-    public async Task POST()
+    public async Task Add()
     {
         var exerciseId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -144,7 +143,7 @@ public class Test : BaseTest
 
     [Fact]
 
-    public async Task PUT()
+    public async Task Update()
     {
         var id = Guid.NewGuid();
         var updatedExerciseId = Guid.NewGuid();
@@ -205,7 +204,7 @@ public class Test : BaseTest
 
     [Fact]
 
-    public async Task DELETE()
+    public async Task Delete()
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();

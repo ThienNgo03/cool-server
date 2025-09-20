@@ -1,14 +1,13 @@
 ﻿using Library.Workouts.All;
 using Library.Workouts.Create;
 using Library.Queryable;
-using Library.Queryable.Include;
+
 using Refit;
 using System.Diagnostics;
-using System.Linq.Expressions;
 
 namespace Library.Workouts.Implementations.Version1;
 
-public class Implementation : ResourceQueryableBase<Model>, Interface
+public class Implementation : ResourceQueryable<Model>, Interface
 {
 
     #region [ Fields ]
@@ -26,33 +25,24 @@ public class Implementation : ResourceQueryableBase<Model>, Interface
 
     #region [ Methods ]
 
-    /// <summary>
-    /// Override to return our specific WorkoutIncludeBuilder
-    /// </summary>
-    public override IIncludable<Model, TProperty> Include<TProperty>(Expression<Func<Model, TProperty>> navigationProperty)
+    public override async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync<TParameters>(TParameters parameters)
     {
-        var builder = new WorkoutIncludeBuilder<TProperty>(this);
-        return builder.Include(navigationProperty);
-    }
+        if (parameters is not All.Parameters processedParams)
+        {
+            throw new ArgumentException($"Expected {typeof(All.Parameters).Name} but got {typeof(TParameters).Name}", nameof(parameters));
+        }
 
-    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(Parameters parameters)
-    {
         Stopwatch stopwatch = Stopwatch.StartNew();
         Models.Refit.GET.Parameters refitParameters = new()
         {
-            Id = parameters.Id,
-            PageIndex = parameters.PageIndex,
-            PageSize = parameters.PageSize,
-            ExerciseId = parameters.ExerciseId,
-            UserId = parameters.UserId,
-            CreatedDate = parameters.CreatedDate,
-            LastUpdated = parameters.LastUpdated,
-            Include = parameters.Include, // New include string parameter
-            // Legacy boolean parameters (deprecated but kept for compatibility)
-            IsIncludeWeekPlans = parameters.IsIncludeWeekPlans,
-            IsIncludeWeekPlanSets = parameters.IsIncludeWeekPlanSets,
-            IsIncludeExercises = parameters.IsIncludeExercises,
-            IsIncludeMuscles = parameters.IsIncludeMuscles
+            Id = processedParams.Id,
+            PageIndex = processedParams.PageIndex,
+            PageSize = processedParams.PageSize,
+            ExerciseId = processedParams.ExerciseId,
+            UserId = processedParams.UserId,
+            CreatedDate = processedParams.CreatedDate,
+            LastUpdated = processedParams.LastUpdated,
+            Include = processedParams.Include
         };
 
         try
@@ -101,8 +91,8 @@ public class Implementation : ResourceQueryableBase<Model>, Interface
                     Data = new Library.Models.PaginationResults.Model<Model>
                     {
                         Total = items.Count,
-                        Index = parameters.PageIndex,
-                        Size = parameters.PageSize,
+                        Index = processedParams.PageIndex,
+                        Size = processedParams.PageSize,
                         Items = items
                     }
                 };
@@ -164,8 +154,8 @@ public class Implementation : ResourceQueryableBase<Model>, Interface
                 Data = new Library.Models.PaginationResults.Model<Model>
                 {
                     Total = items.Count,
-                    Index = parameters.PageIndex,
-                    Size = parameters.PageSize,
+                    Index = processedParams.PageIndex,
+                    Size = processedParams.PageSize,
                     Items = items
                 }
             };

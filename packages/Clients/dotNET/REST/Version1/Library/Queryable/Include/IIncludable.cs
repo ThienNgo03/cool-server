@@ -54,5 +54,5 @@ public interface IIncludable<TEntity, TProperty>
     /// <typeparam name="TParameters">The parameter type specific to the entity</typeparam>
     /// <param name="parameters">Parameters for pagination and filtering</param>
     /// <returns>Paginated results with included navigation properties</returns>
-    Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<TEntity>>> AllAsync<TParameters>(TParameters parameters);
+    Task<Models.Response.Model<Models.PaginationResults.Model<TEntity>>> AllAsync<TParameters>(TParameters parameters);
 }
