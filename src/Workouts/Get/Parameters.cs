@@ -16,12 +16,5 @@ public class Parameters
 
     public int? PageIndex { get; set; }
 
-    public bool IsIncludeWeekPlans { get; set; } = false;
-
-    public bool IsIncludeWeekPlanSets { get; set; } = false;
-
-    public bool IsIncludeExercises { get; set; } = false;
-
-    public bool IsIncludeMuscles { get; set; } = false;
-
+    public string? Include { get; set; }
 }

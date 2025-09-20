@@ -1,23 +1,22 @@
-﻿namespace Journal.Exercises.Get
+﻿namespace Journal.Exercises.Get;
+
+public class Parameters
 {
-    public class Parameters
-    {
-        public Guid? Id { get; set; }
+    public Guid? Id { get; set; }
 
-        public string? Name { get; set; }
+    public string? Name { get; set; }
 
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        public string? Type { get; set; }
+    public string? Type { get; set; }
 
-        public DateTime? CreatedDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
 
-        public DateTime? LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
-        public int? PageSize { get; set; }
+    public int? PageSize { get; set; }
 
-        public int? PageIndex { get; set; }
+    public int? PageIndex { get; set; }
 
-        public bool IsIncludeMuscles { get; set; } = false;
-    }
+    public string? Include { get; set; }
 }
