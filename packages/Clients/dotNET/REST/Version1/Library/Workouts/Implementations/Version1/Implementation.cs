@@ -1,11 +1,13 @@
 ﻿using Library.Workouts.All;
 using Library.Workouts.Create;
+using Library.Queryable;
+
 using Refit;
 using System.Diagnostics;
 
 namespace Library.Workouts.Implementations.Version1;
 
-public class Implementation : Interface
+public class Implementation : ResourceQueryable<Model>, Interface
 {
 
     #region [ Fields ]
@@ -22,22 +24,25 @@ public class Implementation : Interface
     #endregion
 
     #region [ Methods ]
-    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(Parameters parameters)
+
+    public override async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync<TParameters>(TParameters parameters)
     {
+        if (parameters is not All.Parameters processedParams)
+        {
+            throw new ArgumentException($"Expected {typeof(All.Parameters).Name} but got {typeof(TParameters).Name}", nameof(parameters));
+        }
+
         Stopwatch stopwatch = Stopwatch.StartNew();
         Models.Refit.GET.Parameters refitParameters = new()
         {
-            Id = parameters.Id,
-            PageIndex = parameters.PageIndex,
-            PageSize = parameters.PageSize,
-            ExerciseId = parameters.ExerciseId,
-            UserId = parameters.UserId,
-            CreatedDate = parameters.CreatedDate,
-            LastUpdated = parameters.LastUpdated,
-            IsIncludeWeekPlans = parameters.IsIncludeWeekPlans,
-            IsIncludeWeekPlanSets = parameters.IsIncludeWeekPlanSets,
-            IsIncludeExercises = parameters.IsIncludeExercises,
-            IsIncludeMuscles = parameters.IsIncludeMuscles
+            Id = processedParams.Id,
+            PageIndex = processedParams.PageIndex,
+            PageSize = processedParams.PageSize,
+            ExerciseId = processedParams.ExerciseId,
+            UserId = processedParams.UserId,
+            CreatedDate = processedParams.CreatedDate,
+            LastUpdated = processedParams.LastUpdated,
+            Include = processedParams.Include
         };
 
         try
@@ -86,8 +91,8 @@ public class Implementation : Interface
                     Data = new Library.Models.PaginationResults.Model<Model>
                     {
                         Total = items.Count,
-                        Index = parameters.PageIndex,
-                        Size = parameters.PageSize,
+                        Index = processedParams.PageIndex,
+                        Size = processedParams.PageSize,
                         Items = items
                     }
                 };
@@ -149,8 +154,8 @@ public class Implementation : Interface
                 Data = new Library.Models.PaginationResults.Model<Model>
                 {
                     Total = items.Count,
-                    Index = parameters.PageIndex,
-                    Size = parameters.PageSize,
+                    Index = processedParams.PageIndex,
+                    Size = processedParams.PageSize,
                     Items = items
                 }
             };
@@ -230,5 +235,6 @@ public class Implementation : Interface
             throw new NotImplementedException();
         }
     }
+
     #endregion
 }

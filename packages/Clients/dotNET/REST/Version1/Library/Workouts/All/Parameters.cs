@@ -1,8 +1,7 @@
 ﻿namespace Library.Workouts.All;
 
-public class Parameters
+public class Parameters : Library.Models.PaginationParameters.Model
 {
-    public Guid? Id { get; set; }
 
     public Guid? ExerciseId { get; set; }
 
@@ -11,11 +10,4 @@ public class Parameters
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? LastUpdated { get; set; }
-
-    public int? PageSize { get; set; }
-    public int? PageIndex { get; set; }
-    public bool IsIncludeWeekPlans { get; set; } = false;
-    public bool IsIncludeWeekPlanSets { get; set; } = false;
-    public bool IsIncludeExercises { get; set; } = false;
-    public bool IsIncludeMuscles { get; set; } = false;
 }

@@ -16,6 +16,10 @@ public class Parameters
 
     public int? PageIndex { get; set; }
 
+    // New include string property for fluent API (e.g., "exercises.muscles,weekPlans")
+    public string? Include { get; set; }
+
+    // Legacy boolean properties (deprecated but kept for compatibility)
     public bool IsIncludeWeekPlans { get; set; } = false;
 
     public bool IsIncludeWeekPlanSets { get; set; } = false;
