@@ -69,7 +69,7 @@ public class Controller : ControllerBase
             foreach (var inc in includes)
             {
                 Dictionary<Guid, Get.Exercise> exercisesByExerciseId = new();
-                if (inc.Split(".")[0] == "exercises")
+                if (inc.Split(".")[0] == "exercise")
                 {
                     var exerciseIds = result.Select(w => w.ExerciseId).Distinct().ToList();
                     var exercises = await _context.Exercises

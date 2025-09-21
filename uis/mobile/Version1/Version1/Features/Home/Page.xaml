@@ -53,30 +53,34 @@
         </DataTemplate>
     </ContentPage.Resources>
 
-    <Grid>
-        <RefreshView
-            Command="{x:Binding RefreshCommand}"
-            IsRefreshing="{x:Binding IsFuckingBusy,
-                                     Mode=OneWay}"
-            RefreshColor="Black">
-            <VerticalStackLayout Spacing="8">
-                <CarouselView
-                    HorizontalScrollBarVisibility="Never"
-                    IndicatorView="CarouselIndicator"
-                    IsBounceEnabled="True"
-                    ItemTemplate="{x:StaticResource CarouselItemTemplate}"
-                    ItemsLayout="{x:StaticResource CarouselItemsLayout}"
-                    ItemsSource="{x:Binding Items,
-                                            Mode=OneWay}"
-                    Loop="False"
-                    PeekAreaInsets="10"
-                    VerticalOptions="Start" />
-                <IndicatorView
-                    x:Name="CarouselIndicator"
-                    HorizontalOptions="Center"
-                    IndicatorColor="LightGray"
-                    SelectedIndicatorColor="Cyan" />
-            </VerticalStackLayout>
-        </RefreshView>
-    </Grid>
+    <RefreshView
+        Command="{x:Binding RefreshCommand}"
+        IsRefreshing="{x:Binding IsFuckingBusy,
+                                 Mode=OneWay}"
+        RefreshColor="Black">
+        <ScrollView>
+            <Grid RowDefinitions="200, 200, 200">
+                <VerticalStackLayout Spacing="8">
+                    <CarouselView
+                        HorizontalScrollBarVisibility="Never"
+                        IndicatorView="CarouselIndicator"
+                        IsBounceEnabled="True"
+                        ItemTemplate="{x:StaticResource CarouselItemTemplate}"
+                        ItemsLayout="{x:StaticResource CarouselItemsLayout}"
+                        ItemsSource="{x:Binding Items,
+                                                Mode=OneWay}"
+                        Loop="False"
+                        PeekAreaInsets="10"
+                        VerticalOptions="Start" />
+                    <IndicatorView
+                        x:Name="CarouselIndicator"
+                        HorizontalOptions="Center"
+                        IndicatorColor="LightGray"
+                        SelectedIndicatorColor="Cyan" />
+                </VerticalStackLayout>
+                <Border Grid.Row="1" BackgroundColor="OliveDrab" />
+                <Border Grid.Row="2" BackgroundColor="DarkOliveGreen" />
+            </Grid>
+        </ScrollView>
+    </RefreshView>
 </ContentPage>
