@@ -59,7 +59,7 @@ public class Controller : ControllerBase
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.User.Table>()
+        var paginationResults = new Builder<Databases.App.Tables.User.Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -73,7 +73,7 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
-        var user = new Databases.Journal.Tables.User.Table //tạo một hàng dữ liệu mới
+        var user = new Databases.App.Tables.User.Table //tạo một hàng dữ liệu mới
         {
             Id = Guid.NewGuid(),
             Name = payload.Name,
@@ -133,7 +133,7 @@ public class Controller : ControllerBase
     }
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.User.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<Databases.App.Tables.User.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

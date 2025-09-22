@@ -16,7 +16,7 @@ public class Test : BaseTest
     {
         var dbContext = serviceProvider.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var workoutLogSet = new Databases.Journal.Tables.WorkoutLogSet.Table()
+        var workoutLogSet = new Databases.App.Tables.WorkoutLogSet.Table()
         {
             Id = id,
             CreatedDate = DateTime.UtcNow,
@@ -49,7 +49,7 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var workoutLogId = Guid.NewGuid();
         var value = 10;
-        var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table()
+        var workoutLog = new Databases.App.Tables.WorkoutLog.Table()
         {
             Id = workoutLogId,
             WorkoutId = Guid.NewGuid(),
@@ -86,7 +86,7 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var updatedWorkoutLogId = Guid.NewGuid();
         var updatedValue = 10;
-        var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table()
+        var workoutLog = new Databases.App.Tables.WorkoutLog.Table()
         {
             Id = updatedWorkoutLogId,
             WorkoutId = Guid.NewGuid(),
@@ -96,7 +96,7 @@ public class Test : BaseTest
         };
         dbContext.WorkoutLogs.Add(workoutLog);
 
-        var workoutLogSet = new Databases.Journal.Tables.WorkoutLogSet.Table()
+        var workoutLogSet = new Databases.App.Tables.WorkoutLogSet.Table()
         {
             Id = id,
             WorkoutLogId = Guid.NewGuid(),
@@ -136,7 +136,7 @@ public class Test : BaseTest
     {
         var id = Guid.NewGuid();
         var dbContext = serviceProvider.GetRequiredService<JournalDbContext>();
-        var workoutLogSet = new Databases.Journal.Tables.WorkoutLogSet.Table()
+        var workoutLogSet = new Databases.App.Tables.WorkoutLogSet.Table()
         {
             Id = id,
             WorkoutLogId = Guid.NewGuid(),

@@ -14,7 +14,7 @@ public class Service:CreateMethod.CreateMethodBase
     {
         var userId = Guid.NewGuid();
         var journeyId = Guid.NewGuid();
-        var note = new Databases.Journal.Tables.Note.Table 
+        var note = new Databases.App.Tables.Note.Table 
         {
             Id = Guid.NewGuid(),
             UserId = userId,

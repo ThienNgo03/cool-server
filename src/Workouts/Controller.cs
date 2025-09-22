@@ -247,7 +247,7 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
-        var workout = new Databases.Journal.Tables.Workout.Table
+        var workout = new Databases.App.Tables.Workout.Table
         {
             Id = Guid.NewGuid(),
             ExerciseId = payload.ExerciseId,
@@ -265,7 +265,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.Workout.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<Databases.App.Tables.Workout.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

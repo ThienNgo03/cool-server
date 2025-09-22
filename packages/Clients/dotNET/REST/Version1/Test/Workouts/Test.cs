@@ -21,7 +21,7 @@ public class Test : BaseTest
     public async Task All()
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var workout = new Databases.Journal.Tables.Workout.Table()
+        var workout = new Databases.App.Tables.Workout.Table()
         {
             Id = Guid.NewGuid(),
             ExerciseId = Guid.NewGuid(),
@@ -35,6 +35,10 @@ public class Test : BaseTest
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
         var result = await workoutsEndpoint.AllAsync<Library.Workouts.All.Parameters>(new() 
         {
+            IsIncludeWeekPlans = true,
+            IsIncludeWeekPlanSets = true,
+            IsIncludeExercises = true,
+            IsIncludeMuscles = true,
             PageIndex = 0,
             PageSize = 10
         });
@@ -43,7 +47,7 @@ public class Test : BaseTest
         Assert.NotNull(result.Data.Items);
         Assert.True(result.Data.Items.Count > 0, "Expected at least one workout in result.");
 
-        dbContext.Workouts.Remove(workout); 
+        dbContext.Workouts.Remove(workout);
         await dbContext.SaveChangesAsync();
     }
 
@@ -103,7 +107,7 @@ public class Test : BaseTest
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.Workouts.RemoveRange(dbContext.Workouts.
             Where(x => x.ExerciseId == exerciseId && x.UserId == userId));
-        var existingExercise = new Databases.Journal.Tables.Exercise.Table()
+        var existingExercise = new Databases.App.Tables.Exercise.Table()
         {
             Id = exerciseId,
             Name = "Push Up",
@@ -114,7 +118,7 @@ public class Test : BaseTest
         };
         dbContext.Exercises.Add(existingExercise);
 
-        var existingUser = new Databases.Journal.Tables.User.Table()
+        var existingUser = new Databases.App.Tables.User.Table()
         {
             Id = userId,
             Name = "Push Up",
@@ -149,7 +153,7 @@ public class Test : BaseTest
         var updatedExerciseId = Guid.NewGuid();
         var updatedUserId = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        var existingWorkout = new Databases.App.Tables.Workout.Table()
         {
             Id = id,
             ExerciseId = Guid.NewGuid(),
@@ -159,7 +163,7 @@ public class Test : BaseTest
         };
         dbContext.Workouts.Add(existingWorkout);
 
-        var existingExercise = new Databases.Journal.Tables.Exercise.Table()
+        var existingExercise = new Databases.App.Tables.Exercise.Table()
         {
             Id = updatedExerciseId,
             Name = "Push Up",
@@ -170,7 +174,7 @@ public class Test : BaseTest
         };
         dbContext.Exercises.Add(existingExercise);
 
-        var existingUser = new Databases.Journal.Tables.User.Table()
+        var existingUser = new Databases.App.Tables.User.Table()
         {
             Id = updatedUserId,
             Name = "Push Up",
@@ -208,7 +212,7 @@ public class Test : BaseTest
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var workoutToDelete = new Databases.Journal.Tables.Workout.Table()
+        var workoutToDelete = new Databases.App.Tables.Workout.Table()
         {
             Id = id,
             ExerciseId = Guid.NewGuid(),

@@ -39,13 +39,13 @@
   </ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Databases\Journal\Tables\ExerciseMuscle\ExerciseMuscle.xlsx">
+	  <None Update="Databases\App\Tables\ExerciseMuscle\ExerciseMuscle.xlsx">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Databases\Journal\Tables\Exercise\Exercises.xlsx">
+	  <None Update="Databases\App\Tables\Exercise\Exercises.xlsx">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Databases\Journal\Tables\Muscle\Muscle.xlsx">
+	  <None Update="Databases\App\Tables\Muscle\Muscle.xlsx">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

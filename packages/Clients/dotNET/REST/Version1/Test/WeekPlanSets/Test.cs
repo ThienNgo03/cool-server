@@ -16,7 +16,7 @@ public class Test : BaseTest
     {
         var dbContext = serviceProvider.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var weekPlanSet = new Databases.Journal.Tables.WeekPlanSet.Table()
+        var weekPlanSet = new Databases.App.Tables.WeekPlanSet.Table()
         {
             Id = id,
             CreatedDate = DateTime.UtcNow,
@@ -51,7 +51,7 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var weekPlanId = Guid.NewGuid();
         var value = 10;
-        var weekPlan = new Databases.Journal.Tables.WeekPlan.Table()
+        var weekPlan = new Databases.App.Tables.WeekPlan.Table()
         {
             Id = weekPlanId,
             WorkoutId = Guid.NewGuid(),
@@ -89,7 +89,7 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var updatedWeekPlanId = Guid.NewGuid();
         var updatedValue = 10;
-        var weekPlan = new Databases.Journal.Tables.WeekPlan.Table()
+        var weekPlan = new Databases.App.Tables.WeekPlan.Table()
         {
             Id =updatedWeekPlanId,
             WorkoutId = Guid.NewGuid(),
@@ -100,7 +100,7 @@ public class Test : BaseTest
         };
         dbContext.WeekPlans.Add(weekPlan);
 
-        var weekPlanSet = new Databases.Journal.Tables.WeekPlanSet.Table()
+        var weekPlanSet = new Databases.App.Tables.WeekPlanSet.Table()
         {
             Id = id,
             WeekPlanId = Guid.NewGuid(),
@@ -142,7 +142,7 @@ public class Test : BaseTest
     {
         var id = Guid.NewGuid();
         var dbContext = serviceProvider.GetRequiredService<JournalDbContext>();
-        var weekPlanSet = new Databases.Journal.Tables.WeekPlanSet.Table()
+        var weekPlanSet = new Databases.App.Tables.WeekPlanSet.Table()
         {
             Id = id,
             WeekPlanId = Guid.NewGuid(),

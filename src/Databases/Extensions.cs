@@ -10,18 +10,18 @@ public static class Extensions
         services.AddDbContext<JournalDbContext>(x =>
         {
                 x.EnableSensitiveDataLogging();
-                x.UseSqlServer("Server=localhost;Database=JournalTest;Trusted_Connection=true;TrustServerCertificate=true;")
+                x.UseSqlServer("Server=localhost;Database=JournalTest2;Trusted_Connection=True;TrustServerCertificate=True;")
                     .UseSeeding((context, _) =>
                     {
                         var journalContext = (JournalDbContext)context;
-                        Journal.SeedFactory seedFactory = new ();
+                        App.SeedFactory seedFactory = new ();
                         seedFactory.SeedAdmins(journalContext).Wait();
                         seedFactory.SeedExercise(journalContext).Wait();
                         seedFactory.SeedMuscle(journalContext).Wait();
                         seedFactory.SeedExerciseMuscle(journalContext).Wait();
                     });
                 });
-        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=IdentityTest;Trusted_Connection=true;TrustServerCertificate=true;")
+        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity2;Trusted_Connection=True;TrustServerCertificate=True;")
                                                         .UseSeeding((context, _) =>
                                                         {
                                                             var identityContext = (IdentityContext)context;

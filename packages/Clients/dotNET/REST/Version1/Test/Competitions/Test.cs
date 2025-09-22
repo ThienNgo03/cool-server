@@ -26,7 +26,7 @@ public class Test : BaseTest
         var participantId2 = Guid.NewGuid();
         var exerciseId = Guid.NewGuid();
         List<Guid> participantIds = new() { participantId1, participantId2 };
-        var pushUpChalenge = new Databases.Journal.Tables.Competition.Table()
+        var pushUpChalenge = new Databases.App.Tables.Competition.Table()
         {
             Id = id,
             Title = title,
@@ -102,7 +102,7 @@ public class Test : BaseTest
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
         var exerciseId = Guid.NewGuid();
-        var existingCompetition = new Databases.Journal.Tables.Competition.Table
+        var existingCompetition = new Databases.App.Tables.Competition.Table
         {
             Id = id,
             Title = pushUp,
@@ -147,7 +147,7 @@ public class Test : BaseTest
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
         var exerciseId = Guid.NewGuid();
-        var existingCompetition = new Databases.Journal.Tables.Competition.Table
+        var existingCompetition = new Databases.App.Tables.Competition.Table
         {
             Id = id,
             Title = pushUp,

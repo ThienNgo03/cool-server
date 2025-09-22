@@ -35,7 +35,7 @@ public class Controller:ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Post.Payload payload)
     {
-        var gadget = new Databases.Journal.Tables.Gadget.Table
+        var gadget = new Databases.App.Tables.Gadget.Table
         {
             Id = Guid.NewGuid(),
             Name = payload.Name,

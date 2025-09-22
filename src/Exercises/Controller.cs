@@ -53,7 +53,7 @@ public class Controller : ControllerBase
 
         if (!string.IsNullOrEmpty(parameters.SortBy))
         {
-            var sortBy = typeof(Databases.Journal.Tables.Exercise.Table)
+            var sortBy = typeof(Table)
                 .GetProperties()
                 .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
                 ?.Name;
@@ -145,7 +145,7 @@ public class Controller : ControllerBase
         if (string.IsNullOrEmpty(parameters.MusclesSortBy))
             return Ok(paginationResults);
 
-        var normalizeProp = typeof(Databases.Journal.Tables.Muscle.Table)
+        var normalizeProp = typeof(Muscles.Table)
             .GetProperties()
             .FirstOrDefault(p => p.Name.Equals(parameters.MusclesSortBy, StringComparison.OrdinalIgnoreCase))
             ?.Name;
@@ -153,7 +153,7 @@ public class Controller : ControllerBase
         if (normalizeProp == null)
             return Ok(paginationResults);
 
-        var prop = typeof(Databases.Journal.Tables.Muscle.Table).GetProperty(normalizeProp);
+        var prop = typeof(Muscles.Table).GetProperty(normalizeProp);
         if (prop == null)
             return Ok(paginationResults);
 
@@ -180,7 +180,7 @@ public class Controller : ControllerBase
         if (userId is null)
             return Unauthorized("User Id not found");
 
-        var exercise = new Databases.Journal.Tables.Exercise.Table
+        Table exercise = new()
         {
             Id = Guid.NewGuid(),
             Name = payload.Name,
@@ -232,7 +232,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.Exercise.Table> patchDoc,
+                                           [FromBody] JsonPatchDocument<Table> patchDoc,
                                            CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

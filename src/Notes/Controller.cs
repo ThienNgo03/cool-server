@@ -68,7 +68,7 @@
                 return NotFound();
             }
 
-            var note = new Databases.Journal.Tables.Note.Table //tạo một hàng dữ liệu mới
+            var note = new Databases.App.Tables.Note.Table //tạo một hàng dữ liệu mới
             {
                 Id = Guid.NewGuid(),
                 UserId = payload.UserId,

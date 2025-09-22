@@ -94,7 +94,7 @@ public class Controller : ControllerBase
             });
         }
 
-        var weekPlanSet = new Databases.Journal.Tables.WeekPlanSet.Table
+        var weekPlanSet = new Databases.App.Tables.WeekPlanSet.Table
         {
             Id = Guid.NewGuid(),
             WeekPlanId = payload.WeekPlanId,
@@ -113,7 +113,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.WeekPlanSet.Table> patchDoc,
+                                           [FromBody] JsonPatchDocument<Databases.App.Tables.WeekPlanSet.Table> patchDoc,
                                            CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

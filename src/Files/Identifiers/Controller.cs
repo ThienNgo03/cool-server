@@ -38,8 +38,8 @@ public class Controller : ControllerBase
 
             if (identifierId == null)
             {
-                sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(2);
-                sasBuilder.SetPermissions(BlobContainerSasPermissions.Read | BlobContainerSasPermissions.List);
+                sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddDays(3);
+                sasBuilder.SetPermissions(BlobContainerSasPermissions.All);
             }
             else
             {

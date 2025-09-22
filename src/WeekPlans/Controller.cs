@@ -54,7 +54,7 @@ namespace Journal.WeekPlans
 
             var result = await query.AsNoTracking().ToListAsync();
 
-            var paginationResults = new Builder<Databases.Journal.Tables.WeekPlan.Table>()
+            var paginationResults = new Builder<Databases.App.Tables.WeekPlan.Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -87,7 +87,7 @@ namespace Journal.WeekPlans
                 });
             }
 
-            var weekPlan = new Databases.Journal.Tables.WeekPlan.Table
+            var weekPlan = new Databases.App.Tables.WeekPlan.Table
             {
                 Id = Guid.NewGuid(),
                 WorkoutId = payload.WorkoutId,
@@ -152,7 +152,7 @@ namespace Journal.WeekPlans
 
         [HttpPatch]
         public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.WeekPlan.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<Databases.App.Tables.WeekPlan.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
         {
             if (User.Identity is null)

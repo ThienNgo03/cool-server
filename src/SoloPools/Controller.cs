@@ -62,7 +62,7 @@ public class Controller : ControllerBase
         }
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.SoloPool.Table>()
+        var paginationResults = new Builder<Databases.App.Tables.SoloPool.Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -100,7 +100,7 @@ public class Controller : ControllerBase
         if (refereeId != Guid.Parse(userId))
             return BadRequest("Not match Referee");
 
-        var soloPool = new Databases.Journal.Tables.SoloPool.Table
+        var soloPool = new Databases.App.Tables.SoloPool.Table
         {
             Id = Guid.NewGuid(),
             WinnerId = payload.WinnerId,
@@ -162,7 +162,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.SoloPool.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<Databases.App.Tables.SoloPool.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

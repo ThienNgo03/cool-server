@@ -19,7 +19,7 @@ public class Test : BaseTest
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var pushUp = new Databases.Journal.Tables.Exercise.Table()
+        var pushUp = new Databases.App.Tables.Exercise.Table()
         {
             Id = id,
             Name = "Push Up",
@@ -88,7 +88,7 @@ public class Test : BaseTest
         string type = "rep";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var existingExercise = new Databases.Journal.Tables.Exercise.Table
+        var existingExercise = new Databases.App.Tables.Exercise.Table
         {
             Id = id,
             Name = pushUp,
@@ -129,7 +129,7 @@ public class Test : BaseTest
         string description = "A basic exercise for upper body strength.";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var existingExercise = new Databases.Journal.Tables.Exercise.Table
+        var existingExercise = new Databases.App.Tables.Exercise.Table
         {
             Id = id,
             Name = pushUp,

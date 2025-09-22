@@ -54,7 +54,7 @@ public class Controller : ControllerBase
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.WorkoutLog.Table>()
+        var paginationResults = new Builder<Databases.App.Tables.WorkoutLog.Table>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(result.Count)
@@ -87,7 +87,7 @@ public class Controller : ControllerBase
             });
         }
 
-        var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table
+        var workoutLog = new Databases.App.Tables.WorkoutLog.Table
         {
             Id = Guid.NewGuid(),
             WorkoutId = payload.WorkoutId,
@@ -105,7 +105,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.WorkoutLog.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<Databases.App.Tables.WorkoutLog.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

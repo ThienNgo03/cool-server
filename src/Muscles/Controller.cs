@@ -42,7 +42,7 @@ public class Controller(IMessageBus messageBus,
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.Muscle.Table>()
+        var paginationResults = new Builder<Table>()
           .WithIndex(parameters.PageIndex)
           .WithSize(parameters.PageSize)
           .WithTotal(result.Count)
@@ -55,24 +55,24 @@ public class Controller(IMessageBus messageBus,
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
-        var muscle = new Databases.Journal.Tables.Muscle.Table
+        Table item = new()
         {
             Id = Guid.NewGuid(),
             Name = payload.Name,
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
-        _context.Muscles.Add(muscle);
+        _context.Muscles.Add(item);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Post.Messager.Message(muscle.Id));
-        await _hubContext.Clients.All.SendAsync("muscle-created", muscle.Id);
-        return CreatedAtAction(nameof(Get), muscle.Id);
+        await _messageBus.PublishAsync(new Post.Messager.Message(item.Id));
+        await _hubContext.Clients.All.SendAsync("muscle-created", item.Id);
+        return CreatedAtAction(nameof(Get), item.Id);
     }
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.Journal.Tables.Muscle.Table> patchDoc,
-                                       CancellationToken cancellationToken = default!)
+                                           [FromBody] JsonPatchDocument<Table> patchDoc,
+                                           CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)
             return Unauthorized();

@@ -27,7 +27,7 @@ public class Test : BaseTest
         Guid loserId = Guid.NewGuid();
         string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
         Guid convertCompetitionId = Guid.Parse(competitionId);
-        var soloPool = new Databases.Journal.Tables.SoloPool.Table()
+        var soloPool = new Databases.App.Tables.SoloPool.Table()
         {
             Id = id,
             CompetitionId = convertCompetitionId,
@@ -138,7 +138,7 @@ public class Test : BaseTest
         Guid loserId = Guid.NewGuid();
         Guid competitionId = Guid.NewGuid();
 
-        var competition = new Databases.Journal.Tables.Competition.Table()
+        var competition = new Databases.App.Tables.Competition.Table()
         {
             Id = competitionId,
             Title = "Test Competition",
@@ -146,7 +146,7 @@ public class Test : BaseTest
         };
         dbContext.Competitions.Add(competition);
 
-        var soloPool = new Databases.Journal.Tables.SoloPool.Table()
+        var soloPool = new Databases.App.Tables.SoloPool.Table()
         {
             Id = id,
             CompetitionId = competitionId,
@@ -201,7 +201,7 @@ public class Test : BaseTest
         Guid loserId = Guid.NewGuid();
         string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
         Guid convertCompetitionId= Guid.Parse(competitionId);
-        var soloPool = new Databases.Journal.Tables.SoloPool.Table()
+        var soloPool = new Databases.App.Tables.SoloPool.Table()
         {
             Id = id,
             CompetitionId= convertCompetitionId,

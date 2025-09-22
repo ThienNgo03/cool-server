@@ -20,7 +20,7 @@ public class Test : BaseTest
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
-        var meetUp = new Databases.Journal.Tables.MeetUp.Table()
+        var meetUp = new Databases.App.Tables.MeetUp.Table()
         {
             Id = id,
             ParticipantIds = "abc",
@@ -94,7 +94,7 @@ public class Test : BaseTest
     {
         var id = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var existingMeetUp = new Databases.Journal.Tables.MeetUp.Table
+        var existingMeetUp = new Databases.App.Tables.MeetUp.Table
         {
             Id = id,
             ParticipantIds = "abc",
@@ -146,7 +146,7 @@ public class Test : BaseTest
     {
         var id = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var existingMeetUp = new Databases.Journal.Tables.MeetUp.Table
+        var existingMeetUp = new Databases.App.Tables.MeetUp.Table
         {
             Id = id,
             ParticipantIds = "abc",

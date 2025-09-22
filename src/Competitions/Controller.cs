@@ -183,7 +183,7 @@ public class Controller : ControllerBase
         {
             return BadRequest($"Invalid competition type: {competition.Type}");
         }
-        Databases.Journal.Tables.Competition.Table newCompetition = new()
+        Databases.App.Tables.Competition.Table newCompetition = new()
         {
             Id = Guid.NewGuid(),
             Title = competition.Title,
@@ -247,7 +247,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.Competition.Table> patchDoc,
+                                           [FromBody] JsonPatchDocument<Databases.App.Tables.Competition.Table> patchDoc,
                                            CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

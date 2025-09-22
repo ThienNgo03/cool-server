@@ -18,7 +18,7 @@ public class Test : BaseTest
     public async Task GET()
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var weekPlan = new Databases.Journal.Tables.WeekPlan.Table()
+        var weekPlan = new Databases.App.Tables.WeekPlan.Table()
         {
             Id = Guid.NewGuid(),
             WorkoutId = Guid.NewGuid(),
@@ -56,7 +56,7 @@ public class Test : BaseTest
         dbContext.WeekPlans.RemoveRange(dbContext.WeekPlans.
             Where(x => x.DateOfWeek == dateOfWeek));
 
-        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        var existingWorkout = new Databases.App.Tables.Workout.Table()
         {
             Id = workoutId,
             ExerciseId = Guid.NewGuid(),
@@ -96,7 +96,7 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var updatedWorkoutId = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var existingWeekPlan = new Databases.Journal.Tables.WeekPlan.Table()
+        var existingWeekPlan = new Databases.App.Tables.WeekPlan.Table()
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),
@@ -104,7 +104,7 @@ public class Test : BaseTest
             Time = TimeSpan.Zero
         };
         dbContext.WeekPlans.Add(existingWeekPlan);
-        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        var existingWorkout = new Databases.App.Tables.Workout.Table()
         {
             Id = updatedWorkoutId,
             ExerciseId = Guid.NewGuid(),
@@ -143,7 +143,7 @@ public class Test : BaseTest
     {
         var id = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var weekPlan = new Databases.Journal.Tables.WeekPlan.Table()
+        var weekPlan = new Databases.App.Tables.WeekPlan.Table()
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),

@@ -18,7 +18,7 @@ public class Test : BaseTest
     public async Task GET()
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table()
+        var workoutLog = new Databases.App.Tables.WorkoutLog.Table()
         {
             Id = Guid.NewGuid(),
             WorkoutId = Guid.NewGuid(),
@@ -53,7 +53,7 @@ public class Test : BaseTest
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.WorkoutLogs.RemoveRange(dbContext.WorkoutLogs.
             Where(x => x.WorkoutId == workoutId));
-        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        var existingWorkout = new Databases.App.Tables.Workout.Table()
         {
             Id = workoutId,
             ExerciseId = Guid.NewGuid(),
@@ -89,14 +89,14 @@ public class Test : BaseTest
         var id = Guid.NewGuid();
         var updatedWorkoutId = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var existingWorkoutLog = new Databases.Journal.Tables.WorkoutLog.Table()
+        var existingWorkoutLog = new Databases.App.Tables.WorkoutLog.Table()
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),
             WorkoutDate = DateTime.UtcNow
         };
         dbContext.WorkoutLogs.Add(existingWorkoutLog);
-        var existingWorkout = new Databases.Journal.Tables.Workout.Table()
+        var existingWorkout = new Databases.App.Tables.Workout.Table()
         {
             Id = updatedWorkoutId,
             ExerciseId = Guid.NewGuid(),
@@ -132,7 +132,7 @@ public class Test : BaseTest
     {
         var id = Guid.NewGuid();
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
-        var workoutLog = new Databases.Journal.Tables.WorkoutLog.Table()
+        var workoutLog = new Databases.App.Tables.WorkoutLog.Table()
         {
             Id = id,
             WorkoutId = Guid.NewGuid(),

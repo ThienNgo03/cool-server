@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Journal.Muscles.Update;
+﻿namespace Journal.Muscles.Update;
 
 public class Payload
 {

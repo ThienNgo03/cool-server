@@ -24,7 +24,7 @@ public class Test : BaseTest
         Guid participantId = Guid.NewGuid();
         string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
         Guid convertCompetitionId= Guid.Parse(competitionId);
-        var teamPool = new Databases.Journal.Tables.TeamPool.Table()
+        var teamPool = new Databases.App.Tables.TeamPool.Table()
         {
             Id = id,
             CompetitionId= convertCompetitionId,
@@ -98,14 +98,14 @@ public class Test : BaseTest
         int position = 1;
         Guid participantId = Guid.NewGuid();
         Guid competitionId = Guid.NewGuid();
-        var competition = new Databases.Journal.Tables.Competition.Table()
+        var competition = new Databases.App.Tables.Competition.Table()
         {
             Id = competitionId,
             Title = "Test Competition",
             CreatedDate = DateTime.UtcNow
         };
         dbContext.Competitions.Add(competition);
-        var teamPool = new Databases.Journal.Tables.TeamPool.Table()
+        var teamPool = new Databases.App.Tables.TeamPool.Table()
         {
             Id = id,
             CompetitionId = competitionId,
@@ -147,7 +147,7 @@ public class Test : BaseTest
         Guid participantId = Guid.NewGuid();
         string competitionId = "87619852-3344-4EC3-B2CB-051F29C5C1C1";
         Guid convertCompetitionId= Guid.Parse(competitionId);
-        var teamPool = new Databases.Journal.Tables.TeamPool.Table()
+        var teamPool = new Databases.App.Tables.TeamPool.Table()
         {
             Id = id,
             CompetitionId= convertCompetitionId,

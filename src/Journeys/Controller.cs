@@ -44,7 +44,7 @@ namespace Journal.Journeys
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Post.Payload payload)
         {
-            var journey = new Databases.Journal.Tables.Journey.Table //tạo một hàng dữ liệu mới
+            var journey = new Databases.App.Tables.Journey.Table //tạo một hàng dữ liệu mới
             {
                 Id = Guid.NewGuid(),
                 Content = payload.Content,

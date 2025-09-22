@@ -56,7 +56,7 @@ public class Controller : ControllerBase
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.Journal.Tables.MeetUp.Table>()
+        var paginationResults = new Builder<Databases.App.Tables.MeetUp.Table>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(result.Count)
@@ -75,7 +75,7 @@ public class Controller : ControllerBase
         if (userId is null)
             return Unauthorized("User Id not found");
 
-        var meetUp = new Databases.Journal.Tables.MeetUp.Table
+        var meetUp = new Databases.App.Tables.MeetUp.Table
         {
             Id = Guid.NewGuid(),
             ParticipantIds = payload.ParticipantIds,
@@ -130,7 +130,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                           [FromBody] JsonPatchDocument<Databases.Journal.Tables.MeetUp.Table> patchDoc,
+                                           [FromBody] JsonPatchDocument<Databases.App.Tables.MeetUp.Table> patchDoc,
                                            CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

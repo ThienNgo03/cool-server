@@ -13,7 +13,7 @@ public class Test: BaseTest
     [Fact]
     public async Task Should_Upload_Image_Using_SasToken()
     {
-        string sasUri = "http://127.0.0.1:10000/devstoreaccount1/container1?sv=2024-05-04&se=2025-09-13T17%3A51%3A44Z&sr=c&sp=racwdxltfi&sig=p4n%2Bf2VrDvY0VsBmdyTweRtPRaEBofNskpiF1exB124%3D";
+        string sasUri = "http://127.0.0.1:10000/devstoreaccount1/container1?sv=2024-05-04&se=2025-09-14T15%3A57%3A52Z&sr=c&sp=racwdxltfi&sig=VVGiXqx31d8nadPBSGGM9eyxn%2B0mLIVVgh6c4L61Oic%3D";
         string filePath = @"C:\Users\Thin\source\repos\cool-server\packages\Clients\dotNET\REST\Version1\Test\Files\test.png";
         string fileName = Path.GetFileName(filePath);
 
@@ -29,7 +29,8 @@ public class Test: BaseTest
             },
             Metadata = new Dictionary<string, string>
             {
-                { "userId", "12346" }
+                { "userId", "12346" },
+                { "test", "true" }
             },
             //Tags = new Dictionary<string, string>
             //{
@@ -54,7 +55,7 @@ public class Test: BaseTest
     [Fact]
     public async Task Should_Download_Image_By_Metadata()
     {
-        string sasUri = "http://127.0.0.1:10000/devstoreaccount1/container1?sv=2024-05-04&se=2025-09-13T17%3A51%3A44Z&sr=c&sp=racwdxltfi&sig=p4n%2Bf2VrDvY0VsBmdyTweRtPRaEBofNskpiF1exB124%3D";
+        string sasUri = "http://127.0.0.1:10000/devstoreaccount1/container1?sv=2024-05-04&se=2025-09-19T02%3A02%3A16Z&sr=c&sp=racwdxltfi&sig=r%2FkAmkAVkkQQfKYBci%2Ftxn%2BKbQlEG7mAbaCOKMr%2FKxQ%3D";
         string userId = "12346";
         string downloadPath = @"C:\Users\Thin\source\repos\cool-server\packages\Clients\dotNET\REST\Version1\Test\Files\downloaded_by_metadata.png";
 
