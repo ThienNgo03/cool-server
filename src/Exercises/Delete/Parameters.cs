@@ -1,7 +1,6 @@
-﻿namespace Journal.Exercises.Delete
+﻿namespace Journal.Exercises.Delete;
+
+public class Parameters
 {
-    public class Parameters
-    {
-        public Guid Id { get; set; }
-    }
+    public Guid Id { get; set; }
 }

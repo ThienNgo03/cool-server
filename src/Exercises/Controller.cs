@@ -1,29 +1,19 @@
-﻿using Journal.Models.PaginationResults;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
-using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
-
-namespace Journal.Exercises;
+﻿namespace Journal.Exercises;
 
 [ApiController]
 [Authorize]
 [Route("api/exercises")]
-public class Controller : ControllerBase
+public class Controller(
+    IMessageBus messageBus, 
+    JournalDbContext context, 
+    ILogger<Controller> logger, 
+    IHubContext<Hub> hubContext) : ControllerBase
 {
-    private readonly IMessageBus _messageBus;
-    private readonly JournalDbContext _context;
-    private readonly ILogger<Controller> _logger;
-    private readonly IHubContext<Hub> _hubContext;
+    private readonly IMessageBus _messageBus = messageBus;
+    private readonly JournalDbContext _context = context;
+    private readonly ILogger<Controller> _logger = logger;
+    private readonly IHubContext<Hub> _hubContext = hubContext;
 
-    public Controller(IMessageBus messageBus, JournalDbContext context, ILogger<Controller> logger, IHubContext<Hub> hubContext)
-    {
-        _context = context;
-        _logger = logger;
-        _messageBus = messageBus;
-        _hubContext = hubContext;
-    }
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
