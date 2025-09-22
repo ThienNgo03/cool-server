@@ -51,7 +51,19 @@ public class Controller : ControllerBase
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
-
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Databases.Journal.Tables.Exercise.Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
 
         var result = await query.AsNoTracking().ToListAsync();
         var exerciseIds = result.Select(x => x.Id).ToList();
@@ -66,9 +78,7 @@ public class Controller : ControllerBase
             CreatedDate = exercise.CreatedDate,
             LastUpdated = exercise.LastUpdated
         }).ToList();
-        // Split the include parameter into a list
 
-        // Dynamically apply Include for valid navigation properties    mm    
         if (!string.IsNullOrEmpty(parameters.Include))
         {
             // Split the include parameter into a list
@@ -118,7 +128,31 @@ public class Controller : ControllerBase
                 }
             }
         }
-        
+
+        if (!string.IsNullOrEmpty(parameters.MusclesSortBy))
+        {
+            var normalizeProp = typeof(Databases.Journal.Tables.Muscle.Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.MusclesSortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (normalizeProp != null)
+            {
+                var prop = typeof(Databases.Journal.Tables.Muscle.Table).GetProperty(normalizeProp);
+                if (prop != null)
+                {
+                    foreach (var response in responses)
+                    {
+                        if (response.Muscles != null)
+                        {
+                            response.Muscles = parameters.MusclesSortOrder?.ToLower() == "desc"
+                                ? response.Muscles.OrderByDescending(m => prop.GetValue(m)).ToList()
+                                : response.Muscles.OrderBy(m => prop.GetValue(m)).ToList();
+                        }
+                    }
+                }
+            }
+        }
+
 
         var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
