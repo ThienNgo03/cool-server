@@ -79,87 +79,93 @@ public class Controller : ControllerBase
             LastUpdated = exercise.LastUpdated
         }).ToList();
 
-        if (!string.IsNullOrEmpty(parameters.Include))
-        {
-            // Split the include parameter into a list
-            var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                 .Select(i => i.Trim().ToLower())
-                                 .ToList();
-
-            // Dynamically apply Include for valid navigation properties
-            foreach (var inc in includes)
-            {
-                if (inc.Split(".")[0] == "muscles" && exerciseIds.Any())
-                {
-                    // Get all related exercise muscles in one query
-                    var exerciseMuscles = await _context.ExerciseMuscles
-                        .Where(x => exerciseIds.Contains(x.ExerciseId))
-                        .ToListAsync();
-
-                    var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
-
-                    // Get all related muscles in one query
-                    var muscles = await _context.Muscles
-                        .Where(x => muscleIds.Contains(x.Id))
-                        .ToDictionaryAsync(x => x.Id);
-
-                    // Group exercise muscles by exercise ID
-                    var exerciseMuscleGroups = exerciseMuscles
-                        .GroupBy(x => x.ExerciseId)
-                        .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
-
-                    // Attach muscles to each response
-                    foreach (var response in responses)
-                    {
-                        if (exerciseMuscleGroups.TryGetValue(response.Id, out var responseMuscleIds))
-                        {
-                            response.Muscles = responseMuscleIds
-                                .Where(muscleId => muscles.ContainsKey(muscleId))
-                                .Select(muscleId => new Get.Muscle
-                                {
-                                    Id = muscles[muscleId].Id,
-                                    Name = muscles[muscleId].Name,
-                                    CreatedDate = muscles[muscleId].CreatedDate,
-                                    LastUpdated = muscles[muscleId].LastUpdated
-                                })
-                                .ToList();
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!string.IsNullOrEmpty(parameters.MusclesSortBy))
-        {
-            var normalizeProp = typeof(Databases.Journal.Tables.Muscle.Table)
-                .GetProperties()
-                .FirstOrDefault(p => p.Name.Equals(parameters.MusclesSortBy, StringComparison.OrdinalIgnoreCase))
-                ?.Name;
-            if (normalizeProp != null)
-            {
-                var prop = typeof(Databases.Journal.Tables.Muscle.Table).GetProperty(normalizeProp);
-                if (prop != null)
-                {
-                    foreach (var response in responses)
-                    {
-                        if (response.Muscles != null)
-                        {
-                            response.Muscles = parameters.MusclesSortOrder?.ToLower() == "desc"
-                                ? response.Muscles.OrderByDescending(m => prop.GetValue(m)).ToList()
-                                : response.Muscles.OrderBy(m => prop.GetValue(m)).ToList();
-                        }
-                    }
-                }
-            }
-        }
-
-
         var paginationResults = new Builder<Get.Response>()
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(responses.Count)
             .WithItems(responses)
             .Build();
+
+        if (string.IsNullOrEmpty(parameters.Include))
+        {
+            return Ok(paginationResults);
+        }
+
+        var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                             .Select(i => i.Trim().ToLower())
+                             .ToList();
+
+        // Fail fast if no includes contain "muscles" or no exerciseIds
+        if (!includes.Any(inc => inc.Split(".")[0] == "muscles") || !exerciseIds.Any())
+        {
+            return Ok(paginationResults);
+        }
+
+        // Get all related exercise muscles and muscles in parallel
+        var exerciseMusclesTask = _context.ExerciseMuscles
+            .Where(x => exerciseIds.Contains(x.ExerciseId))
+            .ToListAsync();
+
+        var exerciseMuscles = await exerciseMusclesTask;
+        var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
+
+        // Fail fast if no muscle IDs found
+        if (!muscleIds.Any())
+        {
+            return Ok(paginationResults);
+        }
+
+        var muscles = await _context.Muscles
+            .Where(x => muscleIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id);
+
+        var exerciseMuscleGroups = exerciseMuscles
+            .GroupBy(x => x.ExerciseId)
+            .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
+
+        foreach (var response in responses)
+        {
+            if (!exerciseMuscleGroups.TryGetValue(response.Id, out var responseMuscleIds))
+            {
+                continue;
+            }
+
+            response.Muscles = responseMuscleIds
+                .Where(muscleId => muscles.ContainsKey(muscleId))
+                .Select(muscleId => new Get.Muscle
+                {
+                    Id = muscles[muscleId].Id,
+                    Name = muscles[muscleId].Name,
+                    CreatedDate = muscles[muscleId].CreatedDate,
+                    LastUpdated = muscles[muscleId].LastUpdated
+                })
+                .ToList();
+        }
+
+        if (string.IsNullOrEmpty(parameters.MusclesSortBy))
+            return Ok(paginationResults);
+
+        var normalizeProp = typeof(Databases.Journal.Tables.Muscle.Table)
+            .GetProperties()
+            .FirstOrDefault(p => p.Name.Equals(parameters.MusclesSortBy, StringComparison.OrdinalIgnoreCase))
+            ?.Name;
+
+        if (normalizeProp == null)
+            return Ok(paginationResults);
+
+        var prop = typeof(Databases.Journal.Tables.Muscle.Table).GetProperty(normalizeProp);
+        if (prop == null)
+            return Ok(paginationResults);
+
+        var isDescending = parameters.MusclesSortOrder?.ToLower() == "desc";
+        foreach (var response in responses.Where(r => r.Muscles?.Any() == true))
+        {
+            if (response.Muscles == null || !response.Muscles.Any())
+                continue;
+            response.Muscles = isDescending
+                ? response.Muscles.OrderByDescending(m => prop.GetValue(m)).ToList()
+                : response.Muscles.OrderBy(m => prop.GetValue(m)).ToList();
+        }
 
         return Ok(paginationResults);
     }
