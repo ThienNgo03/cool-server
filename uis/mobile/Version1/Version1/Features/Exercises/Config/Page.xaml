@@ -40,13 +40,58 @@
             Color="White" />
         <toolkit:CompareConverter x:Key="CompareConverter" />
 
-        <FlexLayout
+        <GridItemsLayout
             x:Key="WeeklyItemsLayout"
-            AlignContent="Start"
-            AlignItems="Start"
-            Direction="Row"
-            JustifyContent="Start"
-            Wrap="Wrap" />
+            HorizontalItemSpacing="8"
+            Orientation="Vertical"
+            Span="3"
+            VerticalItemSpacing="8" />
+        <DataTemplate x:Key="WeeklyItemTemplate" x:DataType="local:WeeklyItem">
+            <Border
+                x:Name="container"
+                Padding="8"
+                StrokeShape="RoundRectangle 8">
+                <Label
+                    x:Name="content"
+                    FontSize="12"
+                    HorizontalOptions="Center"
+                    Text="{x:Binding Content}"
+                    TextColor="Cyan"
+                    VerticalOptions="Center">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter TargetName="content" Property="TextColor" Value="White" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter TargetName="content" Property="TextColor" Value="Green" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </Label>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter TargetName="container" Property="BackgroundColor" Value="Transparent" />
+                                <Setter TargetName="container" Property="Stroke" Value="Black" />
+                                <Setter TargetName="container" Property="StrokeThickness" Value="1" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter TargetName="container" Property="BackgroundColor" Value="Black" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate x:Key="WorkoutTimesHeader" x:DataType="x:String">
             <Label
                 Margin="0,0,0,8"
@@ -210,28 +255,29 @@
             Orientation="Vertical" />
     </ContentPage.Resources>
     <ScrollView>
-        <Grid RowDefinitions="auto, auto, auto, auto, auto" RowSpacing="16">
+        <Grid RowDefinitions="auto, auto, auto, auto, auto, auto" RowSpacing="16">
             <!--  Weekly Schedule  -->
             <Border
                 Padding="16"
-                BackgroundColor="#151e30"
+                BackgroundColor="White"
                 StrokeShape="RoundRectangle 4"
                 StrokeThickness="0"
                 VerticalOptions="Start">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="Weekly Schedule" TextColor="White" />
-                    <syncfusionToolkit:SfChipGroup
-                        x:Name="WeeklyItems"
-                        ChipLayout="{x:StaticResource WeeklyItemsLayout}"
-                        ChipStroke="Cyan"
-                        ChipTextColor="Cyan"
-                        ChipType="Filter"
-                        DisplayMemberPath="Content"
+                    <Label
+                        FontAttributes="Bold"
+                        Text="Weekly Schedule"
+                        TextColor="Black"
+                        TextDecorations="Underline" />
+
+                    <CollectionView
+                        ItemTemplate="{x:StaticResource WeeklyItemTemplate}"
+                        ItemsLayout="{x:StaticResource WeeklyItemsLayout}"
                         ItemsSource="{x:Binding WeeklyItems,
                                                 Mode=TwoWay}"
-                        SelectedChipBackground="Cyan"
-                        SelectedChipTextColor="Black"
-                        SelectionChanged="WeeklyItems_SelectionChanged" />
+                        SelectedItems="{x:Binding SelectedWeeklyItems,
+                                                  Mode=TwoWay}"
+                        SelectionMode="Multiple" />
                 </VerticalStackLayout>
             </Border>
             <!--  Workout Times  -->

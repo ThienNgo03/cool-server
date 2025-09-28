@@ -29,6 +29,7 @@ public partial class ViewModel(
         {
             Id = idStr;
         }
+        SelectedWeeklyItems.CollectionChanged += OnSelectedWeeklyItems_CollectionChanged;
         TotalSets.CollectionChanged += TotalSets_CollectionChanged;
     }
 
@@ -95,9 +96,51 @@ public partial class ViewModel(
         .Select(i => new WeeklyItem
         {
             Id = Guid.NewGuid().ToString(),
-            Content = CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(i + 1) % 7],
-            IsSelected = false
+            Content = CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(i + 1) % 7]
         }));
+
+    [ObservableProperty]
+    ObservableCollection<object> selectedWeeklyItems = new();
+
+    private void OnSelectedWeeklyItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            var addedWeeklyItem = e.NewItems[0] as WeeklyItem;
+            if (addedWeeklyItem is null) return;
+            WorkoutTimeItems?.Add(new()
+            {
+                Id = addedWeeklyItem.Id,
+                Content = addedWeeklyItem.Content,
+                Time = new(6, 0, 0)
+            });
+            SelectedDays.Add(addedWeeklyItem);
+        }
+        if (e.OldItems != null)
+        {
+            var removedWeeklyItem = e.OldItems[0] as WeeklyItem;
+            if (removedWeeklyItem is null)
+                return;
+
+            if (WorkoutTimeItems is null)
+                return;
+
+            var existingItem = WorkoutTimeItems.FirstOrDefault(x => x.Id == removedWeeklyItem.Id);
+            if (existingItem is null)
+                return;
+            WorkoutTimeItems.Remove(existingItem);
+            SelectedDays.Remove(removedWeeklyItem);
+            var setsToRemove = TotalSets.Where(x => string.Equals(x.Day, removedWeeklyItem.Content, StringComparison.OrdinalIgnoreCase)).ToList();
+            foreach (var set in setsToRemove)
+            {
+                TotalSets.Remove(set);
+            }
+            if (SelectedDayForSet?.Content == removedWeeklyItem.Content)
+            {
+                SelectedDayForSet = null;
+            }
+        }
+    }
     #endregion
 
     #region [ Workout Times ]
@@ -158,6 +201,9 @@ public partial class ViewModel(
     [ObservableProperty]
     int summaryTotalReps;
     #endregion
+
+    #region [ Test ]
+    #endregion
 }
 
 public partial class WeeklyItem : BaseModel
@@ -168,8 +214,8 @@ public partial class WeeklyItem : BaseModel
     [ObservableProperty]
     string content;
 
-    [ObservableProperty]
-    bool isSelected;
+    //[ObservableProperty]
+    //bool isSelected;
 }
 
 public partial class WorkoutTimeItem : BaseModel

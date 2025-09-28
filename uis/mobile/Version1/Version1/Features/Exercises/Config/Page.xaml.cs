@@ -14,42 +14,6 @@ public partial class Page : ContentPage
     }
 
 
-    private void WeeklyItems_SelectionChanged(object sender, Syncfusion.Maui.Toolkit.Chips.SelectionChangedEventArgs e)
-    {
-        var addedItem = e.AddedItem;
-        var removedItem = e.RemovedItem;
-
-        if (addedItem is WeeklyItem addedWeeklyItem)
-        {
-            viewModel.WorkoutTimeItems?.Add(new()
-            {
-                Id = addedWeeklyItem.Id,
-                Content = addedWeeklyItem.Content,
-                Time = new(6, 0, 0)
-            });
-
-            viewModel.SelectedDays.Add(addedWeeklyItem);
-        }
-
-        if (removedItem is WeeklyItem removedWeeklyItem)
-        {
-            viewModel.WorkoutTimeItems?.Remove(viewModel.WorkoutTimeItems?.FirstOrDefault(x => x.Id == removedWeeklyItem.Id));
-            viewModel.SelectedDays.Remove(removedWeeklyItem);
-
-            var setsToRemove = viewModel.TotalSets.Where(x => string.Equals(x.Day, removedWeeklyItem.Content, StringComparison.OrdinalIgnoreCase)).ToList();
-            foreach (var set in setsToRemove)
-            {
-                viewModel.TotalSets.Remove(set);
-            }
-
-            if (viewModel.SelectedDayForSet?.Content == removedWeeklyItem.Content)
-            {
-                viewModel.SelectedDayForSet = null; 
-            }
-        }
-    }
-
-
     private async void AddSetButton_Clicked(object sender, EventArgs e)
     {
         if (viewModel.SelectedDayForSet is null)

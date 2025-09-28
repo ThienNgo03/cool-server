@@ -42,8 +42,10 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
             if (weekPlans != null && weekPlans.Any())
             {
                 var carouselItem = new ContentViews.CarouselItem.Model { Id = workout.Id };
+                
                 foreach (var weekPlan in weekPlans)
                 {
+                    var weekPlanSets = weekPlan.WeekPlanSets;
                     carouselItem.Time = weekPlan.Time.ToString(@"hh\:mm");
                     if (weekPlan.WeekPlanSets != null)
                     {
