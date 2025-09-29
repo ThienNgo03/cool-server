@@ -1,5 +1,6 @@
 ﻿using Journal.Databases.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Journal.Databases;
 
@@ -7,35 +8,57 @@ public static class Extensions
 {
     public static IServiceCollection AddDatabases(this IServiceCollection services, IConfiguration configuration)
     {
+        var journalDbConfig = configuration.GetSection("JournalDb").Get<DbConfig>();
+        var identityDbConfig = configuration.GetSection("IdentityDb").Get<DbConfig>();
+
+        var journalConnectionString = new ConnectionStringBuilder()
+            .WithHost(journalDbConfig.Host)
+            .WithPort(journalDbConfig.Port)
+            .WithDatabase(journalDbConfig.Database)
+            .WithUsername(journalDbConfig.Username)
+            .WithPassword(journalDbConfig.Password)
+            .WithTrustedConnection(journalDbConfig.TrustedConnection)
+            .WithTrustServerCertificate(journalDbConfig.TrustServerCertificate)
+            .Build();
+
+        var identityConnectionString = new ConnectionStringBuilder()
+            .WithHost(identityDbConfig.Host)
+            .WithPort(identityDbConfig.Port)
+            .WithDatabase(identityDbConfig.Database)
+            .WithUsername(identityDbConfig.Username)
+            .WithPassword(identityDbConfig.Password)
+            .WithTrustedConnection(identityDbConfig.TrustedConnection)
+            .WithTrustServerCertificate(identityDbConfig.TrustServerCertificate)
+            .Build();
+
         services.AddDbContext<JournalDbContext>(x =>
         {
-                x.EnableSensitiveDataLogging();
-                x.UseSqlServer("Server=localhost;Database=JournalTest2;Trusted_Connection=True;TrustServerCertificate=True;")
-                    .UseSeeding((context, _) =>
-                    {
-                        var journalContext = (JournalDbContext)context;
-                        App.SeedFactory seedFactory = new ();
-                        seedFactory.SeedAdmins(journalContext).Wait();
-                        seedFactory.SeedExercise(journalContext).Wait();
-                        seedFactory.SeedMuscle(journalContext).Wait();
-                        seedFactory.SeedExerciseMuscle(journalContext).Wait();
-                    });
+            x.EnableSensitiveDataLogging();
+            x.UseSqlServer(journalConnectionString) // Thêm connection string vào đây
+                .UseSeeding((context, _) =>
+                {
+                    var journalContext = (JournalDbContext)context;
+                    App.SeedFactory seedFactory = new();
+                    seedFactory.SeedAdmins(journalContext).Wait();
+                    seedFactory.SeedExercise(journalContext).Wait();
+                    seedFactory.SeedMuscle(journalContext).Wait();
+                    seedFactory.SeedExerciseMuscle(journalContext).Wait();
                 });
-        services.AddDbContext<IdentityContext>(x => x.UseSqlServer("Server=localhost;Database=Identity2;Trusted_Connection=True;TrustServerCertificate=True;")
-                                                        .UseSeeding((context, _) =>
-                                                        {
-                                                            var identityContext = (IdentityContext)context;
-                                                            Identity.SeedFactory seedFactory = new ();
-                                                            seedFactory.SeedAdmins(identityContext).Wait();
-                                                        }));
+        });
+
+        services.AddDbContext<IdentityContext>(x => 
+            x.UseSqlServer(identityConnectionString)
+                .UseSeeding((context, _) =>
+                {
+                    var identityContext = (IdentityContext)context;
+                    Identity.SeedFactory seedFactory = new();
+                    seedFactory.SeedAdmins(identityContext).Wait();
+                }));
 
         services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>()
                 .AddDefaultTokenProviders();
 
         return services;
-
-
     }
-
 }

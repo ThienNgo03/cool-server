@@ -1,22 +1,29 @@
-﻿using Journal.Databases;
-using Journal.Wolverine;
-using Journal.Journeys;
-using Journal.Authentication;
+﻿using Journal.Authentication;
+using Journal.Databases;
+using Journal.Databases.Identity;
 using Journal.Files;
+using Journal.Journeys;
+using Journal.Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
-builder.Services.AddGrpc();
+builder.Services.Configure<DbConfig>(
+    builder.Configuration.GetSection("JournalDb"));
+builder.Services.Configure<DbConfig>(
+    builder.Configuration.GetSection("IdentityDb"));
+
 builder.Services.AddDatabases(builder.Configuration);
+
+builder.Services.AddGrpc();
 builder.Services.AddWolverines(builder.Configuration);
 builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddFile(builder.Configuration);
-var app = builder.Build();
 
+var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -42,6 +49,4 @@ app.MapHub<Journal.SoloPools.Hub>("solo-pools-hub");
 app.MapHub<Journal.TeamPools.Hub>("team-pools-hub");
 app.MapHub<Journal.Users.Hub>("users-hub");
 
-
 app.Run();
-
