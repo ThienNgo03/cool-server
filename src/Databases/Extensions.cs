@@ -11,14 +11,22 @@ public static class Extensions
         var journalDbConfig = configuration.GetSection("JournalDb").Get<DbConfig>();
         var identityDbConfig = configuration.GetSection("IdentityDb").Get<DbConfig>();
 
+        if (journalDbConfig == null)
+        {
+            throw new ArgumentNullException(nameof(journalDbConfig), "JournalDb configuration section is missing or invalid.");
+        }
+        if (identityDbConfig == null)
+        {
+            throw new ArgumentNullException(nameof(identityDbConfig), "IdentityDb configuration section is missing or invalid.");
+        }
         var journalConnectionString = new ConnectionStringBuilder()
             .WithHost(journalDbConfig.Host)
             .WithPort(journalDbConfig.Port)
             .WithDatabase(journalDbConfig.Database)
             .WithUsername(journalDbConfig.Username)
             .WithPassword(journalDbConfig.Password)
-            .WithTrustedConnection(journalDbConfig.TrustedConnection)
-            .WithTrustServerCertificate(journalDbConfig.TrustServerCertificate)
+            .WithTrustedConnection()
+            .WithTrustServerCertificate()
             .Build();
 
         var identityConnectionString = new ConnectionStringBuilder()
@@ -27,8 +35,8 @@ public static class Extensions
             .WithDatabase(identityDbConfig.Database)
             .WithUsername(identityDbConfig.Username)
             .WithPassword(identityDbConfig.Password)
-            .WithTrustedConnection(identityDbConfig.TrustedConnection)
-            .WithTrustServerCertificate(identityDbConfig.TrustServerCertificate)
+            .WithTrustedConnection()
+            .WithTrustServerCertificate()
             .Build();
 
         services.AddDbContext<JournalDbContext>(x =>

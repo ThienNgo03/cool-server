@@ -7,8 +7,8 @@ public class ConnectionStringBuilder
     private string _database;
     private string _username;
     private string _password;
-    private string _trustedConnection;
-    private string _trustServerCertificate;
+    private string _trustedConnection = "false";
+    private string _trustServerCertificate = "false";
 
     public ConnectionStringBuilder WithHost(string host)
     {
@@ -40,15 +40,15 @@ public class ConnectionStringBuilder
         return this;
     }
 
-    public ConnectionStringBuilder WithTrustedConnection(string trustedConnection)
+    public ConnectionStringBuilder WithTrustedConnection()
     {
-        _trustedConnection = trustedConnection;
+        _trustedConnection = "true";
         return this;
     }
 
-    public ConnectionStringBuilder WithTrustServerCertificate(string trustServerCertificate)
+    public ConnectionStringBuilder WithTrustServerCertificate()
     {
-        _trustServerCertificate = trustServerCertificate;
+        _trustServerCertificate = "true";
         return this;
     }
 
