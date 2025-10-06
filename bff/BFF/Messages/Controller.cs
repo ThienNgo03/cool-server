@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Wolverine;
 
 namespace BFF.Messages
 {
@@ -11,11 +12,14 @@ namespace BFF.Messages
     {
         private readonly Database.Messages.Context _context;
         private readonly IHubContext<Hub> _hubContext;
+        private readonly IMessageBus _messageBus;
         public Controller(Database.Messages.Context context, 
-            IHubContext<Hub> hubContext)
+            IHubContext<Hub> hubContext,
+            IMessageBus messageBus)
         {
             _context = context;
             _hubContext = hubContext;
+            _messageBus = messageBus;
         }
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] GET.Parameters parameters)
@@ -50,6 +54,7 @@ namespace BFF.Messages
                 Timestamp = DateTime.UtcNow
             };
             await _context.Messages.Insert(message).ExecuteAsync();
+            await _messageBus.PublishAsync(new Messages.POST.Messager.Message(message.Id));
             await _hubContext.Clients.All.SendAsync("message-created", message.Id);
             return CreatedAtAction(nameof(Get), new { id = message.Id });
         }
@@ -73,6 +78,7 @@ namespace BFF.Messages
                 })
                 .Update()
                 .ExecuteAsync();
+            await _messageBus.PublishAsync(new Messages.PUT.Messager.Message(payload.Id));
             await _hubContext.Clients.All.SendAsync("message-updated", payload.Id);
             return NoContent();
         }
@@ -84,6 +90,7 @@ namespace BFF.Messages
                 .Where(i => i.Id == parameters.Id)
                 .Delete()
                 .ExecuteAsync();
+            await _messageBus.PublishAsync(new Messages.DELETE.Messager.Message(parameters.Id));
             await _hubContext.Clients.All.SendAsync("message-deleted", parameters.Id);
             return NoContent();
         }
