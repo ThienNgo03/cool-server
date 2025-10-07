@@ -1,4 +1,9 @@
-﻿namespace Journal.Exercises;
+﻿using OpenSearch.Net;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+
+namespace Journal.Exercises;
 
 [ApiController]
 [Authorize]
@@ -20,8 +25,15 @@ public class Controller(
     {
         var query = _context.Exercises.AsQueryable();
 
-        if (parameters.Id.HasValue)
-            query = query.Where(x => x.Id == parameters.Id);
+        if (!string.IsNullOrEmpty(parameters.Ids))
+        {
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+                        .Where(guid => guid.HasValue)
+                        .Select(guid => guid.Value)
+                        .ToList();
+            query = query.Where(x => ids.Contains(x.Id));
+        }
 
         if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(x => x.Name.Contains(parameters.Name));
@@ -58,7 +70,6 @@ public class Controller(
         var result = await query.AsNoTracking().ToListAsync();
         var exerciseIds = result.Select(x => x.Id).ToList();
 
-        // Create response model to include muscles
         var responses = result.Select(exercise => new Get.Response
         {
             Id = exercise.Id,
@@ -85,13 +96,11 @@ public class Controller(
                              .Select(i => i.Trim().ToLower())
                              .ToList();
 
-        // Fail fast if no includes contain "muscles" or no exerciseIds
         if (!includes.Any(inc => inc.Split(".")[0] == "muscles") || !exerciseIds.Any())
         {
             return Ok(paginationResults);
         }
 
-        // Get all related exercise muscles and muscles in parallel
         var exerciseMusclesTask = _context.ExerciseMuscles
             .Where(x => exerciseIds.Contains(x.ExerciseId))
             .ToListAsync();
@@ -99,7 +108,6 @@ public class Controller(
         var exerciseMuscles = await exerciseMusclesTask;
         var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
 
-        // Fail fast if no muscle IDs found
         if (!muscleIds.Any())
         {
             return Ok(paginationResults);
@@ -158,6 +166,129 @@ public class Controller(
         }
 
         return Ok(paginationResults);
+    }
+
+    [HttpPost("super-search")]
+    public async Task<IActionResult> SuperSearch([FromBody] SuperSearch.Payload payload)
+    {
+        var query = new
+        {
+            _source = new[] { "id" },
+            query = new
+            {
+                multi_match = new
+                {
+                    query = payload.Keyword,
+                    fields = new[] { "name", "description", "muscles.name" },
+                    fuzziness = "AUTO"
+                }
+            }
+        };
+
+        var json = JsonSerializer.Serialize(query);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        using var httpClient = new HttpClient();
+
+        // Thêm xác thực cơ bản
+        var byteArray = Encoding.ASCII.GetBytes("admin:Thien321*");
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+        var response = await httpClient.PostAsync("http://localhost:9200/exercises/_search", content);
+
+        if (!response.IsSuccessStatusCode)
+            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+        var result = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(result);
+
+        var ids = doc.RootElement
+            .GetProperty("hits")
+            .GetProperty("hits")
+            .EnumerateArray()
+            .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToList();
+
+        var idString = string.Join(",", ids);
+        var count = ids.Count;
+
+        return Ok(new
+        {
+            ids = idString,
+            total = count
+        });
+
+    }
+
+    [HttpPost("sync-data-to-open-search")]
+    public async Task<IActionResult> SeedingOpenSearch()
+    {
+        var pool = new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
+        var settings = new ConnectionConfiguration(pool).BasicAuthentication("admin", "Thien321*");
+        var client = new OpenSearchLowLevelClient(settings);
+
+        var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
+        var exerciseIds = exercises.Select(x => x.Id).ToList();
+
+        if (!exerciseIds.Any())
+            return Ok("No exercises to index.");
+
+        var exerciseMuscles = await _context.ExerciseMuscles
+            .Where(x => exerciseIds.Contains(x.ExerciseId))
+            .ToListAsync();
+
+        var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
+        var muscles = await _context.Muscles
+            .Where(x => muscleIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id);
+
+        var exerciseMuscleGroups = exerciseMuscles
+            .GroupBy(x => x.ExerciseId)
+            .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId).ToList());
+
+        var bulkData = new List<object>();
+
+        foreach (var exercise in exercises)
+        {
+            var musclesToIndex = new List<object>();
+
+            if (exerciseMuscleGroups.TryGetValue(exercise.Id, out var muscleIdsForExercise))
+            {
+                musclesToIndex = muscleIdsForExercise
+                    .Where(muscleId => muscles.ContainsKey(muscleId))
+                    .Select(muscleId => new
+                    {
+                        id = muscles[muscleId].Id,
+                        name = muscles[muscleId].Name,
+                        createdDate = muscles[muscleId].CreatedDate,
+                        lastUpdated = muscles[muscleId].LastUpdated
+                    })
+                    .ToList<object>();
+            }
+
+            bulkData.Add(new { index = new { _index = "exercises", _id = exercise.Id.ToString() } });
+
+            bulkData.Add(new
+            {
+                id = exercise.Id,
+                name = exercise.Name,
+                description = exercise.Description,
+                type = exercise.Type,
+                muscles = musclesToIndex,
+                createdDate = exercise.CreatedDate,
+                lastUpdated = exercise.LastUpdated
+            });
+        }
+
+        var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
+
+        if (!bulkResponse.Success)
+        {
+            return StatusCode(500, $"Bulk indexing failed: {bulkResponse.Body}");
+        }
+
+        return Ok($"Successfully indexed {exercises.Count} exercises.");
     }
 
     [HttpPost]
