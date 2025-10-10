@@ -1,4 +1,4 @@
-using BFF.Database;
+using BFF.Databases;
 using BFF.Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
-builder.Services.AddDatabase();
+builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddWolverine(builder.Configuration);
 
 var app = builder.Build();

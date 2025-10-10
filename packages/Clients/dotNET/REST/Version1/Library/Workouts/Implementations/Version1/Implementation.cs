@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Library.Workouts.Implementations.Version1;
 
-public class Implementation : ResourceQueryable<Model>, Interface
+public class Implementation : Interface
 {
 
     #region [ Fields ]
@@ -25,24 +25,19 @@ public class Implementation : ResourceQueryable<Model>, Interface
 
     #region [ Methods ]
 
-    public override async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync<TParameters>(TParameters parameters)
+    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(All.Parameters parameters)
     {
-        if (parameters is not All.Parameters processedParams)
-        {
-            throw new ArgumentException($"Expected {typeof(All.Parameters).Name} but got {typeof(TParameters).Name}", nameof(parameters));
-        }
-
         Stopwatch stopwatch = Stopwatch.StartNew();
         Models.Refit.GET.Parameters refitParameters = new()
         {
-            Id = processedParams.Id,
-            PageIndex = processedParams.PageIndex,
-            PageSize = processedParams.PageSize,
-            ExerciseId = processedParams.ExerciseId,
-            UserId = processedParams.UserId,
-            CreatedDate = processedParams.CreatedDate,
-            LastUpdated = processedParams.LastUpdated,
-            Include = processedParams.Include
+            Id = parameters.Id,
+            PageIndex = parameters.PageIndex,
+            PageSize = parameters.PageSize,
+            ExerciseId = parameters.ExerciseId,
+            UserId = parameters.UserId,
+            CreatedDate = parameters.CreatedDate,
+            LastUpdated = parameters.LastUpdated,
+            Include = parameters.Include
         };
 
         try
@@ -91,8 +86,8 @@ public class Implementation : ResourceQueryable<Model>, Interface
                     Data = new Library.Models.PaginationResults.Model<Model>
                     {
                         Total = items.Count,
-                        Index = processedParams.PageIndex,
-                        Size = processedParams.PageSize,
+                        Index = parameters.PageIndex,
+                        Size = parameters.PageSize,
                         Items = items
                     }
                 };
@@ -154,8 +149,8 @@ public class Implementation : ResourceQueryable<Model>, Interface
                 Data = new Library.Models.PaginationResults.Model<Model>
                 {
                     Total = items.Count,
-                    Index = processedParams.PageIndex,
-                    Size = processedParams.PageSize,
+                    Index = parameters.PageIndex,
+                    Size = parameters.PageSize,
                     Items = items
                 }
             };
