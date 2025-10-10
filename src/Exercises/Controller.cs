@@ -168,8 +168,8 @@ public class Controller(
         return Ok(paginationResults);
     }
 
-    [HttpPost("super-search")]
-    public async Task<IActionResult> SuperSearch([FromBody] SuperSearch.Payload payload)
+    [HttpGet("super-search")]
+    public async Task<IActionResult> SuperSearch([FromQuery] SuperSearch.Parameters parameters)
     {
         var query = new
         {
@@ -178,8 +178,8 @@ public class Controller(
             {
                 multi_match = new
                 {
-                    query = payload.Keyword,
-                    fields = new[] { "name", "description", "muscles.name" },
+                    query = parameters.Keyword,
+                    fields = new[] { "name", "description", "muscles.name", "type" },
                     fuzziness = "AUTO"
                 }
             }
@@ -202,22 +202,103 @@ public class Controller(
         var result = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(result);
 
-        var ids = doc.RootElement
+        var ids = parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0 
+            ? 
+            doc.RootElement
             .GetProperty("hits")
             .GetProperty("hits")
             .EnumerateArray()
             .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
-            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Where(id => Guid.TryParse(id, out _))
+            .Select(Guid.Parse)
+            .Skip(parameters.PageIndex.Value * parameters.PageSize.Value)
+            .Take(parameters.PageSize.Value)
+            .ToList()
+            :
+            doc.RootElement
+            .GetProperty("hits")
+            .GetProperty("hits")
+            .EnumerateArray()
+            .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
+            .Where(id => Guid.TryParse(id, out _))
+            .Select(Guid.Parse)
             .ToList();
 
-        var idString = string.Join(",", ids);
-        var count = ids.Count;
-
-        return Ok(new
+        var results = await _context.Exercises
+            .Where(e => ids.Contains(e.Id))
+            .AsNoTracking()
+            .ToListAsync();
+        var responses = results.Select(exercise => new SuperSearch.Response
         {
-            ids = idString,
-            total = count
-        });
+            Id = exercise.Id,
+            Name = exercise.Name,
+            Description = exercise.Description,
+            Type = exercise.Type,
+            CreatedDate = exercise.CreatedDate,
+            LastUpdated = exercise.LastUpdated
+        }).ToList();
+
+        var paginationResults = new Builder<SuperSearch.Response>()
+            .WithIndex(0)
+            .WithSize(responses.Count)
+            .WithTotal(responses.Count)
+            .WithItems(responses)
+            .Build();
+
+        if (string.IsNullOrEmpty(parameters.Include))
+        {
+            return Ok(paginationResults);
+        }
+
+        var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                             .Select(i => i.Trim().ToLower())
+                             .ToList();
+
+        if (!includes.Any(inc => inc.Split(".")[0] == "muscles") || !ids.Any())
+        {
+            return Ok(paginationResults);
+        }
+
+        var exerciseMusclesTask = _context.ExerciseMuscles
+            .Where(x => ids.Contains(x.ExerciseId))
+            .ToListAsync();
+
+        var exerciseMuscles = await exerciseMusclesTask;
+        var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
+
+        if (!muscleIds.Any())
+        {
+            return Ok(paginationResults);
+        }
+
+        var muscles = await _context.Muscles
+            .Where(x => muscleIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id);
+
+        var exerciseMuscleGroups = exerciseMuscles
+            .GroupBy(x => x.ExerciseId)
+            .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
+
+        foreach (var musclesResponse in responses)
+        {
+            if (!exerciseMuscleGroups.TryGetValue(musclesResponse.Id, out var responseMuscleIds))
+            {
+                continue;
+            }
+
+            musclesResponse.Muscles = responseMuscleIds
+                .Where(muscleId => muscles.ContainsKey(muscleId))
+                .Select(muscleId => new SuperSearch.Muscle
+                {
+                    Id = muscles[muscleId].Id,
+                    Name = muscles[muscleId].Name,
+                    CreatedDate = muscles[muscleId].CreatedDate,
+                    LastUpdated = muscles[muscleId].LastUpdated
+                })
+                .ToList();
+        }
+
+        return Ok(paginationResults);
 
     }
 
