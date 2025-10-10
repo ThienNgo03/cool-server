@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Test.Databases.Journal;
+using Test.Databases.App;
 
 namespace Test.MeetUps;
 

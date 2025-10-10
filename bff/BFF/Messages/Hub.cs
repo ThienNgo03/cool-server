@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using BFF.Databases.Messages;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BFF.Messages;
 
 public sealed class Hub: Microsoft.AspNetCore.SignalR.Hub
 {
-    private readonly Database.Messages.Context _context;
-    public Hub(Database.Messages.Context context)
+    private readonly Context _context;
+    public Hub(Context context)
     {
         _context = context;
     }

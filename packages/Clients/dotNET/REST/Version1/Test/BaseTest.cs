@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Text.Json;
 using Test.Databases.Identity;
-using Test.Databases.Journal;
+using Test.Databases.App;
 using local = Test.Constant;
 
 namespace Test;
