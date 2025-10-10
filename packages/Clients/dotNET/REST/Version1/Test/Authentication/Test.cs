@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Test.Databases.Identity;
-using Test.Databases.Journal;
+using Test.Databases.App;
 
 namespace Test.Authentication;
 
@@ -43,7 +43,7 @@ public class Test : BaseTest
         identityDbContext.Users.Add(newUser);
         await identityDbContext.SaveChangesAsync();
 
-        journalDbContext.Users.Add(new Databases.Journal.Tables.User.Table
+        journalDbContext.Users.Add(new Databases.App.Tables.User.Table
         {
             Id = Guid.NewGuid(),
             Name = newUser.UserName,
@@ -96,7 +96,7 @@ public class Test : BaseTest
         identityDbContext.Users.Add(newUser);
         await identityDbContext.SaveChangesAsync();
 
-        journalDbContext.Users.Add(new Databases.Journal.Tables.User.Table
+        journalDbContext.Users.Add(new Databases.App.Tables.User.Table
         {
             Id = Guid.NewGuid(),
             Name = newUser.UserName,
@@ -149,7 +149,7 @@ public class Test : BaseTest
         identityDbContext.Users.Add(newUser);
         await identityDbContext.SaveChangesAsync();
 
-        journalDbContext.Users.Add(new Databases.Journal.Tables.User.Table
+        journalDbContext.Users.Add(new Databases.App.Tables.User.Table
         {
             Id = Guid.NewGuid(),
             Name = newUser.UserName,

@@ -1,5 +1,5 @@
 ﻿
-using Test.Databases.Journal;
+using Test.Databases.App;
 using Microsoft.EntityFrameworkCore;
 using Library.Queryable.Include.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,12 +33,9 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
-        var result = await workoutsEndpoint.AllAsync<Library.Workouts.All.Parameters>(new() 
+        var result = await workoutsEndpoint.AllAsync(new()
         {
-            IsIncludeWeekPlans = true,
-            IsIncludeWeekPlanSets = true,
-            IsIncludeExercises = true,
-            IsIncludeMuscles = true,
+            ExerciseId = workout.ExerciseId,
             PageIndex = 0,
             PageSize = 10
         });
@@ -59,38 +56,37 @@ public class Test : BaseTest
         try
         {
             var result = await workoutService
-                .Include(x => x.Exercise)
-                    .ThenInclude(x => x.Muscles)
-                .AllAsync<Library.Workouts.All.Parameters>(new()
+                .AllAsync(new()
                 {
                     PageIndex = 0,
-                    PageSize = 5
+                    PageSize = 5,
+                    Include= "Exercise,Muscles,WeekPlans,WeekPlanSets"
                 });
 
-            var result1 = await workoutService
-                .Include(x => x.WeekPlans)
-                    .ThenInclude(x => x.WeekPlanSets)
-                .AllAsync<Library.Workouts.All.Parameters>(new()
-                {
-                    PageIndex = 0,
-                    PageSize = 5
-                });
+            //var result1 = await workoutService
+            //    .Include(x => x.WeekPlans)
+            //        .ThenInclude(x => x.WeekPlanSets)
+            //    .AllAsync<Library.Workouts.All.Parameters>(new()
+            //    {
+            //        PageIndex = 0,
+            //        PageSize = 5
+            //    });
 
 
-            var result2 = await workoutService
-                .Include(x => x.Exercise)
-                    .ThenInclude(x => x.Muscles)
-                .Include(x => x.WeekPlans)
-                    .ThenInclude(x => x.WeekPlanSets)
-                .AllAsync<Library.Workouts.All.Parameters>(new()
-                {
-                    PageIndex = 0,
-                    PageSize = 5
-                });
+            //var result2 = await workoutService
+            //    .Include(x => x.Exercise)
+            //        .ThenInclude(x => x.Muscles)
+            //    .Include(x => x.WeekPlans)
+            //        .ThenInclude(x => x.WeekPlanSets)
+            //    .AllAsync<Library.Workouts.All.Parameters>(new()
+            //    {
+            //        PageIndex = 0,
+            //        PageSize = 5
+            //    });
 
             Assert.NotNull(result);
-            Assert.NotNull(result1);
-            Assert.NotNull(result2);
+            //Assert.NotNull(result1);
+            //Assert.NotNull(result2);
         }
         catch (Exception ex)
         {

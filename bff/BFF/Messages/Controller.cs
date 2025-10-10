@@ -1,4 +1,5 @@
-﻿using Cassandra.Data.Linq;
+﻿using BFF.Databases.Messages;
+using Cassandra.Data.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -10,10 +11,10 @@ namespace BFF.Messages
     [ApiController]
     public class Controller : ControllerBase
     {
-        private readonly Database.Messages.Context _context;
+        private readonly Context _context;
         private readonly IHubContext<Hub> _hubContext;
         private readonly IMessageBus _messageBus;
-        public Controller(Database.Messages.Context context, 
+        public Controller(Context context, 
             IHubContext<Hub> hubContext,
             IMessageBus messageBus)
         {
@@ -24,7 +25,7 @@ namespace BFF.Messages
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] GET.Parameters parameters)
         {
-            CqlQuery<Database.Messages.Table> query = _context.Messages;
+            CqlQuery<Table> query = _context.Messages;
             if (parameters.Id.HasValue)
                 query = query.Where(m => m.Id == parameters.Id.Value);
 
@@ -45,7 +46,7 @@ namespace BFF.Messages
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] POST.Payload payload)
         {
-            var message = new Database.Messages.Table
+            var message = new Databases.Messages.Table
             {
                 Content = payload.Content,
                 Receiver = payload.Receiver,
@@ -69,7 +70,7 @@ namespace BFF.Messages
             }
             await _context.Messages
                 .Where(i => i.Id == payload.Id)
-                .Select(i => new Database.Messages.Table
+                .Select(i => new Databases.Messages.Table
                 {
                     Content = payload.Content,
                     Receiver = payload.Receiver,
