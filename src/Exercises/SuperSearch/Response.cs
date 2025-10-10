@@ -8,5 +8,4 @@ public class Response : Model
 
 public class Muscle : Muscles.Model
 {
-
 }

@@ -168,6 +168,7 @@ public class Controller(
         return Ok(paginationResults);
     }
 
+
     [HttpGet("super-search")]
     public async Task<IActionResult> SuperSearch([FromQuery] SuperSearch.Parameters parameters)
     {
