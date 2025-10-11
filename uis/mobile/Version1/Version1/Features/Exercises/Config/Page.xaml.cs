@@ -62,4 +62,9 @@ public partial class Page : ContentPage
             viewModel.SummaryTotalReps = viewModel.TotalSets.Sum(x => x.Reps);
         }
     }
+
+    private async void ContentPage_Loaded(object sender, EventArgs e)
+    {
+        await this.viewModel.OnAppearingAsync();
+    }
 }
