@@ -1,6 +1,4 @@
-﻿using Library.Queryable;
-
-namespace Library.Workouts;
+﻿namespace Library.Workouts;
 
 public interface Interface
 {

@@ -1,6 +1,5 @@
 ﻿using Mvvm;
 using Navigation;
-using Library.Queryable.Include.Extensions;
 
 namespace Version1.Features.Home;
 
@@ -16,16 +15,12 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
     {
         await base.OnAppearingAsync();
         IsFuckingBusy = true;
-        await Task.Delay(2000); 
 
         var response = await workouts
-            .Include(x => x.Exercise)
-                .ThenInclude(x => x.Muscles)
-            .Include(x => x.WeekPlans)
-                .ThenInclude(x => x.WeekPlanSets)
-            .AllAsync<Library.Workouts.All.Parameters>(new() 
+            .AllAsync(new() 
             {
-                UserId = MyApp?.CurrentUser?.Id
+                UserId = MyApp?.CurrentUser?.Id,
+                Include = "exercise.muscles, weekPlans"
             });
 
         if (response.Data?.Items == null)
