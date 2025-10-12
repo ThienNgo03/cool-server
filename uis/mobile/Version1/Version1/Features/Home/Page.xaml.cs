@@ -17,8 +17,11 @@ public partial class Page : ContentPage
     }
     #endregion
 
+    #region [ Loaded ]
+
     private async void ContentPage_Loaded(object sender, EventArgs e)
     {
         await this.viewModel.OnAppearingAsync();
     }
+    #endregion
 }

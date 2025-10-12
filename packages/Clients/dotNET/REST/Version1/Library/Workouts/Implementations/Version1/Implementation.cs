@@ -1,6 +1,4 @@
-﻿using Library.Workouts.All;
-using Library.Workouts.Create;
-using Library.Queryable;
+﻿using Library.Workouts.Create;
 
 using Refit;
 using System.Diagnostics;
