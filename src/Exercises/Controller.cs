@@ -9,9 +9,9 @@ namespace Journal.Exercises;
 [Authorize]
 [Route("api/exercises")]
 public class Controller(
-    IMessageBus messageBus, 
-    JournalDbContext context, 
-    ILogger<Controller> logger, 
+    IMessageBus messageBus,
+    JournalDbContext context,
+    ILogger<Controller> logger,
     IHubContext<Hub> hubContext) : ControllerBase
 {
     private readonly IMessageBus _messageBus = messageBus;
@@ -25,15 +25,62 @@ public class Controller(
     {
         var query = _context.Exercises.AsQueryable();
 
+        List<Guid> ids = new();
+
+        if (!string.IsNullOrEmpty(parameters.SearchTerm))
+        {
+            var superSearchQuery = new
+            {
+                _source = new[] { "id" },
+                query = new
+                {
+                    multi_match = new
+                    {
+                        query = parameters.SearchTerm,
+                        fields = new[] { "name", "description", "muscles.name", "type" },
+                        fuzziness = "AUTO"
+                    }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(superSearchQuery);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            using var httpClient = new HttpClient();
+
+            var byteArray = Encoding.ASCII.GetBytes("admin:Thien321*");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+            var response = await httpClient.PostAsync("http://localhost:9200/exercises/_search", content);
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+            var superSearchResult = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(superSearchResult);
+
+            var idList = doc.RootElement
+                            .GetProperty("hits")
+                            .GetProperty("hits")
+                            .EnumerateArray()
+                            .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
+                            .Where(id => Guid.TryParse(id, out _))
+                            .Select(Guid.Parse)
+                            .ToList();
+            ids = idList;
+        }
+
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
-            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            var parameterIds = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
                         .Where(guid => guid.HasValue)
                         .Select(guid => guid.Value)
                         .ToList();
-            query = query.Where(x => ids.Contains(x.Id));
+            ids = ids.Union(parameterIds).ToList();
         }
+        if (ids.Any())
+            query = query.Where(x => ids.Contains(x.Id));
 
         if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(x => x.Name.Contains(parameters.Name));
@@ -166,141 +213,6 @@ public class Controller(
         }
 
         return Ok(paginationResults);
-    }
-
-
-    [HttpGet("super-search")]
-    public async Task<IActionResult> SuperSearch([FromQuery] SuperSearch.Parameters parameters)
-    {
-        var query = new
-        {
-            _source = new[] { "id" },
-            query = new
-            {
-                multi_match = new
-                {
-                    query = parameters.Keyword,
-                    fields = new[] { "name", "description", "muscles.name", "type" },
-                    fuzziness = "AUTO"
-                }
-            }
-        };
-
-        var json = JsonSerializer.Serialize(query);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        using var httpClient = new HttpClient();
-
-        // Thêm xác thực cơ bản
-        var byteArray = Encoding.ASCII.GetBytes("admin:Thien321*");
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-        var response = await httpClient.PostAsync("http://localhost:9200/exercises/_search", content);
-
-        if (!response.IsSuccessStatusCode)
-            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
-
-        var result = await response.Content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(result);
-
-        var ids = parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0 
-            ? 
-            doc.RootElement
-            .GetProperty("hits")
-            .GetProperty("hits")
-            .EnumerateArray()
-            .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
-            .Where(id => Guid.TryParse(id, out _))
-            .Select(Guid.Parse)
-            .Skip(parameters.PageIndex.Value * parameters.PageSize.Value)
-            .Take(parameters.PageSize.Value)
-            .ToList()
-            :
-            doc.RootElement
-            .GetProperty("hits")
-            .GetProperty("hits")
-            .EnumerateArray()
-            .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
-            .Where(id => Guid.TryParse(id, out _))
-            .Select(Guid.Parse)
-            .ToList();
-
-        var results = await _context.Exercises
-            .Where(e => ids.Contains(e.Id))
-            .AsNoTracking()
-            .ToListAsync();
-        var responses = results.Select(exercise => new SuperSearch.Response
-        {
-            Id = exercise.Id,
-            Name = exercise.Name,
-            Description = exercise.Description,
-            Type = exercise.Type,
-            CreatedDate = exercise.CreatedDate,
-            LastUpdated = exercise.LastUpdated
-        }).ToList();
-
-        var paginationResults = new Builder<SuperSearch.Response>()
-            .WithIndex(0)
-            .WithSize(responses.Count)
-            .WithTotal(responses.Count)
-            .WithItems(responses)
-            .Build();
-
-        if (string.IsNullOrEmpty(parameters.Include))
-        {
-            return Ok(paginationResults);
-        }
-
-        var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                             .Select(i => i.Trim().ToLower())
-                             .ToList();
-
-        if (!includes.Any(inc => inc.Split(".")[0] == "muscles") || !ids.Any())
-        {
-            return Ok(paginationResults);
-        }
-
-        var exerciseMusclesTask = _context.ExerciseMuscles
-            .Where(x => ids.Contains(x.ExerciseId))
-            .ToListAsync();
-
-        var exerciseMuscles = await exerciseMusclesTask;
-        var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
-
-        if (!muscleIds.Any())
-        {
-            return Ok(paginationResults);
-        }
-
-        var muscles = await _context.Muscles
-            .Where(x => muscleIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id);
-
-        var exerciseMuscleGroups = exerciseMuscles
-            .GroupBy(x => x.ExerciseId)
-            .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId));
-
-        foreach (var musclesResponse in responses)
-        {
-            if (!exerciseMuscleGroups.TryGetValue(musclesResponse.Id, out var responseMuscleIds))
-            {
-                continue;
-            }
-
-            musclesResponse.Muscles = responseMuscleIds
-                .Where(muscleId => muscles.ContainsKey(muscleId))
-                .Select(muscleId => new SuperSearch.Muscle
-                {
-                    Id = muscles[muscleId].Id,
-                    Name = muscles[muscleId].Name,
-                    CreatedDate = muscles[muscleId].CreatedDate,
-                    LastUpdated = muscles[muscleId].LastUpdated
-                })
-                .ToList();
-        }
-
-        return Ok(paginationResults);
-
     }
 
     [HttpPost("sync-data-to-open-search")]
@@ -502,4 +414,5 @@ public class Controller(
         await _hubContext.Clients.All.SendAsync("exercise-deleted", parameters.Id);
         return NoContent();
     }
+
 }
