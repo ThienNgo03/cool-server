@@ -33,6 +33,79 @@ public partial class ViewModel(
         TotalSets.CollectionChanged += TotalSets_CollectionChanged;
     }
 
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        IsFuckingBusy = true;
+
+        var response = await workoutsBiz
+            .AllAsync(new()
+            {
+                UserId = MyApp?.CurrentUser?.Id,
+                ExerciseId = Guid.Parse(Id),
+                Include = "exercise.muscles, weekPlans.weekPlanSets"
+            });
+
+        // Get the days that are already configured on the server
+        var serverWeekDays = response.Data.Items
+            .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+            .Select(wp => wp.DateOfWeek)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Find matching WeeklyItems and mark them as selected
+        var selectedWeeklyItems = WeeklyItems
+            .Where(item => serverWeekDays.Contains(item.Content))
+            .ToList();
+
+        // Mark server data and add to selected items
+        foreach (var item in selectedWeeklyItems)
+        {
+            item.IsServerData = true;
+            SelectedWeeklyItems.Add(item);
+            SelectedDays.Add(item);
+        }
+
+        //Now add the WorkoutTimeItems from the server
+        var serverWorkoutTimes = response.Data.Items
+                .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+                .Select(wp => {
+                    var correspondingWeeklyItem = WeeklyItems
+                        .FirstOrDefault(wi => string.Equals(wi.Content, wp.DateOfWeek, StringComparison.OrdinalIgnoreCase));
+
+                    return new WorkoutTimeItem
+                    {
+                        Id = correspondingWeeklyItem?.Id ?? Guid.NewGuid().ToString(), // Use WeeklyItem's ID if found
+                        Content = wp.DateOfWeek,
+                        Time = wp.Time
+                    };
+                })
+                .ToList();
+
+        foreach (var workoutTime in serverWorkoutTimes)
+        {
+            WorkoutTimeItems?.Add(workoutTime);
+        }
+
+        //Now for the TotalSets 
+        var serverTotalSets = response.Data.Items
+            .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+            .SelectMany(wp => (wp.WeekPlanSets ?? new List<Library.Workouts.WeekPlanSet>()).Select(wps => new SetConfigItem
+            {
+                Id = wps.Id.ToString(),
+                Content = $"Set {wps.Value}",
+                Day = wp.DateOfWeek,
+                Reps = wps.Value
+            }))
+            .ToList();
+
+        foreach (var totalSet in serverTotalSets)
+        {
+            TotalSets.Add(totalSet);
+        }
+
+        IsFuckingBusy = false;
+    }
+
     [RelayCommand]
     async Task SaveAsync()
     {
@@ -108,6 +181,11 @@ public partial class ViewModel(
         {
             var addedWeeklyItem = e.NewItems[0] as WeeklyItem;
             if (addedWeeklyItem is null) return;
+            if (addedWeeklyItem.IsServerData)
+            {
+                addedWeeklyItem.IsServerData = false;
+                return;
+            }
             WorkoutTimeItems?.Add(new()
             {
                 Id = addedWeeklyItem.Id,
@@ -214,8 +292,8 @@ public partial class WeeklyItem : BaseModel
     [ObservableProperty]
     string content;
 
-    //[ObservableProperty]
-    //bool isSelected;
+    [ObservableProperty]
+    bool isServerData = false;
 }
 
 public partial class WorkoutTimeItem : BaseModel

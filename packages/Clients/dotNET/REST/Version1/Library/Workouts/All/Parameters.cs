@@ -1,6 +1,6 @@
 ﻿namespace Library.Workouts.All;
 
-public class Parameters : Library.Models.PaginationParameters.Model
+public class Parameters : Models.PaginationParameters.Model
 {
 
     public Guid? ExerciseId { get; set; }

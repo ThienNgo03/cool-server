@@ -1,4 +1,6 @@
-﻿namespace Journal.Exercises.Get;
+﻿using Microsoft.Identity.Client;
+
+namespace Journal.Exercises.Get;
 
 public class Parameters : Models.PaginationParameters.Model
 {
@@ -8,4 +10,6 @@ public class Parameters : Models.PaginationParameters.Model
     public string? Type { get; set; }
     public string? MusclesSortBy { get; set; }
     public string? MusclesSortOrder { get; set; }
+
+    public string? SearchTerm { get; set; }
 }
