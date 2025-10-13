@@ -1,4 +1,4 @@
-﻿namespace BFF.Messages.POST;
+﻿namespace BFF.Messages.Send;
 
 public class Payload
 {

@@ -1,4 +1,5 @@
-﻿using Wolverine;
+﻿using BFF.Messages.Send.Messager;
+using Wolverine;
 
 namespace BFF.Wolverine;
 
@@ -11,7 +12,15 @@ public static class Extensions
             //Message 
             opts.PublishMessage<Messages.DELETE.Messager.Message>().ToLocalQueue("message-delete");
             opts.PublishMessage<Messages.PUT.Messager.Message>().ToLocalQueue("message-update");
-            opts.PublishMessage<Messages.POST.Messager.Message>().ToLocalQueue("message-create");
+            opts.PublishMessage<Message>().ToLocalQueue("message-create");
+            //Exercise Configurations
+            opts.PublishMessage<ExerciseConfigurations.Save.Messager.Message>().ToLocalQueue("workout-save");
+            //Workout Log Tracking
+            opts.PublishMessage<WorkoutLogTracking.CreateWorkoutLogs.Messager.Message>().ToLocalQueue("workoutLog-create");
+            //User
+            opts.PublishMessage<Users.Delete.Messager.Message>().ToLocalQueue("user-delete");
+            opts.PublishMessage<Users.Update.Messager.Message>().ToLocalQueue("user-update");
+            opts.PublishMessage<Users.Post.Messager.Message>().ToLocalQueue("user-create");
         });
         return services;
     }

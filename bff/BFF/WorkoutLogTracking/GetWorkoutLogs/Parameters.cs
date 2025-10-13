@@ -1,12 +1,12 @@
-﻿namespace BFF.Exercises.GetWorkouts;
+﻿namespace BFF.WorkoutLogTracking.GetWorkoutLogs;
 
 public class Parameters
 {
     public Guid? Id { get; set; }
 
-    public Guid? ExerciseId { get; set; }
+    public Guid? WorkoutId { get; set; }
 
-    public Guid? UserId { get; set; }
+    public DateTime? WorkoutDate { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 
@@ -15,6 +15,4 @@ public class Parameters
     public int? PageSize { get; set; }
 
     public int? PageIndex { get; set; }
-
-    public string? Include { get; set; }
 }

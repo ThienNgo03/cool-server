@@ -22,6 +22,7 @@ public class Handler
 
     public async Task Handle(Message message)
     {
+        //Add new week plans
         if (message.weekPlans is null)
             return;
 
@@ -53,22 +54,27 @@ public class Handler
                 _context.WeekPlanSets.Add(newWeekPlanSet);
             }
         }
-        var oldWorkouts = await _context.Workouts
-            .Where(w => w.ExerciseId == message.ExerciseId && w.UserId == message.UserId && w.Id != message.Id)
-            .ToListAsync(); 
-        foreach (var workout in oldWorkouts)
-        {
-            var oldWeekPlans = await _context.WeekPlans.Where(wp => wp.WorkoutId == workout.Id).ToListAsync();
-            foreach (var weekPlan in oldWeekPlans)
-            {
-                var oldWeekPlanSets = _context.WeekPlanSets.Where(wps => wps.WeekPlanId == weekPlan.Id);
-                _context.WeekPlanSets.RemoveRange(oldWeekPlanSets);
-            }
-            var oldWeekPlansToRemove = _context.WeekPlans.Where(wp => wp.WorkoutId == workout.Id);
-            _context.WeekPlans.RemoveRange(oldWeekPlansToRemove);
-        }
-        _context.Workouts.RemoveRange(oldWorkouts);
 
+        //Select old workouts
+        
+        ICollection<Guid> oldWorkoutIds = [];
+        if(message.OldWorkoutId.Count>0)
+        {
+            oldWorkoutIds = message.OldWorkoutId;
+        }
+        var oldWeekPlans = await _context.WeekPlans.Where(wp => oldWorkoutIds.Contains(wp.Id)).ToListAsync();
+        var oldWeekPlanIds = oldWeekPlans.Select(o => o.Id).ToList();
+        
+        _context.WeekPlanSets.Where(wps =>oldWeekPlanIds.Contains(wps.WeekPlanId)).ExecuteDelete();
+        _context.WeekPlans.Where(wp => oldWorkoutIds.Contains(wp.WorkoutId)).ExecuteDelete();      
+        _context.Workouts
+            .Where(w => w.ExerciseId == message.ExerciseId && w.UserId == message.UserId && w.Id != message.Id)
+            .ExecuteDelete();
+
+        //Update existing Workout log related to the old workout to the new workout Id
+        _context.WorkoutLogs.Where(x=>oldWorkoutIds.Contains(x.WorkoutId))
+            .ExecuteUpdate(s=>s.SetProperty(p=>p.WorkoutId,p=>message.Id)
+                                .SetProperty(p=>p.LastUpdated,p=>DateTime.UtcNow));
 
         await _context.SaveChangesAsync();
     }

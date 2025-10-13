@@ -11,4 +11,5 @@ public class JournalDbContext(DbContextOptions<JournalDbContext> options) : DbCo
     public DbSet<Tables.WeekPlanSet.Table> WeekPlanSets { get; set; }
     public DbSet<Tables.ExerciseMuscle.Table> ExerciseMuscles { get; set; }
     public DbSet<Tables.Muscle.Table> Muscles { get; set; }
+    public DbSet<Tables.WorkoutLog.Table> WorkoutLogs { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿namespace BFF.Exercises.GetWorkouts;
+﻿namespace BFF.ExerciseConfigurations.WorkoutLoad;
 
 public class Response : Databases.App.Tables.Workout.Table
 {
