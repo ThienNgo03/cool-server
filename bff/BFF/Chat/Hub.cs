@@ -1,7 +1,7 @@
 ﻿using BFF.Databases.Messages;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BFF.Messages;
+namespace BFF.Chat;
 
 public sealed class Hub: Microsoft.AspNetCore.SignalR.Hub
 {

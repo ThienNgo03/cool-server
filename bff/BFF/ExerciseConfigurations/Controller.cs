@@ -71,11 +71,11 @@ namespace BFF.ExerciseConfigurations
             
             _context.Workouts.Add(workout);
             await _context.SaveChangesAsync();
-            var existingWorkout = await _context.Workouts
+            var oldWorkoutIds = await _context.Workouts
                 .Where(w => w.ExerciseId == payload.ExerciseId && w.UserId == payload.UserId && w.Id != workout.Id).Select(w => w.Id).ToListAsync();
-            await _messageBus.PublishAsync(new Save.Messager.Message(workout.Id, payload.WeekPlans, payload.ExerciseId, payload.UserId, existingWorkout));
+            await _messageBus.PublishAsync(new Save.Messager.Message(workout.Id, payload.WeekPlans, payload.ExerciseId, payload.UserId, oldWorkoutIds));
             await _hubContext.Clients.All.SendAsync("workout-created", workout.Id);
-            return NoContent();
+            return Ok(workout.Id);
         }
 
         [HttpGet("workout-load")]

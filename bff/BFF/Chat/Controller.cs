@@ -1,13 +1,12 @@
-﻿using BFF.Databases.Messages;
-using BFF.Messages.LoadMessage;
-using BFF.Messages.Send;
+﻿using BFF.Chat.LoadMessage;
+using BFF.Databases.Messages;
 using Cassandra.Data.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Wolverine;
 
-namespace BFF.Messages
+namespace BFF.Chat
 {
     [Route("api/messages")]
     [ApiController]
@@ -46,21 +45,43 @@ namespace BFF.Messages
         }
 
         [HttpPost("send")]
-        public async Task<IActionResult> Send([FromBody] Payload payload)
+        public async Task<IActionResult> Send([FromBody] Chat.Send.Payload payload)
         {
-            var message = new Databases.Messages.Table
+            var message = new Table
             {
                 Content = payload.Content,
                 Receiver = payload.Receiver,
                 Sender = payload.Sender,
                 Id = Guid.NewGuid(),
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                Day = DateTime.UtcNow.Day,
+                Month = DateTime.UtcNow.Month,
+                Year = DateTime.UtcNow.Year
             };
             await _context.Messages.Insert(message).ExecuteAsync();
-            await _messageBus.PublishAsync(new Messages.Send.Messager.Message(message.Id));
+            await _messageBus.PublishAsync(new Chat.Send.Messager.Message(message.Id));
             await _hubContext.Clients.All.SendAsync("message-created", message.Id);
             return CreatedAtAction(nameof(LoadMessages), new { id = message.Id });
         }
 
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage([FromBody] Chat.UploadImage.Payload payload)
+        {
+            var message = new Table
+            {
+                ImageUploaded = payload.ImageUploaded,
+                Receiver = payload.Receiver,
+                Sender = payload.Sender,
+                Id = Guid.NewGuid(),
+                Timestamp = DateTime.UtcNow,
+                Day = DateTime.UtcNow.Day,
+                Month = DateTime.UtcNow.Month,
+                Year = DateTime.UtcNow.Year
+            };
+            await _context.Messages.Insert(message).ExecuteAsync();
+            await _messageBus.PublishAsync(new Chat.Send.Messager.Message(message.Id));
+            await _hubContext.Clients.All.SendAsync("image-uploaded", message.Id);
+            return CreatedAtAction(nameof(LoadMessages), new { id = message.Id });
+        }
     }
 }

@@ -21,7 +21,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-app.MapHub<BFF.Messages.Hub>("messages-hub");
+app.MapHub<BFF.Chat.Hub>("messages-hub");
 app.MapHub<BFF.WorkoutLogTracking.Hub>("workout-log-tracking-hub");
 app.MapHub<BFF.Users.Hub>("users-hub");
 app.MapHub<BFF.ExerciseConfigurations.Hub>("exercise-configurations-hub");

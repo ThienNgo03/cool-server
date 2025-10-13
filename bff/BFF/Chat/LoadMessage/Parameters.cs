@@ -1,4 +1,4 @@
-﻿namespace BFF.Messages.LoadMessage;
+﻿namespace BFF.Chat.LoadMessage;
 
 public class Parameters
 {

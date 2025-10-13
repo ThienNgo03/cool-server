@@ -1,9 +1,6 @@
-﻿
-using Test.Databases.App;
+﻿using Test.Databases.App;
 using Microsoft.EntityFrameworkCore;
-using Library.Queryable.Include.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Library.Competitions.All;
 
 namespace Test.Workouts;
 

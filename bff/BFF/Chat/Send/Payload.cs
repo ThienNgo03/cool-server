@@ -1,4 +1,4 @@
-﻿namespace BFF.Messages.Send;
+﻿namespace BFF.Chat.Send;
 
 public class Payload
 {
