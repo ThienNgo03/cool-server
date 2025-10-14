@@ -12,16 +12,18 @@ public static class Extension
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         #region Cassandra
-
-        Cluster cluster = Cluster.Builder()
-                .AddContactPoint("localhost")
-                .WithPort(int.Parse("9042"))
+        var cassandraDbConfig = configuration.GetSection("CassandraDb").Get<CassandraConfig>();
+        if (cassandraDbConfig != null)
+        {
+            Cluster cluster = Cluster.Builder()
+                .AddContactPoint(cassandraDbConfig.ContactPoint)
+                .WithPort(cassandraDbConfig.Port)
                 .Build();
 
-        Cassandra.ISession session = cluster.Connect("bff");
-        services.AddSingleton<Context>();
-        services.AddSingleton(session);
-
+            Cassandra.ISession session = cluster.Connect(cassandraDbConfig.Keyspace);
+            services.AddSingleton<Context>();
+            services.AddSingleton(session);
+        }
         #endregion
 
         #region MSSQL
