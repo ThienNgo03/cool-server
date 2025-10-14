@@ -23,6 +23,7 @@
 	</PackageReference>
 	<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="9.0.9" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
+	<PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
   </ItemGroup>
 
 </Project>
