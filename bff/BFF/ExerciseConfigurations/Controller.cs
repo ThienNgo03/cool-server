@@ -131,6 +131,7 @@ namespace BFF.ExerciseConfigurations
                 .Where(wps => wps.WeekPlanId == wp.Id)
                 .Select(wps => new WeekPlanSet
                 {
+                    Id=wps.Id,
                     Value = wps.Value
                 })]
             })];

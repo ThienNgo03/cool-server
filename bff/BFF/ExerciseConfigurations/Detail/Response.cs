@@ -31,5 +31,6 @@ public class WeekPlan
 
 public class WeekPlanSet 
 {
+    public Guid Id { get; set; }
     public int Value { get; set; }
 }
