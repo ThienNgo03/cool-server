@@ -73,7 +73,7 @@ namespace BFF.ExerciseConfigurations
             var oldWorkoutIds = await _context.Workouts
                 .Where(w => w.ExerciseId == payload.ExerciseId && w.UserId == payload.UserId && w.Id != workout.Id).Select(w => w.Id).ToListAsync();
             await _messageBus.PublishAsync(new Save.Messager.Message(workout.Id, payload.WeekPlans, payload.ExerciseId, payload.UserId, oldWorkoutIds));
-            await _hubContext.Clients.All.SendAsync("workout-created", workout.Id);
+            await _hubContext.Clients.All.SendAsync("saved", workout.Id);
             return Ok(workout.Id);
         }
 
