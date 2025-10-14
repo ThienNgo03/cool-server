@@ -125,6 +125,7 @@ namespace BFF.ExerciseConfigurations
             var weekPlanSets=await _context.WeekPlanSets.Where(ws=>weekPlans.Select(w=>w.Id).Contains(ws.WeekPlanId)).ToListAsync();
             response.WeekPlans = [.. weekPlans.Select(wp => new WeekPlan
             {
+                Time = wp.Time,
                 DateOfWeek = wp.DateOfWeek,
                 WeekPlanSets = [.. weekPlanSets
                 .Where(wps => wps.WeekPlanId == wp.Id)

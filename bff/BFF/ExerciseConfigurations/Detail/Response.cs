@@ -23,7 +23,8 @@ public class Muscle
 }
 
 public class WeekPlan 
-{   
+{
+    public TimeSpan Time { get; set; }
     public string? DateOfWeek { get; set; }
     public ICollection<WeekPlanSet>? WeekPlanSets { get; set; }
 }
