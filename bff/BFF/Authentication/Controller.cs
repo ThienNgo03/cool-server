@@ -1,0 +1,134 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Wolverine;
+
+namespace BFF.Authentication;
+
+[Route("api/authentication")]
+[ApiController]
+public class Controller : ControllerBase
+{
+    private readonly ILogger<Controller> _logger;
+    private readonly IMessageBus _messageBus;
+    private readonly Databases.Identity.IdentityContext _context;
+    private readonly UserManager<IdentityUser> _userManager;
+    private readonly IConfiguration _configuration;
+    public Controller(ILogger<Controller> logger,
+        Databases.Identity.IdentityContext context,
+        UserManager<IdentityUser> userManager,
+        IConfiguration configuration,
+        IMessageBus messageBus
+        )
+    {
+        _logger = logger;
+        _context = context;
+        _userManager = userManager;
+        _configuration = configuration;
+        _messageBus = messageBus;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        var users = await _context.Users.ToListAsync();
+        if (users == null || users.Count == 0)
+        {
+            return NotFound("No users found.");
+        }
+        return Ok(users);
+    }
+
+    [HttpPost]
+    [Route("register")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RegisterAsync([FromForm] Register.Payload form)
+    {
+        var newAccount = new IdentityUser
+        {
+            UserName = form.UserName,
+            Email = form.Email,
+            PhoneNumber = form.PhoneNumber,
+        };
+
+        if (form.Password != form.ConfirmPassword)
+            return BadRequest("Passwords do not match.");
+
+        newAccount.EmailConfirmed = true;
+        var result = await _userManager.CreateAsync(newAccount, form.Password);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        await _messageBus.PublishAsync(new Register.Messager.Message(
+                                           Guid.Parse(newAccount.Id),
+                                           null,
+                                           form.UserName,
+                                           form.Email,
+                                           form.PhoneNumber
+         ));
+
+        return NoContent();
+    }
+
+    [HttpPost]
+    [Route("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginAsync([FromBody] Signin.Payload payload)
+    {
+        var user = await _userManager.FindByEmailAsync(payload.Account);
+        if (user == null)
+        {
+            return Unauthorized("Invalid email or password.");
+        }
+
+        var result = await _userManager.CheckPasswordAsync(user, payload.Password);
+        if (!result)
+        {
+            return Unauthorized("Invalid email or password.");
+        }
+
+        var token = GenerateToken(payload.Account);
+        var response = new
+        {
+            Token = token
+        };
+        return CreatedAtAction(nameof(Get), response);
+    }
+
+    private string GenerateToken(string email)
+    {
+        var key = Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!);
+        var issuer = _configuration["JWT:Issuer"];
+        var audience = _configuration["JWT:Audience"];
+
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+        if (user == null)
+            throw new InvalidOperationException("User not found");
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var securityKey = new SymmetricSecurityKey(key);
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}
