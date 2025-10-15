@@ -1,5 +1,7 @@
 using BFF.Authentication;
 using BFF.Databases;
+using BFF.ExerciseConfigurations;
+using BFF.Exercises;
 using BFF.Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddExercises();
+builder.Services.AddExerciseConfigurations();
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddWolverine(builder.Configuration);

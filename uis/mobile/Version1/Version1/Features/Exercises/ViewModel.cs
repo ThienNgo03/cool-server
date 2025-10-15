@@ -5,17 +5,15 @@ namespace Version1.Features.Exercises;
 
 public partial class ViewModel(
     IAppNavigator appNavigator,
-    Library.Muscles.Interface muscles,
-    Library.Workouts.Interface workouts,
-    Library.WeekPlanSets.Interface weekplanSet,
-    Library.Exercises.Interface exercises) : BaseViewModel(appNavigator)
+    //Library.Muscles.Interface muscles,
+    //Library.Exercises.Interface exercises,
+    Core.Exercises.Interface exercises ) : BaseViewModel(appNavigator)
 {
     #region [ Fields ]
 
-    private readonly Library.Muscles.Interface muscles = muscles;
-    private readonly Library.Exercises.Interface exercises = exercises;
-    private readonly Library.Workouts.Interface workouts = workouts;
-    private readonly Library.WeekPlanSets.Interface weekplanSet = weekplanSet;
+    //private readonly Library.Muscles.Interface muscles = muscles;
+    //private readonly Library.Exercises.Interface exercises = exercises;
+    private readonly Core.Exercises.Interface exercises = exercises;
     #endregion
 
     #region [ UI ]
@@ -40,31 +38,29 @@ public partial class ViewModel(
         {
             IsLoading = true;
 
-            var response = await exercises.AllAsync();
+            var response = await exercises.AllAsync(new());
             Items = new();
 
-            if (response?.Data?.Items == null)
+            if (response == null)
             {
                 return;
             }
 
             var serverData = new List<ContentViews.Card.Model>();
 
-            foreach (var ex in response.Data.Items)
+            foreach (var ex in response)
             {
                 var card = new ContentViews.Card.Model
                 {
                     Id = ex.Id.ToString(),
-                    Title = ex.Name,
-                    SubTitle = ex.Muscles != null && ex.Muscles.Any()
-                        ? string.Join(", ", ex.Muscles.Select(m => m.Name))
-                        : string.Empty,
+                    Title = ex.Title,
+                    SubTitle = ex.SubTitle,
                     Description = ex.Description,
-                    IconUrl = "dotnet_bot.png",
-                    Badge = "Easy",
-                    BadgeTextColor = "#2b6cb0",
-                    BadgeBackgroundColor = "#ebf8ff",
-                    Progress = 50,
+                    IconUrl = ex.ImageUrl,
+                    Badge = ex.Badge,
+                    BadgeTextColor = ex.BadgeTextColor,
+                    BadgeBackgroundColor = ex.BadgeBackgroundColor,
+                    Progress = ex.PercentageComplete,
                 };
                 serverData.Add(card);
             }
@@ -72,13 +68,10 @@ public partial class ViewModel(
             source = serverData.ToArray();
             Items = new ObservableCollection<ContentViews.Card.Model>(source);
 
-            var tagResponse = await muscles.AllAsync();
-            if (tagResponse?.Data?.Items == null)
+            var tagResponse = await exercises.CategoriesAsync();
+            if (tagResponse == null)
                 return;
-            Tags = new ObservableCollection<string>(
-                    tagResponse.Data.Items
-                        .Select(m => m.Name)
-            );
+            Tags = new ObservableCollection<string>(tagResponse);
         }
         catch (Exception ex)
         {

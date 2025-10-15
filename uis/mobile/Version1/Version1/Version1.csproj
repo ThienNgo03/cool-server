@@ -69,6 +69,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\..\packages\Clients\dotNET\REST\Version1\Library\Library.csproj" />
+	  <ProjectReference Include="..\Core\Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

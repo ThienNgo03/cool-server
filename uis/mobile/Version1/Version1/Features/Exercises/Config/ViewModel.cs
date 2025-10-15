@@ -5,12 +5,12 @@ using System.Collections.Specialized;
 namespace Version1.Features.Exercises.Config;
 
 public partial class ViewModel(
-    Library.Workouts.Interface workoutsBiz,
+    Core.ExerciseConfigurations.Interface workoutsBiz,
     IAppNavigator appNavigator) : NavigationAwareBaseViewModel(appNavigator)
 {
     #region [ Fields ]
 
-    private readonly Library.Workouts.Interface workoutsBiz = workoutsBiz;
+    private readonly Core.ExerciseConfigurations.Interface workoutsBiz = workoutsBiz;
     #endregion
 
     #region [ UI ]
@@ -39,16 +39,25 @@ public partial class ViewModel(
         IsFuckingBusy = true;
 
         var response = await workoutsBiz
-            .AllAsync(new()
+            .DetailAsync(new()
             {
                 UserId = MyApp?.CurrentUser?.Id,
-                ExerciseId = Guid.Parse(Id),
-                Include = "exercise.muscles, weekPlans.weekPlanSets"
+                ExerciseId = Guid.Parse(Id)
             });
-
+        if (response == null)
+        {
+            IsFuckingBusy = false;
+            return;
+        }
         // Get the days that are already configured on the server
-        var serverWeekDays = response.Data.Items
-            .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+        //var serverWeekDays = response.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+        //    .Select(wp => wp.DateOfWeek)
+        //    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        //var serverWeekDays = response.WeekPlans
+        //    .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+        //    .Select(wp => wp.DateOfWeek)
+        //    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var serverWeekDays = (response.WeekPlans ?? new List<Core.ExerciseConfigurations.Detail.WeekPlan>())
             .Select(wp => wp.DateOfWeek)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -66,8 +75,7 @@ public partial class ViewModel(
         }
 
         //Now add the WorkoutTimeItems from the server
-        var serverWorkoutTimes = response.Data.Items
-                .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
+        var serverWorkoutTimes = (response.WeekPlans ?? new List<Core.ExerciseConfigurations.Detail.WeekPlan>())
                 .Select(wp => {
                     var correspondingWeeklyItem = WeeklyItems
                         .FirstOrDefault(wi => string.Equals(wi.Content, wp.DateOfWeek, StringComparison.OrdinalIgnoreCase));
@@ -75,7 +83,7 @@ public partial class ViewModel(
                     return new WorkoutTimeItem
                     {
                         Id = correspondingWeeklyItem?.Id ?? Guid.NewGuid().ToString(), // Use WeeklyItem's ID if found
-                        Content = wp.DateOfWeek,
+                        Content = wp.DateOfWeek ?? string.Empty,
                         Time = wp.Time
                     };
                 })
@@ -87,9 +95,8 @@ public partial class ViewModel(
         }
 
         //Now for the TotalSets 
-        var serverTotalSets = response.Data.Items
-            .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
-            .SelectMany(wp => (wp.WeekPlanSets ?? new List<Library.Workouts.WeekPlanSet>()).Select(wps => new SetConfigItem
+        var serverTotalSets = (response.WeekPlans ?? new List<Core.ExerciseConfigurations.Detail.WeekPlan>())
+            .SelectMany(wp => (wp.WeekPlanSets ?? new List<Core.ExerciseConfigurations.Detail.WeekPlanSet>()).Select(wps => new SetConfigItem
             {
                 Id = wps.Id.ToString(),
                 Content = $"Set {wps.Value}",
@@ -129,23 +136,42 @@ public partial class ViewModel(
             await ShowSnackBarAsync("Set configurations are missing.");
             return;
         }
-        if(MyApp is null || MyApp.CurrentUser is null)
+
+        List<string> daysWithoutReps = new();
+        var daysWithSets = selectedDays.Select(sd => sd.Content).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var selectedDay in selectedDays)
+        {
+            var hasSets = TotalSets.Any(ts => string.Equals(ts.Day, selectedDay.Content, StringComparison.OrdinalIgnoreCase) && ts.Reps > 0);
+            if (!hasSets)
+            {
+                daysWithoutReps.Add(selectedDay.Content + " ");
+            }
+        }
+
+        if (daysWithoutReps.Any())
+        {
+            string message = "Reps in " + string.Join(", ", daysWithoutReps) + "are missing";
+            await ShowSnackBarAsync(message);
+            return;
+        }
+        if (MyApp is null || MyApp.CurrentUser is null)
         {
             await ShowSnackBarAsync("User credentials are missing");
             return;
         }
 
-        await workoutsBiz.CreateAsync(new Library.Workouts.Create.Payload
+        await workoutsBiz.SaveAsync(new Core.ExerciseConfigurations.Save.Payload
         {
             ExerciseId = Guid.Parse(Id),
             UserId = MyApp.CurrentUser.Id,
-            WeekPlans = WorkoutTimeItems?.Select(wti => new Library.Workouts.Create.WeekPlan
+            WeekPlans = WorkoutTimeItems?.Select(wti => new Core.ExerciseConfigurations.Save.WeekPlan
             {
                 DateOfWeek = wti.Content,
                 Time = wti.Time,
                 WeekPlanSets = TotalSets?
                     .Where(ts => string.Equals(ts.Day, wti.Content, StringComparison.OrdinalIgnoreCase))
-                    .Select(sci => new Library.Workouts.Create.WeekPlanSet
+                    .Select(sci => new Core.ExerciseConfigurations.Save.WeekPlanSet
                     {
                         Value = sci.Reps
                     }).ToList()

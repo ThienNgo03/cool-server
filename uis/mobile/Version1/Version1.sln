@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Version1", "Version1\Versio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "..\..\..\packages\Clients\dotNET\REST\Version1\Library\Library.csproj", "{97E3F9AD-EC29-4988-76FE-AF3F8E4F9669}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{B0DE9DD7-CDC6-4DA4-A84C-D25CDA2780F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{97E3F9AD-EC29-4988-76FE-AF3F8E4F9669}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97E3F9AD-EC29-4988-76FE-AF3F8E4F9669}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97E3F9AD-EC29-4988-76FE-AF3F8E4F9669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0DE9DD7-CDC6-4DA4-A84C-D25CDA2780F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0DE9DD7-CDC6-4DA4-A84C-D25CDA2780F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0DE9DD7-CDC6-4DA4-A84C-D25CDA2780F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0DE9DD7-CDC6-4DA4-A84C-D25CDA2780F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

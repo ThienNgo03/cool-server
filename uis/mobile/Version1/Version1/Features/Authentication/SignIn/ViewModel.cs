@@ -7,6 +7,7 @@ public partial class ViewModel(
     Library.Users.Interface usersBiz,
     Library.Token.Service tokenService,
     Library.Authentication.Interface authBiz,
+    Core.Token.Service coreToken,
     IAppNavigator appNavigator) : BaseViewModel(appNavigator)
 {
     #region [ Fields ]
@@ -14,6 +15,8 @@ public partial class ViewModel(
     private readonly Library.Users.Interface usersBiz = usersBiz;
     private readonly Library.Token.Service tokenService = tokenService;
     private readonly Library.Authentication.Interface authBiz = authBiz;
+
+    private readonly Core.Token.Service coreToken = coreToken;
     #endregion
 
     #region [ UI ]
@@ -73,6 +76,7 @@ public partial class ViewModel(
         };
 
         tokenService.SetToken(result.Token);
+        coreToken.SetToken(result.Token);
 
         var currentUserInfo = await usersBiz.AllAsync(new() { IsSelf = true });
 

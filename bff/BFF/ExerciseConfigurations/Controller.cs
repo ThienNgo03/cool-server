@@ -16,18 +16,21 @@ namespace BFF.ExerciseConfigurations
     public class Controller : ControllerBase
     {
         private readonly JournalDbContext _context;
+        private readonly IMapper _mapper;
         private readonly IMessageBus _messageBus;
         private readonly IHubContext<Hub> _hubContext;
         public Controller(JournalDbContext context,
+            IMapper mapper,
             IMessageBus messageBus,
             IHubContext<Hub> hubContext)
         {
             _context = context;
+            _mapper = mapper;
             _messageBus = messageBus;
             _hubContext = hubContext;
         }
-        [HttpPost("save")]
 
+        [HttpPost("save")]
         public async Task<IActionResult> Save([FromBody] Save.Payload payload)
         {
             if (User.Identity is null)
@@ -74,7 +77,7 @@ namespace BFF.ExerciseConfigurations
                 .Where(w => w.ExerciseId == payload.ExerciseId && w.UserId == payload.UserId && w.Id != workout.Id).Select(w => w.Id).ToListAsync();
             await _messageBus.PublishAsync(new Save.Messager.Message(workout.Id, payload.WeekPlans, payload.ExerciseId, payload.UserId, oldWorkoutIds));
             await _hubContext.Clients.All.SendAsync("saved", workout.Id);
-            return Ok(workout.Id);
+            return CreatedAtAction(nameof(Detail), workout.Id);
         }
 
         [HttpGet("detail")]
@@ -88,6 +91,17 @@ namespace BFF.ExerciseConfigurations
                 query = query.Where(x => x.UserId == parameters.UserId);
             
             var result = await query.AsNoTracking().FirstOrDefaultAsync();
+
+            if(result is null)
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Workout not found",
+                    Detail = $"Workout with Exercise ID {parameters.ExerciseId} and User ID {parameters.UserId} does not exist.",
+                    Status = StatusCodes.Status404NotFound,
+                    Instance = HttpContext.Request.Path
+                });
+            }
 
             Response response =  new()
             {
@@ -111,7 +125,7 @@ namespace BFF.ExerciseConfigurations
             var exerciseMuscles = await _context.ExerciseMuscles
                 .Where(m => m.ExerciseId==result.ExerciseId)
                 .ToListAsync();
-            var muscleIds=exerciseMuscles.Select(em=>em.MuscleId).ToList();
+            var muscleIds = exerciseMuscles.Select(em=>em.MuscleId).ToList();
             var muscles = await _context.Muscles
                 .Where(m => muscleIds.Contains(m.Id))
                 .ToListAsync();
@@ -135,6 +149,9 @@ namespace BFF.ExerciseConfigurations
                     Value = wps.Value
                 })]
             })];
+
+            response.PercentageCompletion = _mapper.Detail.PercentageCompletion();
+            response.Difficulty = _mapper.Detail.Difficulty();
 
             return Ok(response);
         }
