@@ -2,6 +2,7 @@ using BFF.Authentication;
 using BFF.Databases;
 using BFF.ExerciseConfigurations;
 using BFF.Exercises;
+using BFF.Users;
 using BFF.Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddExercises();
 builder.Services.AddExerciseConfigurations();
+builder.Services.AddUsers();
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddWolverine(builder.Configuration);
