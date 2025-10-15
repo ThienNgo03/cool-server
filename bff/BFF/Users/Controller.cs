@@ -54,11 +54,11 @@ public class Controller : ControllerBase
         {
             UserId = u.Id,
             Title = u.Name,
-            SubTitle = u.Email,
-            ImageUrl = _mapper.All.SetImageUrl(),
-            Time = _mapper.All.SetTime(),
-            Status = _mapper.All.SetStatus()
+            SubTitle = u.Email
         }).ToList();
+        _mapper.All.SetImageUrl(response);
+        _mapper.All.SetStatus(response);
+        _mapper.All.SetTime(response);
         return Ok(response);
     }
 }

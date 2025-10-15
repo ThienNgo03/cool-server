@@ -5,9 +5,9 @@ namespace BFF.Users.All;
 
 public interface IMapper
 {
-    TimeSpan SetTime();
-    string SetImageUrl();
-    string SetStatus();
+    void SetTime(List<Response> responses);
+    void SetImageUrl(List<Response> responses);
+    void SetStatus(List<Response> responses);
 }
 public class Mapper : IMapper
 {
@@ -18,22 +18,27 @@ public class Mapper : IMapper
         this.context = context;
         this.faker = new Faker();
     }
-    public TimeSpan SetTime()
+    public void SetTime(List<Response> responses)
     {
-        TimeSpan time = TimeSpan.FromHours(faker.Random.Int(0, 23)).Add(TimeSpan.FromMinutes(faker.Random.Int(0, 59)));
-        return time;
+        foreach(var response in responses)
+        {
+            response.Time = TimeSpan.FromHours(faker.Random.Int(0, 23)).Add(TimeSpan.FromMinutes(faker.Random.Int(0, 59)));
+        }
     }
-    public string SetImageUrl()
+    public void SetImageUrl(List<Response> responses)
     {
-        var imageId = faker.Random.Number(1, 1000);
-        string ImageUrl = $"https://picsum.photos/id/{imageId}/200/200";
-        return ImageUrl;
+        foreach (var response in responses)
+        {
+            var imageId = faker.Random.Number(1, 1000);
+            response.ImageUrl = $"https://picsum.photos/id/{imageId}/200/200";
+        }
     }
-    public string SetStatus()
+    public void SetStatus(List<Response> responses)
     {
         var statuslist = new[] { "Online", "Offline", "Training" };
-        
-        string status = faker.PickRandom(statuslist);
-        return status;
+        foreach (var response in responses)
+        {
+            response.Status = faker.PickRandom(statuslist);
+        }
     }
 }
