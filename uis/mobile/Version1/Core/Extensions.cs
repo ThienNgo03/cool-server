@@ -1,5 +1,6 @@
 ﻿using Core.ExerciseConfigurations;
 using Core.Exercises;
+using Core.User;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core;
@@ -12,6 +13,7 @@ public static class Extensions
 
         services.RegisterExerciseConfigurations(config);
         services.RegisterExercises(config);
+        services.RegisterUsers(config);
         return services;
     }
 }

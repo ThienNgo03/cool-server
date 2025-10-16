@@ -27,7 +27,7 @@ public class Implementation: Interface
 
         try
         {
-            var response = await this.refitInterface.Detail(refitParameters);
+            var response = await this.refitInterface.All(refitParameters);
             if (response is null || response.Content is null)
             {
                 return null;
