@@ -1,7 +1,7 @@
-﻿using BFF.Chat.LoadMessage;
+﻿using BFF.Chat.Messages;
 using BFF.Databases.Messages;
 using Cassandra.Data.Linq;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Wolverine;
@@ -9,79 +9,94 @@ using Wolverine;
 namespace BFF.Chat
 {
     [Route("api/messages")]
+    [Authorize]
     [ApiController]
     public class Controller : ControllerBase
     {
         private readonly Context _context;
         private readonly IHubContext<Hub> _hubContext;
         private readonly IMessageBus _messageBus;
-        public Controller(Context context, 
+        private readonly IMapper _mapper;
+        public Controller(Context context,
             IHubContext<Hub> hubContext,
-            IMessageBus messageBus)
+            IMessageBus messageBus,
+            IMapper mapper)
         {
             _context = context;
             _hubContext = hubContext;
             _messageBus = messageBus;
+            _mapper = mapper;
         }
-        [HttpGet("load-messages")]
-        public async Task<IActionResult> LoadMessages([FromQuery] Parameters parameters)
+        [HttpGet("messages")]
+        public async Task<IActionResult> Messages([FromQuery] Parameters parameters)
         {
             CqlQuery<Table> query = _context.Messages;
-            if (parameters.Id.HasValue)
-                query = query.Where(m => m.Id == parameters.Id.Value);
 
-            if (!string.IsNullOrEmpty(parameters.Content))
-                query = query.Where(m => m.Content == parameters.Content);
-
-            if (!string.IsNullOrEmpty(parameters.Receiver))
-                query = query.Where(m => m.Receiver == parameters.Receiver);
-
-            if (!string.IsNullOrEmpty(parameters.Sender))
-                query = query.Where(m => m.Sender == parameters.Sender);
             var messages = await query.ExecuteAsync();
 
+            if (parameters.PageIndex.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
+                messages = messages.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
+            var responses = messages.Select(x => new Response
+            {
+                Name = x.Name,
+                Message = x.Message,
+                SentDate = x.SentDate
+            }).ToList();
+            _mapper.All.SetAvatar(responses);
 
-            return Ok(messages);
+            return Ok(responses);
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> Send([FromBody] Chat.Send.Payload payload)
+        [HttpPost("send-message")]
+        public async Task<IActionResult> SendMessage([FromBody]SendMessage.Payload payload)
         {
             var message = new Table
             {
-                Content = payload.Content,
-                Receiver = payload.Receiver,
-                Sender = payload.Sender,
+                Message = payload.Message,
+                Name = payload.Name,
                 Id = Guid.NewGuid(),
-                Timestamp = DateTime.UtcNow,
+                SentDate = DateTime.UtcNow.ToString(),
                 Day = DateTime.UtcNow.Day,
                 Month = DateTime.UtcNow.Month,
                 Year = DateTime.UtcNow.Year
             };
             await _context.Messages.Insert(message).ExecuteAsync();
-            await _messageBus.PublishAsync(new Chat.Send.Messager.Message(message.Id));
-            await _hubContext.Clients.All.SendAsync("message-created", message.Id);
-            return CreatedAtAction(nameof(LoadMessages), new { id = message.Id });
+            await _messageBus.PublishAsync(new Chat.SendMessage.Messager.Message(message.Id));
+            await _hubContext.Clients.All.SendAsync("message-sent", message.Id);
+            return CreatedAtAction(nameof(Messages), new { id = message.Id });
         }
 
-        [HttpPost("upload-image")]
-        public async Task<IActionResult> UploadImage([FromBody] Chat.UploadImage.Payload payload)
+        [HttpPut("edit-message")]
+        public async Task<IActionResult> EditMessage([FromBody] EditMessage.Payload payload)
         {
-            var message = new Table
-            {
-                ImageUploaded = payload.ImageUploaded,
-                Receiver = payload.Receiver,
-                Sender = payload.Sender,
-                Id = Guid.NewGuid(),
-                Timestamp = DateTime.UtcNow,
-                Day = DateTime.UtcNow.Day,
-                Month = DateTime.UtcNow.Month,
-                Year = DateTime.UtcNow.Year
-            };
-            await _context.Messages.Insert(message).ExecuteAsync();
-            await _messageBus.PublishAsync(new Chat.Send.Messager.Message(message.Id));
-            await _hubContext.Clients.All.SendAsync("image-uploaded", message.Id);
-            return CreatedAtAction(nameof(LoadMessages), new { id = message.Id });
+            var message = await _context.Messages.Where(m => m.Id == payload.MessageId&&m.Month==payload.Month&&m.SentDate==payload.SentDate)
+                .FirstOrDefault().ExecuteAsync();
+            if (message == null)
+                return NotFound();
+
+            await _context.Messages
+                .Where(m => m.Id == payload.MessageId && m.Month == payload.Month && m.SentDate == payload.SentDate)
+                .Select(x=>new Table 
+                { 
+                    Message=payload.Message,
+                })
+                .Update().ExecuteAsync();
+            await _messageBus.PublishAsync(new Chat.SendMessage.Messager.Message(message.Id));
+            await _hubContext.Clients.All.SendAsync("message-edited", message.Id);
+            return NoContent();
+        }
+
+        [HttpDelete("delete-message")]
+        public async Task<IActionResult> DeleteMessage([FromQuery] DeleteMessage.Parameters parameters)
+        {
+            var message = await _context.Messages.Where(m => m.Id == parameters.MessageId&&m.Month==parameters.Month&&m.SentDate==parameters.SentDate).FirstOrDefault().ExecuteAsync();
+            if (message == null)
+                return NotFound();
+            await _context.Messages
+                .Where(m => m.Id == parameters.MessageId && m.Month == parameters.Month && m.SentDate == parameters.SentDate)
+                .Delete().ExecuteAsync();
+            await _hubContext.Clients.All.SendAsync("message-deleted", message.Id);
+            return NoContent();
         }
     }
 }

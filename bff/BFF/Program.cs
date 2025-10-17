@@ -1,4 +1,5 @@
 using BFF.Authentication;
+using BFF.Chat;
 using BFF.Databases;
 using BFF.ExerciseConfigurations;
 using BFF.Exercises;
@@ -15,6 +16,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddExercises();
 builder.Services.AddExerciseConfigurations();
 builder.Services.AddUsers();
+builder.Services.AddChat();
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddWolverine(builder.Configuration);
