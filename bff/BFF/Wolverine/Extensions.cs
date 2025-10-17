@@ -9,7 +9,9 @@ public static class Extensions
         services.AddWolverine(opts =>
         {
             //Message 
-            opts.PublishMessage<Chat.Send.Messager.Message>().ToLocalQueue("message-create");
+            opts.PublishMessage<Chat.SendMessage.Messager.Message>().ToLocalQueue("message-sent");
+            opts.PublishMessage<Chat.DeleteMessage.Messager.Message>().ToLocalQueue("message-deleted");
+            opts.PublishMessage<Chat.EditMessage.Messager.Message>().ToLocalQueue("message-edited");
             //Exercise Configurations
             opts.PublishMessage<ExerciseConfigurations.Save.Messager.Message>().ToLocalQueue("saved");
             //Workout Log Tracking

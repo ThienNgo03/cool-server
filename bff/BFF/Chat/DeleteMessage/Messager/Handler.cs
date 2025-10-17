@@ -1,4 +1,4 @@
-﻿namespace BFF.Chat.Send.Messager;
+﻿namespace BFF.Chat.DeleteMessage.Messager;
 
 public class Handler
 {
