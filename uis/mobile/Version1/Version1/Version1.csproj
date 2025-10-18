@@ -115,6 +115,9 @@
 	  <MauiXaml Update="Features\Profile\Page.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Features\Users\Page.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Features\WebSocket\SignalR\Component.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

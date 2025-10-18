@@ -12,6 +12,7 @@
     xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:ui="clr-namespace:UI"
+    xmlns:users="clr-namespace:Version1.Features.Users"
     Title="Version1"
     Loaded="Shell_Loaded"
     Shell.TabBarBackgroundColor="#182026"
@@ -33,6 +34,11 @@
             x:Key="HeartPulseIcon"
             FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
             Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_heart_pulse_32_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="UsersIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_people_team_32_regular}"
             Color="Cyan" />
         <FontImageSource
             x:Key="SoccerIcon"
@@ -121,10 +127,10 @@
             <ShellContent ContentTemplate="{DataTemplate exercises:Page}" />
         </Tab>
         <Tab
-            Title="Challenges"
-            Icon="{x:StaticResource TrophyIcon}"
-            Route="challenges">
-            <ShellContent ContentTemplate="{DataTemplate challenges:Page}" />
+            Title="Users"
+            Icon="{x:StaticResource UsersIcon}"
+            Route="users">
+            <ShellContent ContentTemplate="{DataTemplate users:Page}" />
         </Tab>
         <Tab
             Title="Profile"

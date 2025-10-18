@@ -1,13 +1,8 @@
 ﻿using BFF.Databases.App;
-using BFF.Models.PaginationResults;
-using BFF.Users.All;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using Wolverine;
 
 namespace BFF.Users;

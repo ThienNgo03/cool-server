@@ -17,4 +17,5 @@ public static class AppRoutes
 
     public const string Profile = "//main/profile";
     public const string Challenges = "//main/challenges";
+    public const string Users = "//main/users";
 }

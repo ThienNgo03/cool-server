@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Version1.Features.Users.Page"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Version1.Features.Users"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Title="Page"
+    x:DataType="local:ViewModel"
+    Loaded="ContentPage_Loaded">
+    <ContentPage.Resources>
+        <GridItemsLayout
+            x:Key="TabsLayout"
+            HorizontalItemSpacing="8"
+            Orientation="Vertical"
+            Span="2"
+            VerticalItemSpacing="8" />
+        <DataTemplate x:Key="TabItemTemplate" x:DataType="x:String">
+            <Border
+                x:Name="container"
+                Padding="8"
+                StrokeShape="RoundRectangle 8">
+                <Label
+                    x:Name="content"
+                    FontSize="12"
+                    HorizontalOptions="Center"
+                    Text="{x:Binding}"
+                    TextColor="Cyan"
+                    VerticalOptions="Center" />
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter TargetName="container" Property="BackgroundColor" Value="Transparent" />
+                                <Setter TargetName="container" Property="Stroke" Value="Black" />
+                                <Setter TargetName="container" Property="StrokeThickness" Value="1" />
+                                <Setter TargetName="content" Property="Label.TextColor" Value="Black" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter TargetName="container" Property="BackgroundColor" Value="Black" />
+                                <Setter TargetName="content" Property="Label.TextColor" Value="White" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+        </DataTemplate>
+
+    </ContentPage.Resources>
+
+    <Grid Padding="16" RowDefinitions="60, *">
+        <CollectionView
+            HorizontalOptions="Center"
+            ItemTemplate="{x:StaticResource TabItemTemplate}"
+            ItemsLayout="{x:StaticResource TabsLayout}"
+            ItemsSource="{x:Binding Tabs,
+                                    Mode=OneWay}"
+            SelectedItem="{x:Binding SelectedTab,
+                                     Mode=TwoWay}"
+            SelectionMode="Single"
+            VerticalOptions="Center" />
+
+        <VerticalStackLayout
+            Grid.Row="1"
+            toolkit:StateContainer.CanStateChange="True"
+            toolkit:StateContainer.CurrentState="{x:Binding SelectedTab,
+                                                            Mode=OneWay}">
+            <toolkit:StateContainer.StateViews>
+                <VerticalStackLayout toolkit:StateView.StateKey="All Users">
+                    <ActivityIndicator IsRunning="True" />
+                    <Label Text="Loading Users..." />
+                </VerticalStackLayout>
+                <VerticalStackLayout toolkit:StateView.StateKey="Lobby">
+                    <ActivityIndicator IsRunning="True" />
+                    <Label Text="Loading Lobby..." />
+                </VerticalStackLayout>
+            </toolkit:StateContainer.StateViews>
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

@@ -5,14 +5,10 @@ namespace Version1.Features.Exercises;
 
 public partial class ViewModel(
     IAppNavigator appNavigator,
-    //Library.Muscles.Interface muscles,
-    //Library.Exercises.Interface exercises,
     Core.Exercises.Interface exercises ) : BaseViewModel(appNavigator)
 {
     #region [ Fields ]
 
-    //private readonly Library.Muscles.Interface muscles = muscles;
-    //private readonly Library.Exercises.Interface exercises = exercises;
     private readonly Core.Exercises.Interface exercises = exercises;
     #endregion
 
@@ -21,11 +17,7 @@ public partial class ViewModel(
     private ContentViews.Card.Model[] source = Array.Empty<ContentViews.Card.Model>();
 
     [ObservableProperty]
-    bool isLoading;
-
-    [ObservableProperty]
     ObservableCollection<string> tags = new();
-
 
     [ObservableProperty]
     ObservableCollection<ContentViews.Card.Model> items;
@@ -33,10 +25,10 @@ public partial class ViewModel(
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsLoading) return;
+        if (IsFuckingBusy) return;
         try
         {
-            IsLoading = true;
+            IsFuckingBusy = true;
 
             var response = await exercises.AllAsync(new());
             Items = new();
@@ -80,7 +72,7 @@ public partial class ViewModel(
         }
         finally
         {
-            IsLoading = false;
+            IsFuckingBusy = false;
         }
     }
 

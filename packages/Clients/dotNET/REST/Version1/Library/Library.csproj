@@ -20,9 +20,4 @@
 		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Protobuf Include="Authentication\Implementations\Version2\Protos\register.proto" GrpcServices="Client" />
-		<Protobuf Include="Authentication\Implementations\Version2\Protos\login.proto" GrpcServices="Client" />
-	</ItemGroup>
-
 </Project>
