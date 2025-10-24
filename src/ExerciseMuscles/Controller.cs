@@ -97,7 +97,7 @@ public class Controller : ControllerBase
         };
         _context.ExerciseMuscles.Add(exerciseMuscle);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Post.Messager.Message(exerciseMuscle.Id));
+        await _messageBus.PublishAsync(new Post.Messager.Message(exerciseMuscle.Id, payload.ExerciseId));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-created", exerciseMuscle.Id);
         return CreatedAtAction(nameof(Get), exerciseMuscle.Id);
     }
@@ -180,7 +180,7 @@ public class Controller : ControllerBase
         exerciseMuscle.LastUpdated = DateTime.UtcNow;
         _context.ExerciseMuscles.Update(exerciseMuscle);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id, payload.ExerciseId));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", payload.Id);
         return NoContent();
     }
@@ -200,10 +200,11 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
+        var exerciseId = exerciseMuscle.ExerciseId;
 
         _context.ExerciseMuscles.Remove(exerciseMuscle);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, exerciseId));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-deleted", parameters.Id);
         return NoContent();
     }

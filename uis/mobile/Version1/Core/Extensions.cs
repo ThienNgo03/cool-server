@@ -1,4 +1,5 @@
-﻿using Core.ExerciseConfigurations;
+﻿using Core.Authentication;
+using Core.ExerciseConfigurations;
 using Core.Exercises;
 using Core.User;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ public static class Extensions
     {
         services.AddSingleton<Token.Service>();
 
+        services.RegisterAuthentication(config);
         services.RegisterExerciseConfigurations(config);
         services.RegisterExercises(config);
         services.RegisterUsers(config);

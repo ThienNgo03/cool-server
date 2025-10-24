@@ -1,4 +1,5 @@
 ﻿using Journal.Databases.Identity;
+using Journal.Databases.Sql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 

@@ -30,16 +30,16 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
-        var result = await workoutsEndpoint.AllAsync(new()
+        var result = await workoutsEndpoint.GetAsync(new()
         {
             ExerciseId = workout.ExerciseId,
             PageIndex = 0,
             PageSize = 10
         });
+
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.NotNull(result.Data.Items);
-        Assert.True(result.Data.Items.Count > 0, "Expected at least one workout in result.");
+        Assert.NotNull(result.Items);
+        Assert.True(result.Items.Count > 0, "Expected at least one workout in result.");
 
         dbContext.Workouts.Remove(workout);
         await dbContext.SaveChangesAsync();
@@ -49,47 +49,29 @@ public class Test : BaseTest
     [Fact]
     public async Task All_Includes()
     {
+        //prepare test data
+
         var workoutService = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
-        try
-        {
-            var result = await workoutService
-                .AllAsync(new()
-                {
-                    PageIndex = 0,
-                    PageSize = 5,
-                    Include= "Exercise,Muscles,WeekPlans,WeekPlanSets"
-                });
+        var result = await workoutService
+            .GetAsync(new()
+            {
+                PageIndex = 0,
+                PageSize = 5,
+                Include = "exercise.muscles, weekplans.weekplansets"
+            });
 
-            //var result1 = await workoutService
-            //    .Include(x => x.WeekPlans)
-            //        .ThenInclude(x => x.WeekPlanSets)
-            //    .AllAsync<Library.Workouts.All.Parameters>(new()
-            //    {
-            //        PageIndex = 0,
-            //        PageSize = 5
-            //    });
+        Assert.NotNull(result);
+        Assert.NotNull(result.Items);
+        Assert.True(result.Items.Count > 0, "Expected at least one workout in result");
 
+        var firstWorkout = result.Items.First();
+        Assert.NotNull(firstWorkout.Exercise);
+        Assert.NotNull(firstWorkout.Exercise.Muscles);
+        Assert.NotNull(firstWorkout.WeekPlans);
 
-            //var result2 = await workoutService
-            //    .Include(x => x.Exercise)
-            //        .ThenInclude(x => x.Muscles)
-            //    .Include(x => x.WeekPlans)
-            //        .ThenInclude(x => x.WeekPlanSets)
-            //    .AllAsync<Library.Workouts.All.Parameters>(new()
-            //    {
-            //        PageIndex = 0,
-            //        PageSize = 5
-            //    });
+        Assert.True(firstWorkout.Exercise.Muscles.Any(), "Expected muscles to be included and contain items");
+        Assert.True(firstWorkout.WeekPlans.Any(), "Expected week plans to be included and contain items");
 
-            Assert.NotNull(result);
-            //Assert.NotNull(result1);
-            //Assert.NotNull(result2);
-        }
-        catch (Exception ex)
-        {
-            // If test fails, provide useful error message
-            Assert.Fail($"Fluent Include API failed: {ex.Message}");
-        }
     }
 
     [Fact]
@@ -122,12 +104,12 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
-        var payload = new Library.Workouts.Create.Payload
+        var payload = new Library.Workouts.POST.Payload
         {
             ExerciseId = exerciseId,
             UserId = userId,
         };
-        await workoutsEndpoint.CreateAsync(payload);
+        await workoutsEndpoint.PostAsync(payload);
 
         var expected = await dbContext.Workouts.FirstOrDefaultAsync(w => w.UserId == userId && w.ExerciseId == exerciseId);
         Assert.NotNull(expected);
@@ -178,14 +160,14 @@ public class Test : BaseTest
 
         await dbContext.SaveChangesAsync();
 
-        var payload = new Library.Workouts.Update.Payload
+        var payload = new Library.Workouts.PUT.Payload
         {
             Id = id,
             ExerciseId = updatedExerciseId,
             UserId = updatedUserId
         };
         var workoutsEndpoint = serviceProvider!.GetRequiredService<Library.Workouts.Interface>();
-        await workoutsEndpoint.UpdateAsync(payload);
+        await workoutsEndpoint.PutAsync(payload);
 
         await dbContext.Entry(existingWorkout).ReloadAsync();
         var updatedWorkout = existingWorkout;

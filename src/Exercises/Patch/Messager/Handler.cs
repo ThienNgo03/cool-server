@@ -1,9 +1,9 @@
-﻿namespace Journal.ExerciseMuscles.Update.Messager;
-
+﻿using Journal.Databases;
+using Journal.Databases.OpenSearch;
 using Microsoft.Extensions.Options;
 using OpenSearch.Net;
-using Journal.Databases;
-using Journal.Databases.OpenSearch;
+
+namespace Journal.Exercises.Patch.Messager;
 
 public class Handler
 {
@@ -42,49 +42,45 @@ public class Handler
 
         var client = new OpenSearchLowLevelClient(settings);
 
-        // Get the exercise
-        var exercise = await _context.Exercises.AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == message.exerciseId);
-
-        if (exercise != null)
-        {
-            // Get all muscle IDs connected to this exercise
-            var muscleIds = await _context.ExerciseMuscles
-                .Where(em => em.ExerciseId == message.exerciseId)
+        var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
+        var exercise = exercises.FirstOrDefault(e => e.Id == message.Id);
+        var muscleIds = await _context.ExerciseMuscles
+                .Where(em => em.ExerciseId == message.Id)
                 .Select(em => em.MuscleId)
                 .ToListAsync();
 
-            // Get all muscles for those IDs
-            var muscles = await _context.Muscles
-                .Where(m => muscleIds.Contains(m.Id))
-                .AsNoTracking()
-                .ToListAsync();
+        var muscles = await _context.Muscles
+            .Where(m => muscleIds.Contains(m.Id))
+            .AsNoTracking()
+            .ToListAsync();
 
-            var musclesList = muscles.Select(m => new
-            {
-                m.Id,
-                m.Name,
-                m.CreatedDate,
-                m.LastUpdated
-            }).ToList();
-
-            var bulkData = new List<object>
+        var musclesList = muscles.Select(m => new
         {
-            new { index = new { _index = "exercises", _id = message.exerciseId } },
-            new
+            m.Id,
+            m.Name,
+            m.CreatedDate,
+            m.LastUpdated
+        }).ToList();
+
+
+        if (exercise != null)
+        {
+            var bulkData = new List<object>
             {
-                exercise.Id,
-                exercise.Name,
-                exercise.Description,
-                exercise.Type,
-                muscles = musclesList,
-                exercise.CreatedDate,
-                exercise.LastUpdated
-            }
-        };
+                new { index = new { _index = "exercises", _id = exercise.Id } },
+                new
+                {
+                    exercise.Id,
+                    exercise.Name,
+                    exercise.Description,
+                    exercise.Type,
+                    muscles = musclesList,
+                    exercise.CreatedDate,
+                    exercise.LastUpdated
+                }
+            };
 
             var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
-
             if (!bulkResponse.Success)
             {
                 Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
