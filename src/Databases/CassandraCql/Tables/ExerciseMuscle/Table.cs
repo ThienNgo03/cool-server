@@ -1,6 +1,6 @@
 ﻿using Cassandra.Mapping.Attributes;
 
-namespace Journal.Databases.Messages.Tables.ExerciseMuscle;
+namespace Journal.Databases.CassandraCql.Tables.ExerciseMuscle;
 [Table("exercise_muscle")]
 public class Table
 {

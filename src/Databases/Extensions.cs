@@ -1,9 +1,9 @@
 ﻿using Cassandra;
 using Journal.Databases.Identity;
 using Journal.Databases.Sql;
-using Journal.Databases.Messages;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Journal.Databases.CassandraCql;
 
 namespace Journal.Databases;
 

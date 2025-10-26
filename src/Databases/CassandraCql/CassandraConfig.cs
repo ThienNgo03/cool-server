@@ -1,4 +1,4 @@
-﻿namespace Journal.Databases;
+﻿namespace Journal.Databases.CassandraCql;
 
 public class CassandraConfig
 {
