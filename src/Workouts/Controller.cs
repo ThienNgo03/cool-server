@@ -215,7 +215,6 @@ public class Controller : ControllerBase
     }
 
     [HttpPost]
-
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
         if (User.Identity is null)
@@ -304,7 +303,6 @@ public class Controller : ControllerBase
     }
 
     [HttpPut]
-
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
         if (User.Identity is null)
@@ -359,7 +357,6 @@ public class Controller : ControllerBase
     }
 
     [HttpDelete]
-
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
         if (User.Identity is null)

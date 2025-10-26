@@ -1,6 +1,8 @@
 ﻿using Journal.Authentication;
 using Journal.Databases;
 using Journal.Databases.Identity;
+using Journal.Databases.Sql;
+using Journal.Exercises;
 using Journal.Files;
 using Journal.Journeys;
 using Journal.Wolverine;
@@ -13,6 +15,8 @@ builder.Services.Configure<DbConfig>(
     builder.Configuration.GetSection("JournalDb"));
 builder.Services.Configure<DbConfig>(
     builder.Configuration.GetSection("IdentityDb"));
+builder.Services.Configure<OpenSearchConfig>(
+    builder.Configuration.GetSection("OpenSearch"));
 
 builder.Services.AddDatabases(builder.Configuration);
 
@@ -22,6 +26,7 @@ builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddFile(builder.Configuration);
+builder.Services.AddServices();
 
 var app = builder.Build();
 

@@ -1,3 +1,5 @@
-﻿namespace Journal.ExerciseMuscles.Update.Messager;
+﻿using Spectre.Console.Rendering;
 
-public record Message(Guid Id);
+namespace Journal.ExerciseMuscles.Update.Messager;
+
+public record Message(Guid id, Guid exerciseId);

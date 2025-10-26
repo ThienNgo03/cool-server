@@ -1,4 +1,6 @@
-﻿using OpenSearch.Net;
+﻿using Journal.Exercises.Get.SuperSearch;
+using Journal.Workouts.Get;
+using OpenSearch.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -12,12 +14,13 @@ public class Controller(
     IMessageBus messageBus,
     JournalDbContext context,
     ILogger<Controller> logger,
-    IHubContext<Hub> hubContext) : ControllerBase
+    IHubContext<Hub> hubContext, IRefitInterface superSearch) : ControllerBase
 {
     private readonly IMessageBus _messageBus = messageBus;
     private readonly JournalDbContext _context = context;
     private readonly ILogger<Controller> _logger = logger;
     private readonly IHubContext<Hub> _hubContext = hubContext;
+    private readonly IRefitInterface _superSearch = superSearch;
 
 
     [HttpGet]
@@ -46,12 +49,7 @@ public class Controller(
             var json = JsonSerializer.Serialize(superSearchQuery);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            using var httpClient = new HttpClient();
-
-            var byteArray = Encoding.ASCII.GetBytes("admin:Thien321*");
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-            var response = await httpClient.PostAsync("http://localhost:9200/exercises/_search", content);
+            var response = await _superSearch.SearchAsync(content);
 
             if (!response.IsSuccessStatusCode)
                 return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
@@ -215,7 +213,7 @@ public class Controller(
         return Ok(paginationResults);
     }
 
-    [HttpPost("sync-data-to-open-search")]
+    [HttpPost("sync-open-search")]
     public async Task<IActionResult> SeedingOpenSearch()
     {
         var pool = new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
@@ -357,9 +355,15 @@ public class Controller(
         if (userId is null)
             return Unauthorized("User Id not found");
 
+        var changes = new List<(string Path, object? Value)>();
+
         foreach (var op in patchDoc.Operations)
+        {
             if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
                 return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+            changes.Add((op.path, op.value));
+        }
+
 
         if (patchDoc is null)
             return BadRequest("Patch document cannot be null.");
@@ -375,13 +379,14 @@ public class Controller(
             });
 
         patchDoc.ApplyTo(entity);
+        //take the column had changed and it value so i can send it to messagebus to sync the data in Opensearch database
 
         entity.LastUpdated = DateTime.UtcNow;
 
         _context.Exercises.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("exercise-updated", entity.Id);
-
+        await _messageBus.PublishAsync(new Patch.Messager.Message(entity.Id));
         return NoContent();
     }
 
