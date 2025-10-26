@@ -1,4 +1,4 @@
-﻿namespace Journal.Databases.App;
+﻿namespace Journal.Databases;
 
 public class ConnectionStringBuilder
 {

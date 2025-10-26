@@ -31,7 +31,7 @@ namespace BFF.ExerciseConfigurations
         }
 
         [HttpPost("save")]
-        public async Task<IActionResult> Save([FromBody] Save.Payload payload)
+        public async Task<IActionResult> Save([FromBody] Save.Payload payload, [FromHeader(Name = "isTesting")] bool? isTesting)
         {
             if (User.Identity is null)
                 return Unauthorized();
@@ -70,7 +70,30 @@ namespace BFF.ExerciseConfigurations
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
             };
-            
+
+            if (isTesting.HasValue && isTesting == true)
+            {
+                var strategy = _context.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
+                    {
+                        _context.Workouts.Add(workout);
+                        await transaction.RollbackAsync();
+                        Console.WriteLine("Add successfully-scenario");
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        Console.WriteLine("Add failed-scenario");
+                        throw;
+                    }
+                });
+                return Ok(new { Message = "Test pipeline executed, no data saved", WorkoutId = workout.Id });
+            }
+
             _context.Workouts.Add(workout);
             await _context.SaveChangesAsync();
             var oldWorkoutIds = await _context.Workouts
