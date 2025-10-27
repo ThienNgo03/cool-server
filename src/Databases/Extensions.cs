@@ -1,7 +1,9 @@
 ﻿using Journal.Databases.Identity;
+using Journal.Databases.MongoDb;
 using Journal.Databases.Sql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace Journal.Databases;
 
@@ -67,6 +69,14 @@ public static class Extensions
         services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>()
                 .AddDefaultTokenProviders();
+
+        var client = new MongoClient("mongodb://root:mongopw@localhost:27017/admin");
+        var database = client.GetDatabase("Thien");
+
+        // Register EF Core DbContext that uses the MongoDB provider
+        services.AddDbContext<MongoDbContext>(options =>
+            options.UseMongoDB(client, database.DatabaseNamespace.DatabaseName)
+        );
 
         return services;
     }

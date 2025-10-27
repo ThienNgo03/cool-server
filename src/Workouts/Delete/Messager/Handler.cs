@@ -1,17 +1,21 @@
-﻿namespace Journal.Workouts.Delete.Messager;
+﻿using Journal.Databases.MongoDb;
+
+namespace Journal.Workouts.Delete.Messager;
 
 public class Handler
 {
     #region [ Fields ]
 
     private readonly JournalDbContext _context;
+    private readonly MongoDbContext _mongoDbContext;
     #endregion
 
     #region [ CTors ]
 
-    public Handler(JournalDbContext context)
+    public Handler(JournalDbContext context, MongoDbContext mongoDbContext)
     {
         _context = context;
+        _mongoDbContext = mongoDbContext;
     }
     #endregion
 
@@ -39,6 +43,12 @@ public class Handler
             _context.WeekPlanSets.RemoveRange(weekPlanSets);
         }
         await _context.SaveChangesAsync();
+
+        var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
+        if (mongoWorkout == null)
+            return;
+        _mongoDbContext.Workouts.Remove(mongoWorkout);
+        await _mongoDbContext.SaveChangesAsync();
     }
     #endregion
 }
