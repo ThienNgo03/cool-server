@@ -4,11 +4,12 @@ namespace Journal.ExerciseMuscles.Update;
 
 public class Payload
 {
-    public Guid OldMuscleId { get; set; }
+    public Guid PartitionKey { get; set; }
+
     public Guid Id { get; set; }
 
-    public Guid ExerciseId { get; set; }
+    public Guid NewExerciseId { get; set; }
 
-    public Guid MuscleId { get; set; }
+    public Guid NewMuscleId { get; set; }
 
 }

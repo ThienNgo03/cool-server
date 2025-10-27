@@ -32,8 +32,6 @@ public class Controller : ControllerBase
         CqlQuery<Databases.CassandraCql.Tables.ExerciseMuscle.Table> exerciseMuscles = _cassandraContext.ExerciseMuscles;
         var query=await exerciseMuscles.ExecuteAsync();
         
-        
-
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
@@ -90,51 +88,54 @@ public class Controller : ControllerBase
         return CreatedAtAction(nameof(Get), exerciseMuscle.Id);
     }
 
-    [HttpPatch]
-    public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.App.Tables.ExerciseMuscle.Table> patchDoc,
-                                       CancellationToken cancellationToken = default!)
-    {
-        if (User.Identity is null)
-            return Unauthorized();
+    //[HttpPatch]
+    //public async Task<IActionResult> Patch([FromQuery] Guid id, Guid partitionKey,
+    //                                   [FromBody] JsonPatchDocument<Databases.CassandraCql.Tables.ExerciseMuscle.Table> patchDoc,
+    //                                   CancellationToken cancellationToken = default!)
+    //{
+    //    if (User.Identity is null)
+    //        return Unauthorized();
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
+    //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    //    if (userId is null)
+    //        return Unauthorized("User Id not found");
 
-        foreach (var op in patchDoc.Operations)
-            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
-                return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+    //    foreach (var op in patchDoc.Operations)
+    //        if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+    //            return BadRequest("Only Replace and Test operations are allowed in this patch request.");
 
-        if (patchDoc is null)
-            return BadRequest("Patch document cannot be null.");
+    //    if (patchDoc is null)
+    //        return BadRequest("Patch document cannot be null.");
 
-        var entity = await _context.ExerciseMuscles.FindAsync(id, cancellationToken);
-        if (entity == null)
-            return NotFound(new ProblemDetails
-            {
-                Title = "ExerciseMuscle not found",
-                Detail = $"ExerciseMuscle with ID {id} does not exist.",
-                Status = StatusCodes.Status404NotFound,
-                Instance = HttpContext.Request.Path
-            });
+    //    var entity = await _cassandraContext.ExerciseMuscles
+    //        .Where(x => x.MuscleId == partitionKey && x.Id == id)
+    //        .FirstOrDefault()
+    //        .ExecuteAsync();
+    //    if (entity == null)
+    //        return NotFound(new ProblemDetails
+    //        {
+    //            Title = "ExerciseMuscle not found",
+    //            Detail = $"ExerciseMuscle with ID {id} does not exist.",
+    //            Status = StatusCodes.Status404NotFound,
+    //            Instance = HttpContext.Request.Path
+    //        });
 
-        patchDoc.ApplyTo(entity);
+    //    patchDoc.ApplyTo(entity);
 
-        entity.LastUpdated = DateTime.UtcNow;
+    //    entity.LastUpdated = DateTime.UtcNow;
 
-        _context.ExerciseMuscles.Update(entity);
-        await _context.SaveChangesAsync(cancellationToken);
-        await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", entity.Id);
+    //    _context.ExerciseMuscles.Update(entity);
+    //    await _context.SaveChangesAsync(cancellationToken);
+    //    await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", entity.Id);
 
-        return NoContent();
-    }
+    //    return NoContent();
+    //}
 
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
         var exerciseMuscle = await _cassandraContext.ExerciseMuscles
-            .Where(x=>x.MuscleId==payload.OldMuscleId&&x.Id==payload.Id)
+            .Where(x=>x.MuscleId==payload.PartitionKey&&x.Id==payload.Id)
             .FirstOrDefault()
             .ExecuteAsync();
         if (exerciseMuscle == null)
@@ -142,38 +143,44 @@ public class Controller : ControllerBase
             return NotFound();
         }
 
-        var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
+        var existingExercise = await _context.Exercises.FindAsync(payload.NewExerciseId);
         if (existingExercise == null)
         {
             return NotFound(new ProblemDetails
             {
                 Title = "Exercise not found",
-                Detail = $"Exercise with ID {payload.ExerciseId} does not exist.",
+                Detail = $"Exercise with ID {payload.NewExerciseId} does not exist.",
                 Status = StatusCodes.Status404NotFound,
                 Instance = HttpContext.Request.Path
             });
         }
 
-        var existingMuscle = await _context.Muscles.FindAsync(payload.MuscleId);
+        var existingMuscle = await _context.Muscles.FindAsync(payload.NewMuscleId);
         if (existingMuscle == null)
         {
             return NotFound(new ProblemDetails
             {
                 Title = "Muscle not found",
-                Detail = $"Muscle with ID {payload.MuscleId} does not exist.",
+                Detail = $"Muscle with ID {payload.NewMuscleId} does not exist.",
                 Status = StatusCodes.Status404NotFound,
                 Instance = HttpContext.Request.Path
             });
         }
         await _cassandraContext.ExerciseMuscles
-                .Where(x => x.MuscleId == payload.OldMuscleId && x.Id == payload.Id)
-                .Select(x => new Databases.CassandraCql.Tables.ExerciseMuscle.Table
-                {
-                    ExerciseId= payload.ExerciseId,
-                    LastUpdated= DateTime.UtcNow
-                })
-                .Update().ExecuteAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id, payload.ExerciseId));
+               .Where(x => x.MuscleId == payload.PartitionKey && x.Id == payload.Id)
+               .Delete().ExecuteAsync();
+        
+        var newExerciseMuscle = new Databases.CassandraCql.Tables.ExerciseMuscle.Table
+        {
+            Id = Guid.NewGuid(),
+            ExerciseId = payload.NewExerciseId,
+            MuscleId = payload.NewMuscleId,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
+        };
+        await _cassandraContext.ExerciseMuscles.Insert(newExerciseMuscle).ExecuteAsync();
+
+        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id, payload.NewExerciseId, payload.NewMuscleId));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", payload.Id);
         return NoContent();
     }
