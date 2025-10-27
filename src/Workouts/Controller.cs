@@ -1,8 +1,13 @@
-﻿using Journal.Models.PaginationResults;
+﻿using Humanizer;
+using Journal.Databases.MongoDb;
+using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using System.Linq;
 using System.Security.Claims;
 
 namespace Journal.Workouts;
@@ -16,13 +21,19 @@ public class Controller : ControllerBase
     private readonly ILogger<Controller> _logger;
     private readonly JournalDbContext _context;
     private readonly IHubContext<Hub> _hubContext;
+    private readonly MongoDbContext _mongoDbContext;
 
-    public Controller(IMessageBus messageBus, ILogger<Controller> logger, JournalDbContext context, IHubContext<Hub> hubContext)
+    public Controller(IMessageBus messageBus,
+                      ILogger<Controller> logger,
+                      JournalDbContext context,
+                      IHubContext<Hub> hubContext,
+                      MongoDbContext mongoDbContext)
     {
         _messageBus = messageBus;
         _logger = logger;
         _context = context;
         _hubContext = hubContext;
+        _mongoDbContext = mongoDbContext;
     }
 
     [HttpGet]
@@ -46,7 +57,6 @@ public class Controller : ControllerBase
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        // Initialize responses list outside the if condition
         List<Get.Response> responses = result.Select(item => new Get.Response
         {
             Id = item.Id,
@@ -60,144 +70,282 @@ public class Controller : ControllerBase
 
         if (!string.IsNullOrEmpty(parameters.Include))
         {
-            // Split the include parameter into a list
             var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                  .Select(i => i.Trim().ToLower())
                                  .ToList();
 
-            // Dynamically apply Include for valid navigation properties
-            foreach (var inc in includes)
-            {
-                Dictionary<Guid, Get.Exercise> exercisesByExerciseId = new();
-                if (inc.Split(".")[0] == "exercise")
-                {
-                    var exerciseIds = result.Select(w => w.ExerciseId).Distinct().ToList();
-                    var exercises = await _context.Exercises
-                        .Where(e => exerciseIds.Contains(e.Id))
-                        .ToListAsync();
+            bool shouldFallbackToSql = false;
 
-                    // Fetch exercise muscles if requested
-                    Dictionary<Guid, List<Get.Muscle>> musclesByExerciseId = new();
-                    if (inc.Split(".").Length > 1 && inc.Split(".")[1] == "muscles")
+            try
+            {
+                var mongoWorkouts = await _mongoDbContext.Workouts.ToListAsync();
+
+                if (mongoWorkouts == null || !mongoWorkouts.Any())
+                {
+                    shouldFallbackToSql = true;
+                    throw new InvalidOperationException("MongoDB Workouts collection is empty");
+                }
+
+                var mongoWorkoutDict = mongoWorkouts.ToDictionary(w => w.Id);
+
+                foreach (var inc in includes)
+                {
+                    var includeParts = inc.Split(".");
+                    var mainInclude = includeParts[0];
+
+                    if (mainInclude == "exercise")
                     {
-                        var exerciseMuscleRelations = await _context.ExerciseMuscles
-                            .Where(em => exerciseIds.Contains(em.ExerciseId))
+                        foreach (var response in responses)
+                        {
+                            if (!mongoWorkoutDict.TryGetValue(response.Id, out var mongoWorkout))
+                            {
+                                shouldFallbackToSql = true;
+                                break;
+                            }
+
+                            if (mongoWorkout.Exercise == null)
+                            {
+                                shouldFallbackToSql = true;
+                                break;
+                            }
+
+                            response.Exercise = new Get.Exercise
+                            {
+                                Id = mongoWorkout.Exercise.Id,
+                                Name = mongoWorkout.Exercise.Name,
+                                Description = mongoWorkout.Exercise.Description,
+                                Type = mongoWorkout.Exercise.Type,
+                                CreatedDate = mongoWorkout.Exercise.CreatedDate,
+                                LastUpdated = mongoWorkout.Exercise.LastUpdated,
+                                Muscles = null
+                            };
+
+                            if (includeParts.Length > 1 && includeParts[1] == "muscles")
+                            {
+                                if (mongoWorkout.Exercise.Muscles == null || !mongoWorkout.Exercise.Muscles.Any())
+                                {
+                                    shouldFallbackToSql = true;
+                                    break;
+                                }
+
+                                response.Exercise.Muscles = mongoWorkout.Exercise.Muscles.Select(m => new Get.Muscle
+                                {
+                                    Id = m.Id,
+                                    Name = m.Name,
+                                    CreatedDate = m.CreatedDate,
+                                    LastUpdated = m.LastUpdated
+                                }).ToList();
+                            }
+                        }
+
+                        if (shouldFallbackToSql) break;
+                    }
+                    else if (mainInclude == "weekplans")
+                    {
+                        foreach (var response in responses)
+                        {
+                            if (!mongoWorkoutDict.TryGetValue(response.Id, out var mongoWorkout))
+                            {
+                                shouldFallbackToSql = true;
+                                break;
+                            }
+
+                            if (mongoWorkout.WeekPlans == null || !mongoWorkout.WeekPlans.Any())
+                            {
+                                shouldFallbackToSql = true;
+                                break;
+                            }
+
+                            response.WeekPlans = mongoWorkout.WeekPlans.Select(wp => new Get.WeekPlan
+                            {
+                                Id = wp.Id,
+                                DateOfWeek = wp.DateOfWeek,
+                                Time = wp.Time,
+                                WorkoutId = wp.WorkoutId,
+                                CreatedDate = wp.CreatedDate,
+                                LastUpdated = wp.LastUpdated,
+                                WeekPlanSets = null
+                            }).ToList();
+
+                            if (includeParts.Length > 1 && includeParts[1] == "weekplansets")
+                            {
+                                var mongoWeekPlanDict = mongoWorkout.WeekPlans.ToDictionary(wp => wp.Id);
+
+                                foreach (var responseWeekPlan in response.WeekPlans)
+                                {
+                                    if (!mongoWeekPlanDict.TryGetValue(responseWeekPlan.Id, out var mongoWeekPlan))
+                                    {
+                                        shouldFallbackToSql = true;
+                                        break;
+                                    }
+
+                                    if (mongoWeekPlan.WeekPlanSets == null || !mongoWeekPlan.WeekPlanSets.Any())
+                                    {
+                                        shouldFallbackToSql = true;
+                                        break;
+                                    }
+
+                                    responseWeekPlan.WeekPlanSets = mongoWeekPlan.WeekPlanSets.Select(wps => new Get.WeekPlanSet
+                                    {
+                                        Id = wps.Id,
+                                        Value = wps.Value,
+                                        WeekPlanId = wps.WeekPlanId,
+                                        InsertedBy = wps.InsertedBy,
+                                        UpdatedBy = wps.UpdatedBy,
+                                        LastUpdated = wps.LastUpdated,
+                                        CreatedDate = wps.CreatedDate
+                                    }).ToList();
+                                }
+
+                                if (shouldFallbackToSql) break;
+                            }
+                        }
+
+                        if (shouldFallbackToSql) break;
+                    }
+                }
+
+                if (shouldFallbackToSql)
+                {
+                    throw new InvalidOperationException("MongoDB data is incomplete, falling back to SQL");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                foreach (var response in responses)
+                {
+                    response.Exercise = null;
+                    response.WeekPlans = null;
+                }
+
+                var exerciseIds = result.Select(w => w.ExerciseId).Distinct().ToList();
+
+                foreach (var inc in includes)
+                {
+                    Dictionary<Guid, Get.Exercise> exercisesByExerciseId = new();
+                    if (inc.Split(".")[0] == "exercise")
+                    {
+                        var exercises = await _context.Exercises
+                            .Where(e => exerciseIds.Contains(e.Id))
                             .ToListAsync();
 
-                        var muscleIds = exerciseMuscleRelations.Select(em => em.MuscleId).Distinct().ToList();
-                        var muscles = await _context.Muscles
-                            .Where(m => muscleIds.Contains(m.Id))
-                            .ToDictionaryAsync(m => m.Id);
-
-                        // Group muscles by exercise ID
-                        foreach (var relation in exerciseMuscleRelations)
+                        Dictionary<Guid, List<Get.Muscle>> musclesByExerciseId = new();
+                        if (inc.Split(".").Length > 1 && inc.Split(".")[1] == "muscles")
                         {
-                            if (!musclesByExerciseId.ContainsKey(relation.ExerciseId))
-                                musclesByExerciseId[relation.ExerciseId] = new List<Get.Muscle>();
+                            var exerciseMuscleRelations = await _context.ExerciseMuscles
+                                .Where(em => exerciseIds.Contains(em.ExerciseId))
+                                .ToListAsync();
 
-                            if (muscles.TryGetValue(relation.MuscleId, out var muscle))
+                            var muscleIds = exerciseMuscleRelations.Select(em => em.MuscleId).Distinct().ToList();
+                            var muscles = await _context.Muscles
+                                .Where(m => muscleIds.Contains(m.Id))
+                                .ToDictionaryAsync(m => m.Id);
+
+                            foreach (var relation in exerciseMuscleRelations)
                             {
-                                musclesByExerciseId[relation.ExerciseId].Add(new Get.Muscle
+                                if (!musclesByExerciseId.ContainsKey(relation.ExerciseId))
+                                    musclesByExerciseId[relation.ExerciseId] = new List<Get.Muscle>();
+
+                                if (muscles.TryGetValue(relation.MuscleId, out var muscle))
                                 {
-                                    Id = muscle.Id,
-                                    Name = muscle.Name,
-                                    CreatedDate = muscle.CreatedDate,
-                                    LastUpdated = muscle.LastUpdated
-                                });
+                                    musclesByExerciseId[relation.ExerciseId].Add(new Get.Muscle
+                                    {
+                                        Id = muscle.Id,
+                                        Name = muscle.Name,
+                                        CreatedDate = muscle.CreatedDate,
+                                        LastUpdated = muscle.LastUpdated
+                                    });
+                                }
+                            }
+                        }
+
+                        foreach (var exercise in exercises)
+                        {
+                            exercisesByExerciseId[exercise.Id] = new Get.Exercise
+                            {
+                                Id = exercise.Id,
+                                Name = exercise.Name,
+                                Description = exercise.Description,
+                                Type = exercise.Type,
+                                CreatedDate = exercise.CreatedDate,
+                                LastUpdated = exercise.LastUpdated,
+                                Muscles = musclesByExerciseId.ContainsKey(exercise.Id)
+                                         ? musclesByExerciseId[exercise.Id]
+                                         : null
+                            };
+                        }
+
+                        foreach (var response in responses)
+                        {
+                            if (exercisesByExerciseId.ContainsKey(response.ExerciseId))
+                            {
+                                response.Exercise = exercisesByExerciseId[response.ExerciseId];
                             }
                         }
                     }
 
-                    // Create exercise models with their muscles
-                    foreach (var exercise in exercises)
+                    Dictionary<Guid, List<Get.WeekPlan>> workoutWeekPlans = new();
+                    if (inc.Split(".")[0] == "weekplans")
                     {
-                        exercisesByExerciseId[exercise.Id] = new Get.Exercise
-                        {
-                            Id = exercise.Id,
-                            Name = exercise.Name,
-                            Description = exercise.Description,
-                            Type = exercise.Type,
-                            CreatedDate = exercise.CreatedDate,
-                            LastUpdated = exercise.LastUpdated,
-                            Muscles = musclesByExerciseId.ContainsKey(exercise.Id)
-                                     ? musclesByExerciseId[exercise.Id]
-                                     : null
-                        };
-                    }
-
-                    // Update responses with exercises
-                    foreach (var response in responses)
-                    {
-                        if (exercisesByExerciseId.ContainsKey(response.ExerciseId))
-                        {
-                            response.Exercise = exercisesByExerciseId[response.ExerciseId];
-                        }
-                    }
-                }
-
-                Dictionary<Guid, List<Get.WeekPlan>> workoutWeekPlans = new();
-                if (inc.Split(".")[0] == "weekplans")
-                {
-                    var workoutIds = result.Select(w => w.Id).ToList();
-                    var weekPlans = await _context.WeekPlans
-                        .Where(wp => workoutIds.Contains(wp.WorkoutId))
-                        .ToListAsync();
-
-                    var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
-
-                    // Only fetch WeekPlanSets if requested
-                    Dictionary<Guid, List<Get.WeekPlanSet>> weekPlanSetsByWeekPlanId = new();
-                    if (inc.Split(".").Length > 1 && inc.Split(".")[1] == "weekplansets")
-                    {
-                        var weekPlanSets = await _context.WeekPlanSets
-                            .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
+                        var workoutIds = result.Select(w => w.Id).ToList();
+                        var weekPlans = await _context.WeekPlans
+                            .Where(wp => workoutIds.Contains(wp.WorkoutId))
                             .ToListAsync();
 
-                        foreach (var set in weekPlanSets)
-                        {
-                            if (!weekPlanSetsByWeekPlanId.ContainsKey(set.WeekPlanId))
-                                weekPlanSetsByWeekPlanId[set.WeekPlanId] = new List<Get.WeekPlanSet>();
+                        var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
 
-                            weekPlanSetsByWeekPlanId[set.WeekPlanId].Add(new Get.WeekPlanSet
+                        Dictionary<Guid, List<Get.WeekPlanSet>> weekPlanSetsByWeekPlanId = new();
+                        if (inc.Split(".").Length > 1 && inc.Split(".")[1] == "weekplansets")
+                        {
+                            var weekPlanSets = await _context.WeekPlanSets
+                                .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
+                                .ToListAsync();
+
+                            foreach (var set in weekPlanSets)
                             {
-                                Id = set.Id,
-                                Value = set.Value,
-                                WeekPlanId = set.WeekPlanId,
-                                InsertedBy = set.InsertedBy,
-                                UpdatedBy = set.UpdatedBy,
-                                LastUpdated = set.LastUpdated,
-                                CreatedDate = set.CreatedDate
-                            });
+                                if (!weekPlanSetsByWeekPlanId.ContainsKey(set.WeekPlanId))
+                                    weekPlanSetsByWeekPlanId[set.WeekPlanId] = new List<Get.WeekPlanSet>();
+
+                                weekPlanSetsByWeekPlanId[set.WeekPlanId].Add(new Get.WeekPlanSet
+                                {
+                                    Id = set.Id,
+                                    Value = set.Value,
+                                    WeekPlanId = set.WeekPlanId,
+                                    InsertedBy = set.InsertedBy,
+                                    UpdatedBy = set.UpdatedBy,
+                                    LastUpdated = set.LastUpdated,
+                                    CreatedDate = set.CreatedDate
+                                });
+                            }
                         }
-                    }
 
-                    // Group week plans by workout ID
-                    foreach (var weekPlan in weekPlans)
-                    {
-                        if (!workoutWeekPlans.ContainsKey(weekPlan.WorkoutId))
-                            workoutWeekPlans[weekPlan.WorkoutId] = new List<Get.WeekPlan>();
-
-                        var weekPlanModel = new Get.WeekPlan
+                        foreach (var weekPlan in weekPlans)
                         {
-                            Id = weekPlan.Id,
-                            DateOfWeek = weekPlan.DateOfWeek,
-                            Time = weekPlan.Time,
-                            WorkoutId = weekPlan.WorkoutId,
-                            CreatedDate = weekPlan.CreatedDate,
-                            LastUpdated = weekPlan.LastUpdated,
-                            WeekPlanSets = weekPlanSetsByWeekPlanId.ContainsKey(weekPlan.Id)
-                                          ? weekPlanSetsByWeekPlanId[weekPlan.Id]
-                                          : null
-                        };
-                        workoutWeekPlans[weekPlan.WorkoutId].Add(weekPlanModel);
-                    }
+                            if (!workoutWeekPlans.ContainsKey(weekPlan.WorkoutId))
+                                workoutWeekPlans[weekPlan.WorkoutId] = new List<Get.WeekPlan>();
 
-                    // Update responses with week plans
-                    foreach (var response in responses)
-                    {
-                        if (workoutWeekPlans.ContainsKey(response.Id))
+                            var weekPlanModel = new Get.WeekPlan
+                            {
+                                Id = weekPlan.Id,
+                                DateOfWeek = weekPlan.DateOfWeek,
+                                Time = weekPlan.Time,
+                                WorkoutId = weekPlan.WorkoutId,
+                                CreatedDate = weekPlan.CreatedDate,
+                                LastUpdated = weekPlan.LastUpdated,
+                                WeekPlanSets = weekPlanSetsByWeekPlanId.ContainsKey(weekPlan.Id)
+                                              ? weekPlanSetsByWeekPlanId[weekPlan.Id]
+                                              : null
+                            };
+                            workoutWeekPlans[weekPlan.WorkoutId].Add(weekPlanModel);
+                        }
+
+                        foreach (var response in responses)
                         {
-                            response.WeekPlans = workoutWeekPlans[response.Id];
+                            if (workoutWeekPlans.ContainsKey(response.Id))
+                            {
+                                response.WeekPlans = workoutWeekPlans[response.Id];
+                            }
                         }
                     }
                 }
@@ -212,6 +360,129 @@ public class Controller : ControllerBase
             .Build();
 
         return Ok(paginationResults);
+    }
+
+    [HttpPost("sync-data-to-mongodb")]
+    public async Task<IActionResult> SyncData()
+    {
+        try
+        {
+            var workouts = await _context.Workouts.AsNoTracking().ToListAsync();
+            var workoutIds = workouts.Select(x => x.Id).ToList();
+
+            if (!workoutIds.Any())
+                return Ok("No workouts to sync.");
+
+            var weekPlans = await _context.WeekPlans
+                .Where(wp => workoutIds.Contains(wp.WorkoutId))
+                .ToListAsync();
+
+            var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
+
+            var weekPlanSets = await _context.WeekPlanSets
+                .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
+                .ToListAsync();
+
+            var exerciseIds = workouts.Select(w => w.ExerciseId).Distinct().ToList();
+            var exercises = await _context.Exercises
+                .Where(e => exerciseIds.Contains(e.Id))
+                .ToListAsync();
+
+            var exerciseMuscles = await _context.ExerciseMuscles
+                .Where(em => exerciseIds.Contains(em.ExerciseId))
+                .ToListAsync();
+
+            var muscleIds = exerciseMuscles.Select(em => em.MuscleId).Distinct().ToList();
+            var muscles = await _context.Muscles
+                .Where(m => muscleIds.Contains(m.Id))
+                .ToDictionaryAsync(m => m.Id);
+
+            var musclesByExerciseId = exerciseMuscles
+                .GroupBy(em => em.ExerciseId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Where(em => muscles.ContainsKey(em.MuscleId))
+                          .Select(em => new Journal.Databases.MongoDb.Collections.Workout.Muscle
+                          {
+                              Id = muscles[em.MuscleId].Id,
+                              Name = muscles[em.MuscleId].Name,
+                              CreatedDate = muscles[em.MuscleId].CreatedDate,
+                              LastUpdated = muscles[em.MuscleId].LastUpdated
+                          }).ToList()
+                );
+
+            var weekPlanSetsByWeekPlanId = weekPlanSets
+                .GroupBy(wps => wps.WeekPlanId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(wps => new Journal.Databases.MongoDb.Collections.Workout.WeekPlanSet
+                    {
+                        Id = wps.Id,
+                        Value = wps.Value,
+                        WeekPlanId = wps.WeekPlanId,
+                        InsertedBy = wps.InsertedBy,
+                        UpdatedBy = wps.UpdatedBy,
+                        LastUpdated = wps.LastUpdated,
+                        CreatedDate = wps.CreatedDate
+                    }).ToList()
+                );
+
+            var weekPlansByWorkoutId = weekPlans
+                .GroupBy(wp => wp.WorkoutId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(wp => new Journal.Databases.MongoDb.Collections.Workout.WeekPlan
+                    {
+                        Id = wp.Id,
+                        DateOfWeek = wp.DateOfWeek,
+                        Time = wp.Time,
+                        WorkoutId = wp.WorkoutId,
+                        CreatedDate = wp.CreatedDate,
+                        LastUpdated = wp.LastUpdated,
+                        WeekPlanSets = weekPlanSetsByWeekPlanId.GetValueOrDefault(wp.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlanSet>())
+                    }).ToList()
+                );
+
+            var workoutCollections = new List<Journal.Databases.MongoDb.Collections.Workout.Collection>();
+
+            foreach (var workout in workouts)
+            {
+                var exercise = exercises.FirstOrDefault(e => e.Id == workout.ExerciseId);
+
+                var workoutCollection = new Journal.Databases.MongoDb.Collections.Workout.Collection
+                {
+                    Id = workout.Id,
+                    ExerciseId = workout.ExerciseId,
+                    UserId = workout.UserId,
+                    CreatedDate = workout.CreatedDate,
+                    LastUpdated = workout.LastUpdated,
+                    Exercise = exercise != null ? new Journal.Databases.MongoDb.Collections.Workout.Exercise
+                    {
+                        Id = exercise.Id,
+                        Name = exercise.Name,
+                        Description = exercise.Description,
+                        Type = exercise.Type,
+                        CreatedDate = exercise.CreatedDate,
+                        LastUpdated = exercise.LastUpdated,
+                        Muscles = musclesByExerciseId.GetValueOrDefault(exercise.Id, new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>())
+                    } : null,
+                    WeekPlans = weekPlansByWorkoutId.GetValueOrDefault(workout.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlan>())
+                };
+
+                workoutCollections.Add(workoutCollection);
+            }
+
+            _mongoDbContext.Workouts.RemoveRange(_mongoDbContext.Workouts);
+            _mongoDbContext.Workouts.AddRange(workoutCollections);
+
+            var savedCount = await _mongoDbContext.SaveChangesAsync();
+
+            return Ok($"Successfully synced {savedCount} workouts to MongoDB.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error syncing workouts: {ex.Message}");
+        }
     }
 
     [HttpPost]
