@@ -9,10 +9,8 @@ public interface IMapper
 public class Mapper:IMapper
 {
     private readonly Faker faker;
-    private readonly Databases.Messages.Context context;
-    public Mapper(Databases.Messages.Context context)
+    public Mapper()
     {
-        this.context = context;
         this.faker = new Faker();
     }
     public void SetAvatar(List<Response> responses)

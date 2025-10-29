@@ -1,9 +1,11 @@
-﻿using Journal.Databases.Identity;
+﻿using Cassandra;
+using Journal.Databases.Identity;
 using Journal.Databases.MongoDb;
 using Journal.Databases.Sql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Journal.Databases.CassandraCql;
 
 namespace Journal.Databases;
 
@@ -11,6 +13,20 @@ public static class Extensions
 {
     public static IServiceCollection AddDatabases(this IServiceCollection services, IConfiguration configuration)
     {
+        #region Cassandra
+        var cassandraDbConfig = configuration.GetSection("CassandraDb").Get<CassandraConfig>();
+        if (cassandraDbConfig != null)
+        {
+            Cluster cluster = Cluster.Builder()
+                .AddContactPoint(cassandraDbConfig.ContactPoint)
+                .WithPort(cassandraDbConfig.Port)
+                .Build();
+
+            Cassandra.ISession session = cluster.Connect(cassandraDbConfig.Keyspace);
+            services.AddSingleton<Context>();
+            services.AddSingleton(session);
+        }
+        #endregion
         var journalDbConfig = configuration.GetSection("JournalDb").Get<DbConfig>();
         var identityDbConfig = configuration.GetSection("IdentityDb").Get<DbConfig>();
 
