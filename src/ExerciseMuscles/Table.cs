@@ -2,6 +2,6 @@
 
 namespace Journal.ExerciseMuscles;
 [Table("exercise_muscle")]
-public class Table:Model
+public class Table: Model
 {
 }

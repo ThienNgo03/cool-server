@@ -41,22 +41,33 @@ public class Controller : ControllerBase
 
         var query = _context.Users.AsQueryable();
 
-        Guid? id = parameters.IsSelf ? Guid.Parse(userId) : parameters.Id;
-
-        List<Guid> ids = [];
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
-            var parameterIds = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
-                        .Where(guid => guid.HasValue)
-                        .Select(guid => guid.Value)
-                        .ToList();
-            ids = ids.Union(parameterIds).ToList();
+            List<Guid> ids;
+
+            if (parameters.IsSelf)
+            {
+                if (Guid.TryParse(userId, out var id))
+                {
+                    ids = new List<Guid> { id };
+                }
+                else
+                {
+                    ids = new List<Guid>();
+                }
+            }
+            else
+            {
+                ids = parameters.Ids
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+                    .Where(guid => guid.HasValue)
+                    .Select(guid => guid.Value)
+                    .ToList();
+            }
+
             query = query.Where(x => ids.Contains(x.Id));
         }
-
-        if (id is not null)
-            query = query.Where(u => u.Id == id.Value);
 
         if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(x => x.Name.Contains(parameters.Name));

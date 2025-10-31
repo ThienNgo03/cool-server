@@ -1,5 +1,5 @@
 ﻿namespace Journal.Users;
 
-public class Table:Model
+public class Table: Model
 {
 }

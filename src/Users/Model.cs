@@ -1,8 +1,7 @@
 ﻿namespace Journal.Users;
 
-public class Model
+public class Model: Models.Base
 {
-    public Guid Id { get; set; }
     public string Name { get; set; }
 
     public string Email { get; set; }

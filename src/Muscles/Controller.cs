@@ -25,15 +25,13 @@ public class Controller(IMessageBus messageBus,
     {
         var query = _context.Muscles.AsQueryable();
 
-        List<Guid> ids = [];
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
-            var parameterIds = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
-                        .Where(guid => guid.HasValue)
-                        .Select(guid => guid.Value)
-                        .ToList();
-            ids = ids.Union(parameterIds).ToList();
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+            .Where(guid => guid.HasValue)
+            .Select(guid => guid.Value)
+            .ToList();
             query = query.Where(x => ids.Contains(x.Id));
         }
 
