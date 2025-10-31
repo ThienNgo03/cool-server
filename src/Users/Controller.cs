@@ -116,11 +116,14 @@ public class Controller : ControllerBase
             Id = Guid.NewGuid(),
             Name = payload.Name,
             Email = payload.Email,
-            PhoneNumber = payload.PhoneNumber
+            PhoneNumber = payload.PhoneNumber,
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
         };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Post.Messager.Message(user.Id));
+        await _hubContext.Clients.All.SendAsync("user-created", user.Id);
         return CreatedAtAction(nameof(Get), user.Id);
     }
 
@@ -142,9 +145,11 @@ public class Controller : ControllerBase
         user.Name = payload.Name;
         user.PhoneNumber = payload.PhoneNumber;
         user.Email = payload.Email;
+        user.LastUpdated = DateTime.UtcNow;
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _hubContext.Clients.All.SendAsync("user-updated", payload.Id);
         return NoContent(); //201
     }
 
@@ -167,6 +172,7 @@ public class Controller : ControllerBase
         _context.Users.Remove(user); //xóa data tìm được khỏi table hiện tại
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, parameters.DeleteNotes)); // bắn qua handler
+        await _hubContext.Clients.All.SendAsync("user-deleted", parameters.Id);
         return NoContent(); //201
     }
     [HttpPatch]
@@ -199,11 +205,10 @@ public class Controller : ControllerBase
             });
 
         patchDoc.ApplyTo(entity);
-
+        entity.LastUpdated = DateTime.UtcNow;
         _context.Users.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
-        await _hubContext.Clients.All.SendAsync("week-plan-updated", entity.Id);
-
+        await _hubContext.Clients.All.SendAsync("user-updated", entity.Id);
         return NoContent();
     }
 }

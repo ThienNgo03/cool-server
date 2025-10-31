@@ -59,11 +59,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Databases\App\Migrations\" />
 	  <Folder Include="Databases\App\Tables\WeekPlanSet\" />
 	  <Folder Include="Databases\App\Tables\WeekPlan\" />
 	  <Folder Include="Databases\App\Tables\WorkoutLogSet\" />
 	  <Folder Include="Databases\App\Tables\WorkoutLog\" />
 	  <Folder Include="Databases\App\Tables\Workout\" />
+	  <Folder Include="Databases\Identity\Migrations\" />
 	  <Folder Include="Notes\Create\" />
 	</ItemGroup>
 	<ItemGroup>

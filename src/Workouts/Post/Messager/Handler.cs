@@ -147,9 +147,15 @@ public class Handler
             } : null,
             WeekPlans = weekPlansByWorkoutId.GetValueOrDefault(workout.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlan>())
         };
-
-        _mongoDbContext.Workouts.AddRange(workoutCollection);
-        await _mongoDbContext.SaveChangesAsync();
+        try
+        {
+            _mongoDbContext.Workouts.AddRange(workoutCollection);
+            await _mongoDbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return;
+        }
     }
     #endregion
 }

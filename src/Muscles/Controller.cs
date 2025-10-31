@@ -35,9 +35,6 @@ public class Controller(IMessageBus messageBus,
             query = query.Where(x => ids.Contains(x.Id));
         }
 
-        if (parameters.Id.HasValue)
-            query = query.Where(x => x.Id == parameters.Id);
-
         if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(x => x.Name.Contains(parameters.Name));
 
