@@ -11,7 +11,7 @@ public class JournalDbContext : DbContext // database
     public DbSet<Muscles.Table> Muscles { get; set; }
     public DbSet<Tables.Journey.Table> Journeys { get; set; } // table 
     public DbSet<Tables.Note.Table> Notes { get; set; }
-    public DbSet<Tables.User.Table> Users { get; set; }
+    public DbSet<Users.Table> Users { get; set; }
     public DbSet<Tables.JourneyUsers.Table> JourneyUsers { get; set; }
     public DbSet<Tables.Gadget.Table> Gadgets { get; set; }
     public DbSet<Tables.JourneyGadgets.Table> JourneyGadgets { get; set; }
@@ -24,7 +24,7 @@ public class JournalDbContext : DbContext // database
     public DbSet<Tables.TeamPool.Table> TeamPools { get; set; }
     public DbSet<WorkoutLogSets.Table> WorkoutLogSets { get; set; }
     public DbSet<WeekPlanSets.Table> WeekPlanSets { get; set; }
-    public DbSet<Tables.ExerciseMuscle.Table> ExerciseMuscles { get; set; }
+    public DbSet<ExerciseMuscles.Table> ExerciseMuscles { get; set; }
     public DbSet<Tables.Sport.Table> Sport { get; set; }
 }
 

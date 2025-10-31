@@ -14,7 +14,7 @@ public class Handler
     }
     public async Task Handle(Message message)
     {
-        var newAccount = new Databases.App.Tables.User.Table
+        var newAccount = new Users.Table
         {
             Id = message.id,
             Name = message.name,

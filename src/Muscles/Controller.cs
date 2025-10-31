@@ -25,6 +25,18 @@ public class Controller(IMessageBus messageBus,
     {
         var query = _context.Muscles.AsQueryable();
 
+        List<Guid> ids = [];
+        if (!string.IsNullOrEmpty(parameters.Ids))
+        {
+            var parameterIds = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+                        .Where(guid => guid.HasValue)
+                        .Select(guid => guid.Value)
+                        .ToList();
+            ids = ids.Union(parameterIds).ToList();
+            query = query.Where(x => ids.Contains(x.Id));
+        }
+
         if (parameters.Id.HasValue)
             query = query.Where(x => x.Id == parameters.Id);
 
@@ -39,6 +51,20 @@ public class Controller(IMessageBus messageBus,
 
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
+
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
 
         var result = await query.AsNoTracking().ToListAsync();
 

@@ -97,9 +97,6 @@ public class Controller:ControllerBase
         var response = new
         {
             Token = token,
-            //Expiration = DateTime.UtcNow.AddHours(1),
-            //TokenType = "Bearer",
-            //Scope = "read write",
         };
         return CreatedAtAction(nameof(Get), response);
     }
