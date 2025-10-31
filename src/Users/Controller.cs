@@ -31,6 +31,7 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
+
         if (User.Identity is null)
             return Unauthorized();
 
@@ -41,6 +42,18 @@ public class Controller : ControllerBase
         var query = _context.Users.AsQueryable();
 
         Guid? id = parameters.IsSelf ? Guid.Parse(userId) : parameters.Id;
+
+        List<Guid> ids = [];
+        if (!string.IsNullOrEmpty(parameters.Ids))
+        {
+            var parameterIds = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+                        .Where(guid => guid.HasValue)
+                        .Select(guid => guid.Value)
+                        .ToList();
+            ids = ids.Union(parameterIds).ToList();
+            query = query.Where(x => ids.Contains(x.Id));
+        }
 
         if (id is not null)
             query = query.Where(u => u.Id == id.Value);
@@ -54,12 +67,26 @@ public class Controller : ControllerBase
         if (!string.IsNullOrEmpty(parameters.PhoneNumber))
             query = query.Where(x => x.PhoneNumber.Contains(parameters.PhoneNumber));
 
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
+
         if (parameters.PageIndex.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.App.Tables.User.Table>()
+        var paginationResults = new Builder<Table>()
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
@@ -73,7 +100,7 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
-        var user = new Databases.App.Tables.User.Table //tạo một hàng dữ liệu mới
+        var user = new Table //tạo một hàng dữ liệu mới
         {
             Id = Guid.NewGuid(),
             Name = payload.Name,
@@ -133,7 +160,7 @@ public class Controller : ControllerBase
     }
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.App.Tables.User.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<Users.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

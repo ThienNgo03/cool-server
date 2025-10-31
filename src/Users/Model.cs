@@ -1,9 +1,8 @@
-﻿namespace Journal.Databases.App.Tables.User;
+﻿namespace Journal.Users;
 
-public class Table
+public class Model
 {
     public Guid Id { get; set; }
-
     public string Name { get; set; }
 
     public string Email { get; set; }
@@ -11,5 +10,4 @@ public class Table
     public string PhoneNumber { get; set; }
 
     public string? ProfilePicture { get; set; }
-
 }
