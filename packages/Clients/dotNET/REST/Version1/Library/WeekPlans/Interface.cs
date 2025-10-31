@@ -2,11 +2,9 @@
 
 public interface Interface
 {
-    Task<Models.Response.Model<Models.PaginationResults.Model<Model>>> AllAsync(All.Parameters parameters);
-
-    Task CreateAsync(Create.Payload payload);
-
-    Task UpdateAsync(Update.Payload payload);
-
-    Task DeleteAsync(Delete.Parameters parameters);
+    Task<Models.PaginationResults.Model<Model>> GetAsync(GET.Parameters parameters);
+    Task PostAsync(POST.Payload payload);
+    Task PutAsync(PUT.Payload payload);
+    Task PatchAsync(Models.Patch.Parameters parameters);
+    Task DeleteAsync(DELETE.Parameters parameters);
 }

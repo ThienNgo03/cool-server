@@ -447,7 +447,7 @@ public class Controller : ControllerBase
                         WeekPlanId = wps.WeekPlanId,
                         InsertedBy = wps.InsertedBy,
                         UpdatedBy = wps.UpdatedBy,
-                        LastUpdated = wps.LastUpdated,
+                        LastUpdated = wps.LastUpdated ?? DateTime.MinValue,
                         CreatedDate = wps.CreatedDate
                     }).ToList()
                 );
@@ -663,7 +663,9 @@ public class Controller : ControllerBase
             return Unauthorized("User Id not found");
         if (parameters.IsDeleteAll)
         {
-            await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE Workouts");
+            var workouts = await _context.Workouts.ToListAsync();
+            _context.Workouts.RemoveRange(workouts);
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 

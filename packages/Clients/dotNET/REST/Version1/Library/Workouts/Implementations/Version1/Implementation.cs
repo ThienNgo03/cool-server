@@ -110,6 +110,39 @@ public class Implementation : Interface
         }
     }
 
+    public async Task PatchAsync(Models.Patch.Parameters parameters)
+    {
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        PATCH.Parameters refitParameters = new()
+        {
+            Id = parameters.Id
+        };
+
+        var operations = parameters.Operations.Select(op => new PATCH.Operation
+        {
+            op = "replace",
+            path = $"/{op.Path}",
+            value = op.Value
+        }).ToList();
+
+        try
+        {
+            var result = await refitInterface.PATCH(refitParameters, operations);
+            stopwatch.Stop();
+            var duration = stopwatch.ElapsedMilliseconds;
+        }
+        catch (ApiException ex)
+        {
+            stopwatch.Stop();
+            var duration = stopwatch.ElapsedMilliseconds;
+
+            Debug.WriteLine("Error in: " + nameof(PatchAsync));
+            Debug.WriteLine("Status code: " + ex.StatusCode);
+            Debug.WriteLine("Message: " + ex.Message);
+        }
+    }
+
     public async Task DeleteAsync(DELETE.Parameters parameters)
     {
         try

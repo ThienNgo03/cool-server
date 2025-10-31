@@ -105,7 +105,7 @@ public class Handler
                     WeekPlanId = wps.WeekPlanId,
                     InsertedBy = wps.InsertedBy,
                     UpdatedBy = wps.UpdatedBy,
-                    LastUpdated = wps.LastUpdated,
+                    LastUpdated = wps.LastUpdated ?? DateTime.MinValue,
                     CreatedDate = wps.CreatedDate
                 }).ToList()
             );

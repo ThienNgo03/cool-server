@@ -5,18 +5,17 @@ namespace Library.WeekPlanSets.Implementations.Version1;
 public interface IRefitInterface
 {
     [Get("/api/week-plan-sets")]
-    Task<ApiResponse<Models.Refit.GET.Response>> GET([Query] Models.Refit.GET.Parameters parameters);
+    Task<ApiResponse<Models.PaginationResults.Model<Model>>> GET([Query] GET.Parameters parameters);
 
     [Post("/api/week-plan-sets")]
-    Task<ApiResponse<object>> POST([Body] Models.Refit.POST.Payload payload);
-
-    [Patch("/api/reports")]
-    Task<ApiResponse<object>> PATCH([Query] Models.Refit.PATCH.Parameters parameters, [Body] List<Models.Refit.PATCH.Operation> operations);
+    Task<ApiResponse<object>> POST([Body] POST.Payload payload);
 
     [Put("/api/week-plan-sets")]
-    Task<ApiResponse<object>> PUT([Body] Models.Refit.PUT.Payload payload);
+    Task<ApiResponse<object>> PUT([Body] PUT.Payload payload);
+
+    [Patch("/api/week-plan-sets")]
+    Task<ApiResponse<object>> PATCH([Query] PATCH.Parameters parameters, [Body] List<PATCH.Operation> operations);
 
     [Delete("/api/week-plan-sets")]
-    Task<ApiResponse<object>> DELETE([Query] Models.Refit.DELETE.Parameters parameters);
-
+    Task<ApiResponse<object>> DELETE([Query] DELETE.Parameters parameters);
 }

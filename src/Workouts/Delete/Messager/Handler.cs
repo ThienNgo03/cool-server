@@ -43,12 +43,18 @@ public class Handler
             _context.WeekPlanSets.RemoveRange(weekPlanSets);
         }
         await _context.SaveChangesAsync();
-
-        var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
-        if (mongoWorkout == null)
+        try
+        {
+            var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
+            if (mongoWorkout == null)
+                return;
+            _mongoDbContext.Workouts.Remove(mongoWorkout);
+            await _mongoDbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
             return;
-        _mongoDbContext.Workouts.Remove(mongoWorkout);
-        await _mongoDbContext.SaveChangesAsync();
+        }
     }
     #endregion
 }

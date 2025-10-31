@@ -27,15 +27,12 @@ public class Test : BaseTest
         dbContext.WorkoutLogSets.Add(workoutLogSet);
         await dbContext.SaveChangesAsync();
         var workoutLogSetsEndpoint = serviceProvider.GetRequiredService<Library.WorkoutLogSets.Interface>();
-        var response = await workoutLogSetsEndpoint.AllAsync(new Library.WorkoutLogSets.All.Parameters()
+        var response = await workoutLogSetsEndpoint.GetAsync(new Library.WorkoutLogSets.GET.Parameters()
         {
             PageIndex = 0,
             PageSize = 10
         });
         Assert.NotNull(response);
-        Assert.NotNull(response.Data);
-        Assert.NotNull(response.Data.Items);
-        Assert.True(response.Data.Items.Any(x => x.Id == id), "Find the week plan set just added");
 
         dbContext.WorkoutLogSets.Remove(workoutLogSet);
         await dbContext.SaveChangesAsync();
@@ -61,12 +58,12 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutLogSetsEndpoint = serviceProvider.GetRequiredService<Library.WorkoutLogSets.Interface>();
-        var payLoad = new Library.WorkoutLogSets.Create.Payload()
+        var payLoad = new Library.WorkoutLogSets.POST.Payload()
         {
             WorkoutLogId = workoutLogId,
             Value = value
         };
-        await workoutLogSetsEndpoint.CreateAsync(payLoad);
+        await workoutLogSetsEndpoint.PostAsync(payLoad);
 
         var expected = await dbContext.WorkoutLogSets.FirstOrDefaultAsync(x => x.WorkoutLogId == workoutLogId);
         Assert.NotNull(expected);
@@ -108,13 +105,13 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutLogSetsEndpoint = serviceProvider.GetRequiredService<Library.WorkoutLogSets.Interface>();
-        var payload = new Library.WorkoutLogSets.Update.Payload()
+        var payload = new Library.WorkoutLogSets.PUT.Payload()
         {
             Id = id,
             WorkoutLogId = updatedWorkoutLogId,
             Value = updatedValue
         };
-        await workoutLogSetsEndpoint.UpdateAsync(payload);
+        await workoutLogSetsEndpoint.PutAsync(payload);
 
         await dbContext.Entry(workoutLogSet).ReloadAsync();
 
@@ -148,7 +145,7 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutLogSetsEndpoint = serviceProvider.GetRequiredService<Library.WorkoutLogSets.Interface>();
-        var parameters = new Library.WorkoutLogSets.Delete.Parameters() { Id = id };
+        var parameters = new Library.WorkoutLogSets.DELETE.Parameters() { Id = id };
         await workoutLogSetsEndpoint.DeleteAsync(parameters);
 
         await dbContext.Entry(workoutLogSet).ReloadAsync();

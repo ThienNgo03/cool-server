@@ -1,0 +1,230 @@
+{
+	"info": {
+		"_postman_id": "ad649902-da70-41d2-9c91-8a987bec927c",
+		"name": "Workout💪",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49014517"
+	},
+	"item": [
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{localhost}}/api/workouts?ids=ab0e56f0-ed15-4cb1-ba68-954c08d34e90",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"workouts"
+					],
+					"query": [
+						{
+							"key": "ids",
+							"value": "ab0e56f0-ed15-4cb1-ba68-954c08d34e90"
+						},
+						{
+							"key": "include",
+							"value": "exercise.muscles,weekplans.weekplansets",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"exerciseId\": \"d3f8a6b2-9e4c-4f1a-8f3e-2c9b9a2f1e5a\",\r\n  \"userId\": \"a1b2c3d4-e5f6-7890-abcd-1234567890ef\",\r\n  \"weekPlans\": [\r\n    {\r\n      \"dateOfWeek\": \"Sunday\",\r\n      \"time\": \"08:30:00\",\r\n      \"weekPlanSets\": [\r\n        {\r\n          \"value\": 10\r\n        },\r\n        {\r\n          \"value\": 15\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"dateOfWeek\": \"Monday\",\r\n      \"time\": \"09:00:00\",\r\n      \"weekPlanSets\": [\r\n        {\r\n          \"value\": 12\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/workouts",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-1234567890ef\",\r\n  \"exerciseId\": \"d3f8a6b2-9e4c-4f1a-8f3e-2c9b9a2f1e5a\",\r\n  \"userId\": \"a1b2c3d4-e5f6-7890-abcd-1234567890ef\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/workouts",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{localhost}}/api/workouts?id=861bc6cc-406c-4dd0-8843-4abbdcd08078",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"workouts"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "861bc6cc-406c-4dd0-8843-4abbdcd08078"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    { \"op\": \"replace\", \"path\": \"/\", \"value\": \"\"}\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/workouts",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"workouts"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sync data to MongoDb",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{localhost}}/api/workouts/sync-data-to-mongodb",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"workouts",
+						"sync-data-to-mongodb"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

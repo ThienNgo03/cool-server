@@ -52,28 +52,34 @@ public class Handler
             );
 
         var exercise = await _context.Exercises.FirstOrDefaultAsync(x => x.Id == workout.ExerciseId);
-
-        var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
-
-        if (mongoWorkout == null)
-            return;
-
-        mongoWorkout.ExerciseId = workout.ExerciseId;
-        mongoWorkout.UserId = workout.UserId;
-        mongoWorkout.LastUpdated = workout.LastUpdated;
-        mongoWorkout.Exercise = exercise != null ? new Journal.Databases.MongoDb.Collections.Workout.Exercise
+        try
         {
-            Id = exercise.Id,
-            Name = exercise.Name,
-            Description = exercise.Description,
-            Type = exercise.Type,
-            CreatedDate = exercise.CreatedDate,
-            LastUpdated = exercise.LastUpdated,
-            Muscles = musclesByExerciseId.GetValueOrDefault(exercise.Id, new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>())
-        } : null;
+            var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
 
-        _mongoDbContext.Workouts.Update(mongoWorkout);
-        await _mongoDbContext.SaveChangesAsync();
+            if (mongoWorkout == null)
+                return;
+
+            mongoWorkout.ExerciseId = workout.ExerciseId;
+            mongoWorkout.UserId = workout.UserId;
+            mongoWorkout.LastUpdated = workout.LastUpdated;
+            mongoWorkout.Exercise = exercise != null ? new Journal.Databases.MongoDb.Collections.Workout.Exercise
+            {
+                Id = exercise.Id,
+                Name = exercise.Name,
+                Description = exercise.Description,
+                Type = exercise.Type,
+                CreatedDate = exercise.CreatedDate,
+                LastUpdated = exercise.LastUpdated,
+                Muscles = musclesByExerciseId.GetValueOrDefault(exercise.Id, new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>())
+            } : null;
+
+            _mongoDbContext.Workouts.Update(mongoWorkout);
+            await _mongoDbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return;
+        }
     }
     #endregion
 }

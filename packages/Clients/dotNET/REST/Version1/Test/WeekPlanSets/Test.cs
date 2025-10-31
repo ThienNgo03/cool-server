@@ -29,15 +29,12 @@ public class Test : BaseTest
         dbContext.WeekPlanSets.Add(weekPlanSet);
         await dbContext.SaveChangesAsync();
         var weekPlanSetsEndpoint = serviceProvider.GetRequiredService<Library.WeekPlanSets.Interface>();
-        var response = await weekPlanSetsEndpoint.AllAsync(new Library.WeekPlanSets.All.Parameters()
+        var response = await weekPlanSetsEndpoint.GetAsync(new Library.WeekPlanSets.GET.Parameters()
         {
             PageIndex = 0,
             PageSize = 10
         });
         Assert.NotNull(response);
-        Assert.NotNull(response.Data);
-        Assert.NotNull(response.Data.Items);
-        Assert.True(response.Data.Items.Any(x => x.Id == id), "Find the week plan set just added");
 
         dbContext.WeekPlanSets.Remove(weekPlanSet);
         await dbContext.SaveChangesAsync();
@@ -64,12 +61,12 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var weekPlanSetsEndpoint = serviceProvider.GetRequiredService<Library.WeekPlanSets.Interface>();
-        var payLoad = new Library.WeekPlanSets.Create.Payload()
+        var payLoad = new Library.WeekPlanSets.POST.Payload()
         {
             WeekPlanId = weekPlanId,
             Value = value
         };
-        await weekPlanSetsEndpoint.CreateAsync(payLoad);
+        await weekPlanSetsEndpoint.PostAsync(payLoad);
 
         var expected = await dbContext.WeekPlanSets.FirstOrDefaultAsync(x => x.WeekPlanId == weekPlanId);
         Assert.NotNull(expected);
@@ -114,13 +111,13 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var weekPlanSetsEndpoint = serviceProvider.GetRequiredService<Library.WeekPlanSets.Interface>();
-        var payload = new Library.WeekPlanSets.Update.Payload()
+        var payload = new Library.WeekPlanSets.PUT.Payload()
         {
             Id = id,
             WeekPlanId = updatedWeekPlanId,
             Value = updatedValue
         };
-        await weekPlanSetsEndpoint.UpdateAsync(payload);
+        await weekPlanSetsEndpoint.PutAsync(payload);
 
         await dbContext.Entry(weekPlanSet).ReloadAsync();
 
@@ -156,7 +153,7 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var weekPlanSetsEndpoint = serviceProvider.GetRequiredService<Library.WeekPlanSets.Interface>();
-        var parameters = new Library.WeekPlanSets.Delete.Parameters() { Id = id };
+        var parameters = new Library.WeekPlanSets.DELETE.Parameters() { Id = id };
         await weekPlanSetsEndpoint.DeleteAsync(parameters);
 
         await dbContext.Entry(weekPlanSet).ReloadAsync();

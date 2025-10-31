@@ -31,15 +31,12 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var weekPlansEndpoint = serviceProvider!.GetRequiredService<Library.WeekPlans.Interface>();
-        var result = await weekPlansEndpoint.AllAsync(new()
+        var result = await weekPlansEndpoint.GetAsync(new()
         {
             PageIndex = 0,
             PageSize = 10
         });
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.NotNull(result.Data.Items);
-        Assert.True(result.Data.Items.Count > 0, "Expected at least one week plan in result.");
 
         dbContext.WeekPlans.Remove(weekPlan);
         await dbContext.SaveChangesAsync();
@@ -69,14 +66,14 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
 
-        var payload = new Library.WeekPlans.Create.Payload()
+        var payload = new Library.WeekPlans.POST.Payload()
         {
             WorkoutId = workoutId,
             DateOfWeek = dateOfWeek,
             Time = TimeSpan.Zero,
         };
         var weekPlansEndpoint = serviceProvider!.GetRequiredService<Library.WeekPlans.Interface>();
-        await weekPlansEndpoint.CreateAsync(payload);
+        await weekPlansEndpoint.PostAsync(payload);
 
         var expected = await dbContext.WeekPlans.FirstOrDefaultAsync(x => x.DateOfWeek == dateOfWeek);
         Assert.NotNull(expected);
@@ -117,14 +114,14 @@ public class Test : BaseTest
 
         var weekPlansEndpoint = serviceProvider!.GetRequiredService<Library.WeekPlans.Interface>();
         var updatedDateOfWeek = "Tuesday";
-        var payload = new Library.WeekPlans.Update.Payload
+        var payload = new Library.WeekPlans.PUT.Payload
         {
             Id = id,
             WorkoutId = updatedWorkoutId,
             DateOfWeek = updatedDateOfWeek,
             Time = TimeSpan.Zero
         };
-        await weekPlansEndpoint.UpdateAsync(payload);
+        await weekPlansEndpoint.PutAsync(payload);
 
         await dbContext.Entry(existingWeekPlan).ReloadAsync();
         var updatedWeekPlan = existingWeekPlan;

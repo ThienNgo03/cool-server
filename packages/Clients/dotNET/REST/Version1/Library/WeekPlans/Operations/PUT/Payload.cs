@@ -1,0 +1,13 @@
+﻿namespace Library.WeekPlans.PUT;
+
+public class Payload
+{
+    public Guid Id { get; set; }
+
+    public Guid WorkoutId { get; set; }
+
+    public string DateOfWeek { get; set; }
+
+    public TimeSpan Time { get; set; }
+
+}

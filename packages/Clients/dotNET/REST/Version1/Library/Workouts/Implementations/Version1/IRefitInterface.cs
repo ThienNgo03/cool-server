@@ -13,6 +13,9 @@ public interface IRefitInterface
     [Put("/api/workouts")]
     Task<ApiResponse<object>> PUT([Body] PUT.Payload payload);
 
+    [Patch("/api/workouts")]
+    Task<ApiResponse<object>> PATCH([Query] PATCH.Parameters parameters, [Body] List<PATCH.Operation> operations);
+
     [Delete("/api/workouts")]
     Task<ApiResponse<object>> DELETE([Query] DELETE.Parameters parameters);
 }

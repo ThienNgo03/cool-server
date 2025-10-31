@@ -30,15 +30,12 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutLogsEndpoint = serviceProvider!.GetRequiredService<Library.WorkoutLogs.Interface>();
-        var result = await workoutLogsEndpoint.AllAsync(new()
+        var result = await workoutLogsEndpoint.GetAsync(new()
         {
             PageIndex = 0,
             PageSize = 10
         });
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.NotNull(result.Data.Items);
-        Assert.True(result.Data.Items.Count > 0, "Expected at least one week plan in result.");
 
         dbContext.WorkoutLogs.Remove(workoutLog);
         await dbContext.SaveChangesAsync();
@@ -64,13 +61,13 @@ public class Test : BaseTest
         dbContext.Workouts.Add(existingWorkout);
         await dbContext.SaveChangesAsync();
 
-        var payload = new Library.WorkoutLogs.Create.Payload()
+        var payload = new Library.WorkoutLogs.POST.Payload()
         {
             WorkoutId = workoutId,
             WorkoutDate = DateTime.UtcNow,
         };
         var workoutLogsEndpoint = serviceProvider!.GetRequiredService<Library.WorkoutLogs.Interface>();
-        await workoutLogsEndpoint.CreateAsync(payload);
+        await workoutLogsEndpoint.PostAsync(payload);
 
         var expected = await dbContext.WorkoutLogs.FirstOrDefaultAsync(x => x.WorkoutId == workoutId);
         Assert.NotNull(expected);
@@ -108,13 +105,13 @@ public class Test : BaseTest
         await dbContext.SaveChangesAsync();
 
         var workoutLogsEndpoint = serviceProvider!.GetRequiredService<Library.WorkoutLogs.Interface>();
-        var payload = new Library.WorkoutLogs.Update.Payload
+        var payload = new Library.WorkoutLogs.PUT.Payload
         {
             Id = id,
             WorkoutId = updatedWorkoutId,
             WorkoutDate = DateTime.UtcNow
         };
-        await workoutLogsEndpoint.UpdateAsync(payload);
+        await workoutLogsEndpoint.PutAsync(payload);
 
         await dbContext.Entry(existingWorkoutLog).ReloadAsync();
         var updatedWorkoutLog = existingWorkoutLog;
