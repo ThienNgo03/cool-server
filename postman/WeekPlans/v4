@@ -1,0 +1,198 @@
+{
+	"info": {
+		"_postman_id": "f0e196ab-1c1c-407f-99be-6371e0ff66b0",
+		"name": "WeekPlans 🗓️",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49014517"
+	},
+	"item": [
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{localhost}}/api/week-plans",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"week-plans"
+					],
+					"query": [
+						{
+							"key": "ids",
+							"value": "7dbcfa3f-dbc8-4bc7-a01b-033ffbe52689, 7fd8a8e8-3fc9-4b67-8777-0952461b7edd",
+							"disabled": true
+						},
+						{
+							"key": "sortBy",
+							"value": "time",
+							"disabled": true
+						},
+						{
+							"key": "sortOrder",
+							"value": "desc",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"workoutId\": \"12345\",\r\n  \"dateOfWeek\": \"Monday\",\r\n  \"time\": \"07:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/week-plans",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"week-plans"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"9858ae46-e924-4810-e7c4-08ddc6e978d6\",\r\n    \"WorkoutId\": \"12345\",\r\n    \"DateOfWeek\": \"Monday\",\r\n    \"Time\": \"07:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/week-plans",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"week-plans"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{localhost}}/api/week-plans",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"week-plans"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "eb9eaf49-61e1-4005-dddb-08ddc6e94421",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": ".",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    { \"op\": \"replace\", \"path\": \"/\", \"value\": \"\"}\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{localhost}}/api/week-plans",
+					"host": [
+						"{{localhost}}"
+					],
+					"path": [
+						"api",
+						"week-plans"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

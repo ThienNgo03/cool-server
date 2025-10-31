@@ -27,8 +27,8 @@ public static class Extensions
             services.AddSingleton(session);
         }
         #endregion
-        var journalDbConfig = configuration.GetSection("JournalDb").Get<DbConfig>();
-        var identityDbConfig = configuration.GetSection("IdentityDb").Get<DbConfig>();
+        var journalDbConfig = configuration.GetSection("JournalDb").Get<Sql.DbConfig>();
+        var identityDbConfig = configuration.GetSection("IdentityDb").Get<Sql.DbConfig>();
 
         if (journalDbConfig == null)
         {
@@ -38,7 +38,7 @@ public static class Extensions
         {
             throw new ArgumentNullException(nameof(identityDbConfig), "IdentityDb configuration section is missing or invalid.");
         }
-        var journalConnectionString = new ConnectionStringBuilder()
+        var journalConnectionString = new Sql.ConnectionStringBuilder()
             .WithHost(journalDbConfig.Host)
             .WithPort(journalDbConfig.Port)
             .WithDatabase(journalDbConfig.Database)
@@ -48,7 +48,7 @@ public static class Extensions
             .WithTrustServerCertificate()
             .Build();
 
-        var identityConnectionString = new ConnectionStringBuilder()
+        var identityConnectionString = new Sql.ConnectionStringBuilder()
             .WithHost(identityDbConfig.Host)
             .WithPort(identityDbConfig.Port)
             .WithDatabase(identityDbConfig.Database)
@@ -86,10 +86,26 @@ public static class Extensions
                 .AddEntityFrameworkStores<IdentityContext>()
                 .AddDefaultTokenProviders();
 
-        var client = new MongoClient("mongodb://root:mongopw@localhost:27017/admin");
-        var database = client.GetDatabase("Thien");
+        var mongoDbConfig = configuration.GetSection("MongoDb").Get<MongoDb.DbConfig>();
+        if (mongoDbConfig == null)
+        {
+            throw new ArgumentNullException(nameof(mongoDbConfig), "MongoDb configuration section is missing or invalid.");
+        }
 
-        // Register EF Core DbContext that uses the MongoDB provider
+        var mongoConnectionStringBuilder = new MongoDb.ConnectionStringBuilder()
+            .WithHost(mongoDbConfig.Host)
+            .WithPort(mongoDbConfig.Port)
+            .WithDatabase(mongoDbConfig.Database)
+            .WithUsername(mongoDbConfig.Username)
+            .WithPassword(mongoDbConfig.Password)
+            .WithAuthDatabase(mongoDbConfig.AuthDatabase);
+
+        var mongoConnectionString = mongoConnectionStringBuilder.Build();
+        var databaseName = mongoConnectionStringBuilder.GetDatabaseName();
+
+        var client = new MongoClient(mongoConnectionString);
+        var database = client.GetDatabase(databaseName);
+
         services.AddDbContext<MongoDbContext>(options =>
             options.UseMongoDB(client, database.DatabaseNamespace.DatabaseName)
         );

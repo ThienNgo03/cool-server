@@ -2,7 +2,7 @@
 
 public class Parameters
 {
-    public Guid? Id { get; set; }
+    public string? Ids { get; set; }
 
     public Guid? ExerciseId { get; set; }
 
@@ -17,4 +17,8 @@ public class Parameters
     public int? PageIndex { get; set; }
 
     public string? Include { get; set; }
+
+    public string? SortBy { get; set; }
+
+    public string? SortOrder { get; set; }
 }
