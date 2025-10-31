@@ -30,8 +30,15 @@ public class Controller : ControllerBase
     {
         var query = _context.WeekPlanSets.AsQueryable();
 
-        if (parameters.Id.HasValue)
-            query = query.Where(x => x.Id == parameters.Id);
+        if (!string.IsNullOrEmpty(parameters.Ids))
+        {
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+            .Where(guid => guid.HasValue)
+            .Select(guid => guid.Value)
+            .ToList();
+            query = query.Where(x => ids.Contains(x.Id));
+        }
 
         if (parameters.WeekPlanId.HasValue)
             query = query.Where(x => x.WeekPlanId == parameters.WeekPlanId);
@@ -44,6 +51,20 @@ public class Controller : ControllerBase
 
         if (parameters.LastUpdated.HasValue)
             query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
+
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
 
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex.Value >= 0)
             query = query.Skip(parameters.PageSize.Value * parameters.PageIndex.Value).Take(parameters.PageSize.Value);
@@ -69,6 +90,8 @@ public class Controller : ControllerBase
             .Build();
 
         return Ok(paginationResults);
+
+
     }
 
     [HttpPost]
@@ -94,7 +117,7 @@ public class Controller : ControllerBase
             });
         }
 
-        var weekPlanSet = new Databases.App.Tables.WeekPlanSet.Table
+        var weekPlanSet = new Table
         {
             Id = Guid.NewGuid(),
             WeekPlanId = payload.WeekPlanId,
@@ -113,7 +136,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                           [FromBody] JsonPatchDocument<Databases.App.Tables.WeekPlanSet.Table> patchDoc,
+                                           [FromBody] JsonPatchDocument<Table> patchDoc,
                                            CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

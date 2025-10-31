@@ -2,7 +2,7 @@
 {
     public class Parameters
     {
-        public Guid? Id { get; set; }
+        public string? Ids { get; set; }
 
         public Guid? WeekPlanId { get; set; }
 
@@ -15,6 +15,10 @@
         public int? PageSize { get; set; }
 
         public int? PageIndex { get; set; }
+
+        public string? SortBy { get; set; }
+
+        public string? SortOrder { get; set; }
 
     }
 }

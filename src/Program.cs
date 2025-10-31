@@ -17,6 +17,8 @@ builder.Services.Configure<DbConfig>(
     builder.Configuration.GetSection("IdentityDb"));
 builder.Services.Configure<OpenSearchConfig>(
     builder.Configuration.GetSection("OpenSearch"));
+builder.Services.Configure<Journal.Databases.MongoDb.DbConfig>(
+    builder.Configuration.GetSection("MongoDb"));
 
 builder.Services.AddDatabases(builder.Configuration);
 

@@ -28,7 +28,7 @@ public class Handler
 
         foreach (var weekPlan in message.weekPlans)
         {
-            var newWeekPlan = new Databases.App.Tables.WeekPlan.Table
+            var newWeekPlan = new WeekPlans.Table
             {
                 Id = Guid.NewGuid(),
                 WorkoutId = message.Id,
@@ -43,7 +43,7 @@ public class Handler
                 continue;
             foreach (var weekPlanSet in weekPlan.WeekPlanSets)
             {
-                var newWeekPlanSet = new Databases.App.Tables.WeekPlanSet.Table
+                var newWeekPlanSet = new WeekPlanSets.Table
                 {
                     Id = Guid.NewGuid(),
                     WeekPlanId = newWeekPlan.Id,
