@@ -2,7 +2,7 @@
 
 public class Parameters
 {
-    public Guid MuscleId { get; set; }
+    public Guid PartitionKey { get; set; }
     public Guid Id { get; set; }
 
 }

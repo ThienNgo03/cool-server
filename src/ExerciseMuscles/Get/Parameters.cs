@@ -2,15 +2,11 @@
 
 public class Parameters
 {
-    public Guid? Id { get; set; }
+    public string? Ids { get; set; }
 
-    public Guid? ExerciseId { get; set; }
+    public string? ExerciseId { get; set; }
 
-    public Guid? MuscleId { get; set; }
-
-    public DateTime? CreatedDate { get; set; }
-
-    public DateTime? LastUpdated { get; set; }
+    public Guid? PartitionKey { get; set; }
 
     public int? PageSize { get; set; }
 
