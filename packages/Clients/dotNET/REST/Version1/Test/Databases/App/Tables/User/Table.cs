@@ -12,4 +12,8 @@ public class Table
 
     public string? ProfilePicture { get; set; }
 
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime LastUpdated { get; set; }
+
 }

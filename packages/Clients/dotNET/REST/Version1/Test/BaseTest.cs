@@ -31,11 +31,6 @@ public class BaseTest
         services.AddDbContext<IdentityContext>(options =>
            options.UseSqlServer(local.Config.IdentityConnectionString));
 
-        //var connectionString = "UseDevelopmentStorage=true";
-        //var containerName = "container1";
-
-        //services.AddSingleton(new BlobContainerClient(connectionString, containerName));
-
         serviceProvider = services.BuildServiceProvider();
 
         var tokenService = serviceProvider.GetRequiredService<Library.Token.Service>();

@@ -1,9 +1,5 @@
 ﻿using ExcelDataReader;
 using System.Data;
-
-using Exercises = Journal.Exercises;
-using Muscles = Journal.Muscles;
-
 namespace Journal.Databases.App;
 
 public class SeedFactory
@@ -120,7 +116,8 @@ public class SeedFactory
             Name = "systemtester",
             Email = "systemtester@journal.com",
             PhoneNumber = "0564330462",
-            ProfilePicture = null
+            ProfilePicture = null,
+            CreatedDate = DateTime.UtcNow
         };
         context.Users.Add(testAdmin);
         await context.SaveChangesAsync();

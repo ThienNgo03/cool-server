@@ -2,6 +2,6 @@
 
 public static class Config
 {
-    public const string JournalConnectionString = "Server=localhost;Database=JournalTest;Trusted_Connection=True;TrustServerCertificate=True;";
-    public const string IdentityConnectionString = "Server=localhost;Database=IdentityTest;Trusted_Connection=True;TrustServerCertificate=True;";
+    public const string JournalConnectionString = "Server=localhost;Database=Journal;Trusted_Connection=True;TrustServerCertificate=True;";
+    public const string IdentityConnectionString = "Server=localhost;Database=Identity;Trusted_Connection=True;TrustServerCertificate=True;";
 }

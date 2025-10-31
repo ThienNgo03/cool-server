@@ -99,6 +99,8 @@ public class Test : BaseTest
             Name = "Push Up",
             Email = "abc@gmail.com",
             PhoneNumber = "1234567890",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
         };
         dbContext.Users.Add(existingUser);
         await dbContext.SaveChangesAsync();
@@ -155,6 +157,8 @@ public class Test : BaseTest
             Name = "Push Up",
             Email = "abc@gmail.com",
             PhoneNumber = "1234567890",
+            CreatedDate = DateTime.UtcNow,
+            LastUpdated = DateTime.UtcNow
         };
         dbContext.Users.Add(existingUser);
 
