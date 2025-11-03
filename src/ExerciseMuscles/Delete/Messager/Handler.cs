@@ -1,94 +1,67 @@
 ﻿namespace Journal.ExerciseMuscles.Delete.Messager;
 
-using Microsoft.Extensions.Options;
-using OpenSearch.Net;
-using Journal.Databases;
-using Journal.Databases.OpenSearch;
+using OpenSearch.Client;
 
 public class Handler
 {
     private readonly JournalDbContext _context;
-    private readonly OpenSearchConfig _config;
+    private readonly IOpenSearchClient _openSearchClient;
 
-    public Handler(JournalDbContext context, IOptions<OpenSearchConfig> config)
+    public Handler(JournalDbContext context, IOpenSearchClient openSearchClient)
     {
         _context = context;
-        _config = config.Value;
+        _openSearchClient = openSearchClient;
     }
 
     public async Task Handle(Message message)
     {
-        var builder = new ConnectionStringBuilder()
-            .WithHost(_config.Host)
-            .WithPort(_config.Port)
-            .WithUsername(_config.Username)
-            .WithPassword(_config.Password);
+        var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
+            message.exerciseId.ToString(),
+            g => g.Index("exercises")
+        );
 
-        if (_config.EnableSsl)
-            builder.WithSsl();
-
-        if (_config.SkipCertificateValidation)
-            builder.WithSkipCertificateValidation();
-
-        var uri = new Uri(builder.Build());
-        var pool = new SingleNodeConnectionPool(uri);
-        var settings = new ConnectionConfiguration(pool)
-            .BasicAuthentication(_config.Username, _config.Password);
-
-        if (_config.SkipCertificateValidation)
+        if (!getResponse.IsValid)
         {
-            settings = settings.ServerCertificateValidationCallback((o, cert, chain, errors) => true);
+            Console.WriteLine($"Error retrieving exercise {message.exerciseId} from OpenSearch: {getResponse.ServerError?.Error?.Reason ?? getResponse.DebugInformation}");
+            return;
         }
 
-        var client = new OpenSearchLowLevelClient(settings);
+        var exerciseDoc = getResponse.Source;
 
-        // Get the exercise
-        var exercise = await _context.Exercises.AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == message.exerciseId);
-
-        if (exercise != null)
+        if (exerciseDoc.Muscles == null || !exerciseDoc.Muscles.Any())
         {
-            // Get all muscle IDs connected to this exercise
-            var muscleIds = await _context.ExerciseMuscles
-                .Where(em => em.ExerciseId == message.exerciseId)
-                .Select(em => em.MuscleId)
-                .ToListAsync();
+            Console.WriteLine($"No muscles found for exercise {message.exerciseId}.");
+            return;
+        }
 
-            // Get all muscles for those IDs
-            var muscles = await _context.Muscles
-                .Where(m => muscleIds.Contains(m.Id))
-                .AsNoTracking()
-                .ToListAsync();
+        // Remove the old muscle
+        var muscleToRemove = exerciseDoc.Muscles.FirstOrDefault(m => m.Id == message.muscleId);
 
-            var musclesList = muscles.Select(m => new
-            {
-                m.Id,
-                m.Name,
-                m.CreatedDate,
-                m.LastUpdated
-            }).ToList();
-
-            var bulkData = new List<object>
+        if (muscleToRemove != null)
         {
-            new { index = new { _index = "exercises", _id = message.exerciseId } },
-            new
-            {
-                exercise.Id,
-                exercise.Name,
-                exercise.Description,
-                exercise.Type,
-                muscles = musclesList,
-                exercise.CreatedDate,
-                exercise.LastUpdated
-            }
-        };
+            exerciseDoc.Muscles.Remove(muscleToRemove);
 
-            var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
+            // Update the document
+            var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                message.exerciseId.ToString(),
+                u => u
+                    .Index("exercises")
+                    .Doc(new
+                    {
+                        muscles = exerciseDoc.Muscles,
+                        lastUpdated = DateTime.UtcNow
+                    })
+                    .DocAsUpsert(false)
+            );
 
-            if (!bulkResponse.Success)
+            if (!updateResponse.IsValid)
             {
-                Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
+                Console.WriteLine($"Error removing muscle from exercise in OpenSearch: {updateResponse.ServerError?.Error?.Reason ?? updateResponse.DebugInformation}");
             }
+        }
+        else
+        {
+            Console.WriteLine($"Muscle {message.muscleId} not found in exercise {message.exerciseId}.");
         }
     }
 }

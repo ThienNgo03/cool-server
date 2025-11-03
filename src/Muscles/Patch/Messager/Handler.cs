@@ -1,4 +1,4 @@
-﻿namespace Journal.Muscles.Update.Messager;
+﻿namespace Journal.Muscles.Patch.Messager;
 
 using Journal.Databases;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,19 @@ public class Handler
 
     public async Task Handle(Message message)
     {
-        // Step 1: Find all exercises that have this muscle
+        if (message.changes == null || !message.changes.Any())
+            return;
+
+        // Get the updated muscle from database
+        var updatedMuscle = await _context.Muscles.FirstOrDefaultAsync(m => m.Id == message.muscleId);
+
+        if (updatedMuscle == null)
+        {
+            Console.WriteLine($"Muscle {message.muscleId} not found.");
+            return;
+        }
+
+        // Find all exercises that have this muscle
         var exerciseIds = await _context.ExerciseMuscles
             .Where(em => em.MuscleId == message.muscleId)
             .Select(em => em.ExerciseId)
@@ -30,14 +42,14 @@ public class Handler
             return;
         }
 
-        // Step 2: Update the muscle in each exercise document
+        // Update the muscle in each exercise document
         foreach (var exerciseId in exerciseIds)
         {
-            await UpdateMuscleInExercise(exerciseId, message.updatedMuscle);
+            await PatchMuscleInExercise(exerciseId, updatedMuscle, message.changes);
         }
     }
 
-    private async Task UpdateMuscleInExercise(Guid exerciseId, Table updatedMuscle)
+    private async Task PatchMuscleInExercise(Guid exerciseId, Table updatedMuscle, List<(string Path, object? Value)> changes)
     {
         // Get current exercise document
         var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
@@ -59,15 +71,27 @@ public class Handler
             return;
         }
 
-        // Find and update the muscle in the list
+        // Find the muscle to update
         var muscleToUpdate = exerciseDoc.Muscles.FirstOrDefault(m => m.Id == updatedMuscle.Id);
 
         if (muscleToUpdate != null)
         {
-            // Update muscle properties
-            muscleToUpdate.Name = updatedMuscle.Name;
+            // Apply changes to the muscle
+            foreach (var (path, value) in changes)
+            {
+                var fieldName = path.TrimStart('/');
+
+                switch (fieldName.ToLowerInvariant())
+                {
+                    case "name":
+                        muscleToUpdate.Name = value?.ToString() ?? muscleToUpdate.Name;
+                        break;
+                        // Add other patchable fields as needed
+                }
+            }
+
+            // Always update lastUpdated
             muscleToUpdate.LastUpdated = updatedMuscle.LastUpdated;
-            muscleToUpdate.CreatedDate = updatedMuscle.CreatedDate;
 
             // Update the document in OpenSearch
             var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
@@ -84,7 +108,7 @@ public class Handler
 
             if (!updateResponse.IsValid)
             {
-                Console.WriteLine($"Error updating muscle in exercise {exerciseId}: {updateResponse.ServerError?.Error?.Reason ?? updateResponse.DebugInformation}");
+                Console.WriteLine($"Error patching muscle in exercise {exerciseId}: {updateResponse.ServerError?.Error?.Reason ?? updateResponse.DebugInformation}");
             }
         }
     }

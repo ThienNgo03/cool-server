@@ -40,6 +40,7 @@ public class Controller : ControllerBase
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query = _context.Workouts.AsQueryable();
+        var all = query;
 
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
@@ -378,6 +379,7 @@ public class Controller : ControllerBase
         }
 
         var paginationResults = new Builder<Get.Response>()
+            .WithAll(await all.CountAsync())
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(responses.Count)

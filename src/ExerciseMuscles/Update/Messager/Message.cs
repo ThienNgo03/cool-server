@@ -1,5 +1,10 @@
 ﻿using Spectre.Console.Rendering;
 
 namespace Journal.ExerciseMuscles.Update.Messager;
-
-public record Message(Guid id, Guid exerciseId, Guid muscleId);
+public record Message(
+    Table exerciseMuscles,
+    Guid oldExerciseId,
+    Guid oldMuscleId,
+    Guid newExerciseId,
+    Guid newMuscleId
+);

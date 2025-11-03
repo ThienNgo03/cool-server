@@ -4,6 +4,12 @@ public class Builder<T>
 {
     private readonly Model<T> _paginationResults = new();
 
+    public Builder<T> WithAll(int all)
+    {
+        _paginationResults.All = all;
+        return this;
+    }
+
     public Builder<T> WithIndex(int? index)
     {
         _paginationResults.Index = index;

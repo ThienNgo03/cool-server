@@ -1,4 +1,4 @@
 ﻿namespace Journal.ExerciseMuscles.Post.Messager;
 
-public record Message(Guid id, Guid exerciseId);
+public record Message(Table exerciseMuscles);
 

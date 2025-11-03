@@ -1,91 +1,84 @@
 ﻿namespace Journal.ExerciseMuscles.Post.Messager;
 
-using Microsoft.Extensions.Options;
-using OpenSearch.Net;
 using Journal.Databases;
-using Journal.Databases.OpenSearch;
+using Microsoft.EntityFrameworkCore;
+using OpenSearch.Client;
 
 public class Handler
 {
     private readonly JournalDbContext _context;
-    private readonly OpenSearchConfig _config;
+    private readonly IOpenSearchClient _openSearchClient;
 
-    public Handler(JournalDbContext context, IOptions<OpenSearchConfig> config)
+    public Handler(JournalDbContext context, IOpenSearchClient openSearchClient)
     {
         _context = context;
-        _config = config.Value;
+        _openSearchClient = openSearchClient;
     }
 
     public async Task Handle(Message message)
     {
-        var builder = new ConnectionStringBuilder()
-            .WithHost(_config.Host)
-            .WithPort(_config.Port)
-            .WithUsername(_config.Username)
-            .WithPassword(_config.Password);
+        // Get the muscle information from database
+        var muscle = await _context.Muscles.FirstOrDefaultAsync(x => x.Id == message.exerciseMuscles.MuscleId);
 
-        if (_config.EnableSsl)
-            builder.WithSsl();
-
-        if (_config.SkipCertificateValidation)
-            builder.WithSkipCertificateValidation();
-
-        var uri = new Uri(builder.Build());
-        var pool = new SingleNodeConnectionPool(uri);
-        var settings = new ConnectionConfiguration(pool)
-            .BasicAuthentication(_config.Username, _config.Password);
-
-        if (_config.SkipCertificateValidation)
+        if (muscle == null)
         {
-            settings = settings.ServerCertificateValidationCallback((o, cert, chain, errors) => true);
+            Console.WriteLine($"Muscle with ID {message.exerciseMuscles.MuscleId} not found.");
+            return;
         }
 
-        var client = new OpenSearchLowLevelClient(settings);
+        // Get the current exercise document from OpenSearch
+        var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
+            message.exerciseMuscles.ExerciseId.ToString(),
+            g => g.Index("exercises")
+        );
 
-        var exercise = await _context.Exercises.AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == message.exerciseId);
-
-        if (exercise != null)
+        if (!getResponse.IsValid)
         {
-            var muscleIds = await _context.ExerciseMuscles
-                .Where(em => em.ExerciseId == message.exerciseId)
-                .Select(em => em.MuscleId)
-                .ToListAsync();
+            Console.WriteLine($"Error retrieving exercise from OpenSearch: {getResponse.ServerError?.Error?.Reason ?? getResponse.DebugInformation}");
+            return;
+        }
 
-            var muscles = await _context.Muscles
-                .Where(m => muscleIds.Contains(m.Id))
-                .AsNoTracking()
-                .ToListAsync();
+        var exerciseDoc = getResponse.Source;
 
-            var musclesList = muscles.Select(m => new
-            {
-                m.Id,
-                m.Name,
-                m.CreatedDate,
-                m.LastUpdated
-            }).ToList();
-
-            var bulkData = new List<object>
+        // Initialize muscles list if null
+        if (exerciseDoc.Muscles == null)
         {
-            new { index = new { _index = "exercises", _id = message.exerciseId } },
-            new
-            {
-                exercise.Id,
-                exercise.Name,
-                exercise.Description,
-                exercise.Type,
-                muscles = musclesList,
-                exercise.CreatedDate,
-                exercise.LastUpdated
-            }
+            exerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
+        }
+
+        // Create new muscle document
+        var newMuscle = new Databases.OpenSearch.Indexes.Muscle.Index
+        {
+            Id = muscle.Id,
+            Name = muscle.Name,
+            CreatedDate = muscle.CreatedDate,
+            LastUpdated = muscle.LastUpdated
         };
 
-            var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
+        if (!exerciseDoc.Muscles.Any(m => m.Id == newMuscle.Id))
+        {
+            exerciseDoc.Muscles.Add(newMuscle);
 
-            if (!bulkResponse.Success)
+            var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                message.exerciseMuscles.ExerciseId.ToString(),
+                u => u
+                    .Index("exercises")
+                    .Doc(new
+                    {
+                        muscles = exerciseDoc.Muscles,
+                        lastUpdated = message.exerciseMuscles.CreatedDate
+                    })
+                    .DocAsUpsert(false)
+            );
+
+            if (!updateResponse.IsValid)
             {
-                Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
+                Console.WriteLine($"Error updating muscles in OpenSearch: {updateResponse.ServerError?.Error?.Reason ?? updateResponse.DebugInformation}");
             }
+        }
+        else
+        {
+            Console.WriteLine($"Muscle {newMuscle.Id} already exists in exercise {message.exerciseMuscles.ExerciseId}.");
         }
     }
 }

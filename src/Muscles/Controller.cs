@@ -24,6 +24,7 @@ public class Controller(IMessageBus messageBus,
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query = _context.Muscles.AsQueryable();
+        var all = query;
 
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
@@ -64,6 +65,7 @@ public class Controller(IMessageBus messageBus,
         var result = await query.AsNoTracking().ToListAsync();
 
         var paginationResults = new Builder<Table>()
+          .WithAll(await all.CountAsync())
           .WithIndex(parameters.PageIndex)
           .WithSize(parameters.PageSize)
           .WithTotal(result.Count)
@@ -102,9 +104,13 @@ public class Controller(IMessageBus messageBus,
         if (userId is null)
             return Unauthorized("User Id not found");
 
+        var changes = new List<(string Path, object? Value)>();
         foreach (var op in patchDoc.Operations)
+        {
             if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
                 return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+            changes.Add((op.path, op.value));
+        }
 
         if (patchDoc is null)
             return BadRequest("Patch document cannot be null.");
@@ -126,7 +132,7 @@ public class Controller(IMessageBus messageBus,
         _context.Muscles.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("muscle-updated", entity.Id);
-
+        await _messageBus.PublishAsync(new Patch.Messager.Message(entity.Id, changes));
         return NoContent();
     }
 
@@ -149,7 +155,7 @@ public class Controller(IMessageBus messageBus,
         muscle.LastUpdated = DateTime.UtcNow;
         _context.Muscles.Update(muscle);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id, muscle));
         await _hubContext.Clients.All.SendAsync("muscle-updated", payload.Id);
         return NoContent();
     }

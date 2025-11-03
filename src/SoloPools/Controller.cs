@@ -34,6 +34,7 @@ public class Controller : ControllerBase
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query = _dbContext.SoloPools.AsQueryable();
+        var all = query;
         // Filtering
         if (parameters.Id.HasValue)
         {
@@ -63,6 +64,7 @@ public class Controller : ControllerBase
         var result = await query.AsNoTracking().ToListAsync();
 
         var paginationResults = new Builder<Databases.App.Tables.SoloPool.Table>()
+                .WithAll(await all.CountAsync())
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)
