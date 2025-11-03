@@ -33,8 +33,6 @@ public class Test : BaseTest
         var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
         var result = await exercisesEndpoint.AllAsync(new() 
         {
-            PageIndex = 0,
-            PageSize = 10
         });
 
         Assert.NotNull(result);
