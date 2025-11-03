@@ -30,10 +30,8 @@ public class Controller : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
-        CqlQuery<Table> exerciseMuscles = _cassandraContext.ExerciseMuscles;
-        var query = await exerciseMuscles.ExecuteAsync();
-        var all = query.Count();
-
+        var query = await _cassandraContext.ExerciseMuscles.ExecuteAsync();
+        
         if (parameters.PartitionKey.HasValue)
         {
             query = query.Where(x => x.MuscleId == parameters.PartitionKey);
@@ -52,6 +50,8 @@ public class Controller : ControllerBase
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
         var result =  query.ToList();
+
+        var all = (await _cassandraContext.ExerciseMuscles.ExecuteAsync()).Count();
 
         var paginationResults = new Builder<Table>()
           .WithAll(all)
@@ -192,12 +192,13 @@ public class Controller : ControllerBase
         await _cassandraContext.ExerciseMuscles
                .Where(x => x.MuscleId == payload.PartitionKey && x.Id == payload.Id)
                .Delete().ExecuteAsync();
-        
+
         var newExerciseMuscle = new Table
         {
-            Id = Guid.NewGuid(),
+            Id = payload.Id,
             ExerciseId = payload.NewExerciseId,
             MuscleId = payload.NewMuscleId,
+            CreatedDate = exerciseMuscle.CreatedDate,
             LastUpdated = DateTime.UtcNow
         };
         await _cassandraContext.ExerciseMuscles.Insert(newExerciseMuscle).ExecuteAsync();

@@ -1,7 +1,7 @@
 ﻿using Refit;
 using System.Diagnostics;
 
-namespace Library.Users.Implementations.Version1;
+namespace Library.ExerciseMuscles.Implementations.Version1;
 
 public class Implementation : Interface
 {
@@ -23,11 +23,9 @@ public class Implementation : Interface
     public async Task<Models.PaginationResults.Model<Model>> AllAsync(GET.Parameters parameters)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-
-        
         try
         {
-            var response = await this.refitInterface.GET(parameters);
+            var response = await refitInterface.GET(parameters);
 
             stopwatch.Stop();
             var duration = stopwatch.ElapsedMilliseconds;
@@ -36,7 +34,6 @@ public class Implementation : Interface
             {
                 return new()
                 {
-
                     Size = parameters.PageSize,
                     Index = parameters.PageIndex,
                     Items = new List<Model>(),
@@ -73,24 +70,51 @@ public class Implementation : Interface
         }
         catch (ApiException ex)
         {
-
-            throw new NotImplementedException();
+            throw new HttpRequestException(
+                $"Server returned error {ex.StatusCode}: {ex.Message}",
+                ex,
+                ex.StatusCode);
         }
     }
 
     public async Task CreateAsync(POST.Payload payload)
     {
-        throw new NotImplementedException();
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        try
+        {
+            var response = await refitInterface.POST(payload);
+
+            stopwatch.Stop();
+            var duration = stopwatch.ElapsedMilliseconds;
+        }
+        catch (ApiException ex)
+        {
+            stopwatch.Stop();
+        }
     }
 
     public async Task UpdateAsync(PUT.Payload payload)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await refitInterface.PUT(payload);
+        }
+        catch (ApiException ex)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public async Task DeleteAsync(DELETE.Parameters parameters)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await refitInterface.DELETE(parameters);
+        }
+        catch (ApiException ex)
+        {
+            throw new NotImplementedException();
+        }
     }
     #endregion
 }

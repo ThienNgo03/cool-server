@@ -1,5 +1,7 @@
-﻿namespace Test.Databases.App.Tables.ExerciseMuscle;
+﻿using Cassandra.Mapping.Attributes;
 
+namespace Test.Databases.CassandraCql.Tables.ExerciseMuscle;
+[Table("exercise_muscle")]
 public class Table
 {
     public Guid Id { get; set; }
