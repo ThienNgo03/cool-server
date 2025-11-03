@@ -15,14 +15,14 @@ public class Test : BaseTest
     #region [ Endpoints ]
 
     [Fact]
-    public async Task GET_PushUpExist()
+    public async Task GET_DataExist()
     {
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
         var pushUp = new Databases.App.Tables.Exercise.Table()
         {
             Id = id,
-            Name = "TEST EXERCISE",
+            Name = $"TEST EXERCISE-{id}",
             Description = "A basic TEST EXERCISE for upper body strength.",
             Type = "Rep",
             CreatedDate = DateTime.UtcNow,
@@ -41,11 +41,30 @@ public class Test : BaseTest
         Assert.NotNull(result);
         Assert.NotNull(result.Items);
         Assert.True(result.Items.Count > 0, "Expected at least one exercise in result.");
-        Assert.True(result.Items.Any(e => e.Name == "TEST EXERCISE"), "Expected to find 'TEST EXERCISE' exercise in the result.");
+        Assert.True(result.Items.Any(e => e.Name == $"TEST EXERCISE-{id}"), "Expected to find 'TEST EXERCISE' exercise in the result.");
         dbContext.Exercises.Remove(pushUp);
         await dbContext.SaveChangesAsync();
     }
 
+    [Fact]
+    public async Task ALL_Included()
+    {
+        
+        var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
+        var result = await exercisesEndpoint.AllAsync(new()
+        {
+            PageIndex = 0,
+            PageSize = 10,
+            Include = "muscles",
+        });
+
+        Assert.NotNull(result);
+        Assert.NotNull(result);
+        Assert.NotNull(result.Items);
+        Assert.True(result.Items.Count > 0, "Expected at least one exercise in result.");
+        var firstExercise = result.Items.First();
+        Assert.NotNull(firstExercise.Muscles);
+    }
 
     [Fact]
 

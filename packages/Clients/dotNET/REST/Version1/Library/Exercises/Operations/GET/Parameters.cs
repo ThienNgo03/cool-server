@@ -1,20 +1,17 @@
 ﻿namespace Library.Exercises.GET;
 
-public class Parameters
+public class Parameters : Models.PaginationParameters.Model
 {
-    public Guid? Id { get; set; }
-
     public string? Name { get; set; }
 
     public string? Description { get; set; }
 
     public string? Type { get; set; }
 
+    public string? MusclesSortBy { get; set; }
+    public string? MusclesSortOrder { get; set; }
+
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? LastUpdated { get; set; }
-
-    public int? PageSize { get; set; }
-
-    public int? PageIndex { get; set; }
 }
