@@ -40,6 +40,7 @@ public class Controller : ControllerBase
             return Unauthorized("User ID not found");
 
         var query = _context.Users.AsQueryable();
+        var all = query;
 
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
@@ -98,6 +99,7 @@ public class Controller : ControllerBase
         var result = await query.AsNoTracking().ToListAsync();
 
         var paginationResults = new Builder<Table>()
+                .WithAll(await all.CountAsync())
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
                 .WithTotal(result.Count)

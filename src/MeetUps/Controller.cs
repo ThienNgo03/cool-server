@@ -31,6 +31,7 @@ public class Controller : ControllerBase
     {
 
         var query = _context.MeetUps.AsQueryable();
+        var all = query.Count();
 
         if (parameters.Id.HasValue)
             query = query.Where(x => x.Id == parameters.Id);
@@ -57,6 +58,7 @@ public class Controller : ControllerBase
         var result = await query.AsNoTracking().ToListAsync();
 
         var paginationResults = new Builder<Databases.App.Tables.MeetUp.Table>()
+            .WithAll(all)
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(result.Count)

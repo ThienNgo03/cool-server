@@ -1,6 +1,6 @@
-﻿using Journal.Exercises.Get.SuperSearch;
-using Journal.Workouts.Get;
+﻿using Journal.Workouts.Get;
 using OpenSearch.Net;
+using OpenSearch.Client;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -14,58 +14,48 @@ public class Controller(
     IMessageBus messageBus,
     JournalDbContext context,
     ILogger<Controller> logger,
-    IHubContext<Hub> hubContext, IRefitInterface superSearch) : ControllerBase
+    IHubContext<Hub> hubContext,
+    IOpenSearchClient openSearchClient) : ControllerBase
 {
     private readonly IMessageBus _messageBus = messageBus;
     private readonly JournalDbContext _context = context;
     private readonly ILogger<Controller> _logger = logger;
     private readonly IHubContext<Hub> _hubContext = hubContext;
-    private readonly IRefitInterface _superSearch = superSearch;
-
+    private readonly IOpenSearchClient _openSearchClient = openSearchClient;
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query = _context.Exercises.AsQueryable();
 
-        List<Guid> ids = new();
+        var all = query;
 
+        List<Guid> ids = new();
         if (!string.IsNullOrEmpty(parameters.SearchTerm))
         {
-            var superSearchQuery = new
+            var searchResponse = await _openSearchClient.SearchAsync<Databases.OpenSearch.Indexes.Exercise.Index>(s => s
+                .Index("exercises")
+                .Source(src => src.Includes(i => i.Field(f => f.Id)))
+                .Query(q => q
+                    .MultiMatch(mm => mm
+                        .Query(parameters.SearchTerm)
+                        .Fields(f => f
+                            .Field(ff => ff.Name)
+                            .Field(ff => ff.Description)
+                            .Field(ff => ff.Muscles.First().Name)
+                            .Field(ff => ff.Type)
+                        )
+                        .Fuzziness(Fuzziness.Auto)
+                    )
+                )
+            );
+
+            if (!searchResponse.IsValid)
             {
-                _source = new[] { "id" },
-                query = new
-                {
-                    multi_match = new
-                    {
-                        query = parameters.SearchTerm,
-                        fields = new[] { "name", "description", "muscles.name", "type" },
-                        fuzziness = "AUTO"
-                    }
-                }
-            };
+                return StatusCode(500, searchResponse.ServerError?.Error?.Reason ?? searchResponse.DebugInformation);
+            }
 
-            var json = JsonSerializer.Serialize(superSearchQuery);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _superSearch.SearchAsync(content);
-
-            if (!response.IsSuccessStatusCode)
-                return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
-
-            var superSearchResult = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(superSearchResult);
-
-            var idList = doc.RootElement
-                            .GetProperty("hits")
-                            .GetProperty("hits")
-                            .EnumerateArray()
-                            .Select(hit => hit.GetProperty("_source").GetProperty("id").GetString())
-                            .Where(id => Guid.TryParse(id, out _))
-                            .Select(Guid.Parse)
-                            .ToList();
-            ids = idList;
+            ids = searchResponse.Documents.Select(doc => doc.Id).ToList();
         }
 
         if (!string.IsNullOrEmpty(parameters.Ids))
@@ -126,6 +116,7 @@ public class Controller(
         }).ToList();
 
         var paginationResults = new Builder<Get.Response>()
+            .WithAll(await all.CountAsync())
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(responses.Count)
@@ -216,10 +207,6 @@ public class Controller(
     [HttpPost("sync-open-search")]
     public async Task<IActionResult> SeedingOpenSearch()
     {
-        var pool = new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
-        var settings = new ConnectionConfiguration(pool).BasicAuthentication("admin", "Thien321*");
-        var client = new OpenSearchLowLevelClient(settings);
-
         var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
         var exerciseIds = exercises.Select(x => x.Id).ToList();
 
@@ -239,45 +226,51 @@ public class Controller(
             .GroupBy(x => x.ExerciseId)
             .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId).ToList());
 
-        var bulkData = new List<object>();
+        // Create documents to index
+        var documentsToIndex = new List<Databases.OpenSearch.Indexes.Exercise.Index>();
 
         foreach (var exercise in exercises)
         {
-            var musclesToIndex = new List<object>();
+            var musclesToIndex = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
 
             if (exerciseMuscleGroups.TryGetValue(exercise.Id, out var muscleIdsForExercise))
             {
                 musclesToIndex = muscleIdsForExercise
                     .Where(muscleId => muscles.ContainsKey(muscleId))
-                    .Select(muscleId => new
+                    .Select(muscleId => new Databases.OpenSearch.Indexes.Muscle.Index
                     {
-                        id = muscles[muscleId].Id,
-                        name = muscles[muscleId].Name,
-                        createdDate = muscles[muscleId].CreatedDate,
-                        lastUpdated = muscles[muscleId].LastUpdated
+                        Id = muscles[muscleId].Id,
+                        Name = muscles[muscleId].Name,
+                        CreatedDate = muscles[muscleId].CreatedDate,
+                        LastUpdated = muscles[muscleId].LastUpdated
                     })
-                    .ToList<object>();
+                    .ToList();
             }
 
-            bulkData.Add(new { index = new { _index = "exercises", _id = exercise.Id.ToString() } });
-
-            bulkData.Add(new
+            documentsToIndex.Add(new Databases.OpenSearch.Indexes.Exercise.Index
             {
-                id = exercise.Id,
-                name = exercise.Name,
-                description = exercise.Description,
-                type = exercise.Type,
-                muscles = musclesToIndex,
-                createdDate = exercise.CreatedDate,
-                lastUpdated = exercise.LastUpdated
+                Id = exercise.Id,
+                Name = exercise.Name,
+                Description = exercise.Description,
+                Type = exercise.Type,
+                Muscles = musclesToIndex,
+                CreatedDate = exercise.CreatedDate,
+                LastUpdated = exercise.LastUpdated
             });
         }
 
-        var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
+        // Bulk index using high-level client
+        var bulkResponse = await _openSearchClient.BulkAsync(b => b
+            .Index("exercises")
+            .IndexMany(documentsToIndex, (descriptor, doc) => descriptor
+                .Id(doc.Id.ToString())
+                .Document(doc)
+            )
+        );
 
-        if (!bulkResponse.Success)
+        if (!bulkResponse.IsValid)
         {
-            return StatusCode(500, $"Bulk indexing failed: {bulkResponse.Body}");
+            return StatusCode(500, $"Bulk indexing failed: {bulkResponse.ServerError?.Error?.Reason ?? bulkResponse.DebugInformation}");
         }
 
         return Ok($"Successfully indexed {exercises.Count} exercises.");
@@ -304,7 +297,7 @@ public class Controller(
         };
         _context.Exercises.Add(exercise);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Post.Messager.Message(exercise.Id));
+        await _messageBus.PublishAsync(new Post.Messager.Message(exercise));
         await _hubContext.Clients.All.SendAsync("exercise-created", exercise.Id);
         return CreatedAtAction(nameof(Get), exercise.Id);
     }
@@ -338,7 +331,7 @@ public class Controller(
         exercise.LastUpdated = DateTime.UtcNow;
         _context.Exercises.Update(exercise);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _messageBus.PublishAsync(new Update.Messager.Message(exercise));
         await _hubContext.Clients.All.SendAsync("exercise-updated", payload.Id);
         return NoContent();
     }
@@ -386,7 +379,7 @@ public class Controller(
         _context.Exercises.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("exercise-updated", entity.Id);
-        await _messageBus.PublishAsync(new Patch.Messager.Message(entity.Id));
+        await _messageBus.PublishAsync(new Patch.Messager.Message(entity, changes));
         return NoContent();
     }
 

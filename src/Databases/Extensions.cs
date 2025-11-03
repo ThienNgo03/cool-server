@@ -1,11 +1,12 @@
 ﻿using Cassandra;
+using Journal.Databases.CassandraCql;
 using Journal.Databases.Identity;
 using Journal.Databases.MongoDb;
 using Journal.Databases.Sql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using Journal.Databases.CassandraCql;
+using OpenSearch.Client;
 
 namespace Journal.Databases;
 
@@ -23,7 +24,7 @@ public static class Extensions
                 .Build();
 
             Cassandra.ISession session = cluster.Connect(cassandraDbConfig.Keyspace);
-            services.AddSingleton<Context>();
+            services.AddSingleton<CassandraCql.Context>();
             services.AddSingleton(session);
         }
         #endregion
@@ -109,6 +110,23 @@ public static class Extensions
         services.AddDbContext<MongoDbContext>(options =>
             options.UseMongoDB(client, database.DatabaseNamespace.DatabaseName)
         );
+
+        var openSearchConfig = configuration.GetSection("OpenSearch").Get<OpenSearchConfig>();
+        if (openSearchConfig == null)
+        {
+            throw new ArgumentNullException(nameof(openSearchConfig), "OpenSearch configuration section is missing or invalid.");
+        }
+
+        var openSearchConnectionString = new OpenSearch.ConnectionStringBuilder()
+            .WithHost(openSearchConfig.Host)
+            .WithPort(openSearchConfig.Port)
+            .Build();
+
+        var connectionSettings = new ConnectionSettings(new Uri(openSearchConnectionString))
+            .BasicAuthentication(openSearchConfig.Username, openSearchConfig.Password);
+
+        var openSearchClient = new OpenSearchClient(connectionSettings);
+        services.AddSingleton<IOpenSearchClient>(openSearchClient);
 
         return services;
     }

@@ -28,7 +28,6 @@ builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddFile(builder.Configuration);
-builder.Services.AddServices();
 
 var app = builder.Build();
 

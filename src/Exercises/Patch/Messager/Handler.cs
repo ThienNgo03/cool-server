@@ -1,89 +1,63 @@
-﻿using Journal.Databases;
-using Journal.Databases.OpenSearch;
-using Microsoft.Extensions.Options;
-using OpenSearch.Net;
+﻿namespace Journal.Exercises.Patch.Messager;
 
-namespace Journal.Exercises.Patch.Messager;
+using OpenSearch.Client;
+using System.Dynamic;
 
 public class Handler
 {
     private readonly JournalDbContext _context;
-    private readonly OpenSearchConfig _config;
+    private readonly IOpenSearchClient _openSearchClient;
 
-    public Handler(JournalDbContext context, IOptions<OpenSearchConfig> config)
+    public Handler(JournalDbContext context, IOpenSearchClient openSearchClient)
     {
         _context = context;
-        _config = config.Value;
+        _openSearchClient = openSearchClient;
     }
 
     public async Task Handle(Message message)
     {
-        var builder = new ConnectionStringBuilder()
-            .WithHost(_config.Host)
-            .WithPort(_config.Port)
-            .WithUsername(_config.Username)
-            .WithPassword(_config.Password);
-
-        if (_config.EnableSsl)
-            builder.WithSsl();
-
-        if (_config.SkipCertificateValidation)
-            builder.WithSkipCertificateValidation();
-
-        var uri = new Uri(builder.Build());
-        var pool = new SingleNodeConnectionPool(uri);
-        var settings = new ConnectionConfiguration(pool)
-            .BasicAuthentication(_config.Username, _config.Password);
-
-        if (_config.SkipCertificateValidation)
+        if (message.changes != null && message.changes.Any())
         {
-            settings = settings.ServerCertificateValidationCallback((o, cert, chain, errors) => true);
-        }
+            var updateFields = new Dictionary<string, object?>();
 
-        var client = new OpenSearchLowLevelClient(settings);
-
-        var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
-        var exercise = exercises.FirstOrDefault(e => e.Id == message.Id);
-        var muscleIds = await _context.ExerciseMuscles
-                .Where(em => em.ExerciseId == message.Id)
-                .Select(em => em.MuscleId)
-                .ToListAsync();
-
-        var muscles = await _context.Muscles
-            .Where(m => muscleIds.Contains(m.Id))
-            .AsNoTracking()
-            .ToListAsync();
-
-        var musclesList = muscles.Select(m => new
-        {
-            m.Id,
-            m.Name,
-            m.CreatedDate,
-            m.LastUpdated
-        }).ToList();
-
-
-        if (exercise != null)
-        {
-            var bulkData = new List<object>
+            foreach (var (path, value) in message.changes)
             {
-                new { index = new { _index = "exercises", _id = exercise.Id } },
-                new
+                var fieldName = path.TrimStart('/').ToLowerInvariant();
+
+                if (fieldName == "name")
                 {
-                    exercise.Id,
-                    exercise.Name,
-                    exercise.Description,
-                    exercise.Type,
-                    muscles = musclesList,
-                    exercise.CreatedDate,
-                    exercise.LastUpdated
+                    updateFields["name"] = value;
+                    continue;
                 }
-            };
 
-            var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
-            if (!bulkResponse.Success)
+                if (fieldName == "description")
+                {
+                    updateFields["description"] = value;
+                    continue;
+                }
+
+                if (fieldName == "type")
+                {
+                    updateFields["type"] = value;
+                    continue;
+                }
+            }
+            updateFields["lastUpdated"] = message.exercise.LastUpdated;
+
+            if (updateFields.Any())
             {
-                Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
+                var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                    message.exercise.Id.ToString(),
+                    u => u
+                        .Index("exercises")
+                        .Doc(updateFields)
+                        .DocAsUpsert(false)
+                );
+
+                if (!updateResponse.IsValid)
+                {
+                    Console.WriteLine($"Error updating document in OpenSearch: {updateResponse.ServerError?.Error?.Reason ?? updateResponse.DebugInformation}");
+                }
             }
         }
     }
