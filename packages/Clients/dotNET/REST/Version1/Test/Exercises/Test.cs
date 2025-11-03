@@ -22,8 +22,8 @@ public class Test : BaseTest
         var pushUp = new Databases.App.Tables.Exercise.Table()
         {
             Id = id,
-            Name = "Push Up",
-            Description = "A basic exercise for upper body strength.",
+            Name = "TEST EXERCISE",
+            Description = "A basic TEST EXERCISE for upper body strength.",
             Type = "Rep",
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
@@ -38,10 +38,10 @@ public class Test : BaseTest
         });
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.NotNull(result.Data.Items);
-        Assert.True(result.Data.Items.Count > 0, "Expected at least one exercise in result.");
-        Assert.True(result.Data.Items.Any(e => e.Name == "Push Up"), "Expected to find 'Push Up' exercise in the result.");
+        Assert.NotNull(result);
+        Assert.NotNull(result.Items);
+        Assert.True(result.Items.Count > 0, "Expected at least one exercise in result.");
+        Assert.True(result.Items.Any(e => e.Name == "TEST EXERCISE"), "Expected to find 'TEST EXERCISE' exercise in the result.");
         dbContext.Exercises.Remove(pushUp);
         await dbContext.SaveChangesAsync();
     }
@@ -52,39 +52,42 @@ public class Test : BaseTest
     public async Task POST()
     {
         Guid Id = Guid.NewGuid();
-        string pushUp = $"Push Up {Id}";
-        string description = "A basic exercise for upper body strength.";
+        string testExercise = $"TEST EXERCISE {Id}";
+        string description = "A basic TEST EXERCISE for upper body strength.";
         string type = "Rep";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         dbContext.Exercises.RemoveRange(
-            dbContext.Exercises.Where(e => e.Name == pushUp && e.Description == description).ToList());
+            dbContext.Exercises.Where(e => e.Name == testExercise && e.Description == description).ToList());
         await dbContext.SaveChangesAsync();
         var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
 
-        var payload = new Library.Exercises.Create.Payload
+        var payload = new Library.Exercises.POST.Payload
         {
-            Name = pushUp,
+            Name = testExercise,
             Description = description,
             Type = type
         };
         await exercisesEndpoint.CreateAsync(payload);
 
         var expected = await dbContext.Exercises
-            .FirstOrDefaultAsync(e => e.Name == pushUp);
+            .FirstOrDefaultAsync(e => e.Name == testExercise);
         Assert.NotNull(expected);
-        Assert.Equal(pushUp, expected.Name);
+        Assert.Equal(testExercise, expected.Name);
         Assert.Equal(description, expected.Description);
         Assert.Equal(type, expected.Type);
 
         Assert.True(expected.CreatedDate > DateTime.MinValue);
+        
+        dbContext.Exercises.Remove(expected);
+        await dbContext.SaveChangesAsync();
     }
 
     [Fact]
 
     public async Task PUT()
     {
-        string pushUp = "Push Up";
-        string description = "A basic exercise for upper body strength.";
+        string pushUp = "TEST EXERCISE";
+        string description = "A basic TEST EXERCISE for upper body strength.";
         string type = "rep";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
@@ -100,12 +103,12 @@ public class Test : BaseTest
         dbContext.Exercises.Add(existingExercise);
         await dbContext.SaveChangesAsync();
         var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
-        var payload = new Library.Exercises.Update.Payload
+        var payload = new Library.Exercises.PUT.Payload
         {
             Id = id,
-            Name = "Pull Up",
+            Name = "UPDATED TEST EXERCISE",
             Type = "Rep",
-            Description = "An updated description for the push up exercise."
+            Description = "An updated TEST EXERCISE for the push up exercise."
         };
         await exercisesEndpoint.UpdateAsync(payload);
 
@@ -113,8 +116,8 @@ public class Test : BaseTest
         var updatedExercise = existingExercise;
 
         Assert.NotNull(updatedExercise);
-        Assert.Equal("Pull Up", updatedExercise.Name);
-        Assert.Equal("An updated description for the push up exercise.", updatedExercise.Description);
+        Assert.Equal("UPDATED TEST EXERCISE", updatedExercise.Name);
+        Assert.Equal("An updated TEST EXERCISE for the push up exercise.", updatedExercise.Description);
         Assert.Equal("Rep", updatedExercise.Type);
 
         dbContext.Exercises.Remove(updatedExercise);
@@ -125,8 +128,8 @@ public class Test : BaseTest
 
     public async Task DELETE()
     {
-        string pushUp = "Push Up";
-        string description = "A basic exercise for upper body strength.";
+        string pushUp = "TEST EXERCISE";
+        string description = "A basic TEST EXERCISE for upper body strength.";
         var dbContext = serviceProvider!.GetRequiredService<JournalDbContext>();
         var id = Guid.NewGuid();
         var existingExercise = new Databases.App.Tables.Exercise.Table
@@ -141,7 +144,7 @@ public class Test : BaseTest
         dbContext.Exercises.Add(existingExercise);
         await dbContext.SaveChangesAsync();
         var exercisesEndpoint = serviceProvider!.GetRequiredService<Library.Exercises.Interface>();
-        await exercisesEndpoint.DeleteAsync(new Library.Exercises.Delete.Parameters { Id = id });
+        await exercisesEndpoint.DeleteAsync(new Library.Exercises.DELETE.Parameters { Id = id });
 
         await dbContext.Entry(existingExercise).ReloadAsync();
         var deletedExercise = await dbContext.Exercises.FindAsync(existingExercise.Id);
@@ -159,9 +162,8 @@ public class Test : BaseTest
         });
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.NotNull(result.Data.Items);
-        Assert.True(result.Data.Items.Count > 0, "Expected at least one muscle in result.");
+        Assert.NotNull(result.Items);
+        Assert.True(result.Items.Count > 0, "Expected at least one muscle in result.");
     }
 
 
