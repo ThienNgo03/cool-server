@@ -9,6 +9,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Channels;
 
 namespace Journal.Workouts;
 
@@ -449,7 +450,7 @@ public class Controller : ControllerBase
                         WeekPlanId = wps.WeekPlanId,
                         InsertedBy = wps.InsertedBy,
                         UpdatedBy = wps.UpdatedBy,
-                        LastUpdated = wps.LastUpdated ?? DateTime.MinValue,
+                        LastUpdated = wps.LastUpdated,
                         CreatedDate = wps.CreatedDate
                     }).ToList()
                 );
@@ -555,7 +556,7 @@ public class Controller : ControllerBase
 
         _context.Workouts.Add(workout);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Post.Messager.Message(workout.Id, payload.WeekPlans));
+        await _messageBus.PublishAsync(new Post.Messager.Message(workout, payload.WeekPlans));
         await _hubContext.Clients.All.SendAsync("workout-created", workout.Id);
         return CreatedAtAction(nameof(Get), workout.Id);
     }
@@ -572,11 +573,14 @@ public class Controller : ControllerBase
         if (userId is null)
             return Unauthorized("User Id not found");
 
+        var changes = new List<(string Path, object? Value)>();
         foreach (var op in patchDoc.Operations)
+        {
             if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
                 return BadRequest("Only Replace and Test operations are allowed in this patch request.");
-
-        if (patchDoc is null)
+            changes.Add((op.path, op.value));
+        }
+            if (patchDoc is null)
             return BadRequest("Patch document cannot be null.");
 
         var entity = await _context.Workouts.FindAsync(id, cancellationToken);
@@ -596,7 +600,7 @@ public class Controller : ControllerBase
         _context.Workouts.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("workout-updated", entity.Id);
-
+        await _messageBus.PublishAsync(new Patch.Messager.Message(entity, changes));
         return NoContent();
     }
 
@@ -649,7 +653,7 @@ public class Controller : ControllerBase
         workout.LastUpdated = DateTime.UtcNow;
         _context.Workouts.Update(workout);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _messageBus.PublishAsync(new Update.Messager.Message(workout));
         await _hubContext.Clients.All.SendAsync("workout-updated", payload.Id);
         return NoContent();
     }

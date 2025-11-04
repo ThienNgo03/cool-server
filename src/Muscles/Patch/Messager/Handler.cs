@@ -1,6 +1,7 @@
 ﻿namespace Journal.Muscles.Patch.Messager;
 
 using Journal.Databases;
+using Journal.Databases.MongoDb;
 using Microsoft.EntityFrameworkCore;
 using OpenSearch.Client;
 
@@ -8,11 +9,16 @@ public class Handler
 {
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
+    private readonly MongoDbContext _mongoDbContext;
 
-    public Handler(JournalDbContext context, IOpenSearchClient openSearchClient)
+    public Handler(
+        JournalDbContext context,
+        IOpenSearchClient openSearchClient,
+        MongoDbContext mongoDbContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
+        _mongoDbContext = mongoDbContext;
     }
 
     public async Task Handle(Message message)
@@ -22,7 +28,6 @@ public class Handler
 
         // Get the updated muscle from database
         var updatedMuscle = await _context.Muscles.FirstOrDefaultAsync(m => m.Id == message.muscleId);
-
         if (updatedMuscle == null)
         {
             Console.WriteLine($"Muscle {message.muscleId} not found.");
@@ -42,16 +47,76 @@ public class Handler
             return;
         }
 
-        // Update the muscle in each exercise document
-        foreach (var exerciseId in exerciseIds)
+        // ===== SYNC OPENSEARCH =====
+        try
         {
-            await PatchMuscleInExercise(exerciseId, updatedMuscle, message.changes);
+            foreach (var exerciseId in exerciseIds)
+            {
+                await PatchMuscleInExerciseOpenSearch(exerciseId, updatedMuscle, message.changes);
+            }
+        }
+        catch
+        {
+            Console.WriteLine("Can't reach OpenSearch");
+        }
+
+        // ===== SYNC MONGODB =====
+        try
+        {
+            var workouts = await _mongoDbContext.Workouts
+                .Where(w => exerciseIds.Contains(w.ExerciseId))
+                .ToListAsync();
+
+            if (!workouts.Any())
+            {
+                Console.WriteLine($"No workouts found for exercises with muscle {message.muscleId}");
+                return;
+            }
+
+            int updatedCount = 0;
+            foreach (var workout in workouts)
+            {
+                if (workout.Exercise?.Muscles == null || !workout.Exercise.Muscles.Any())
+                    continue;
+
+                var muscleToUpdate = workout.Exercise.Muscles.FirstOrDefault(m => m.Id == updatedMuscle.Id);
+                if (muscleToUpdate != null)
+                {
+                    foreach (var (path, value) in message.changes)
+                    {
+                        var fieldName = path.TrimStart('/').ToLowerInvariant();
+                        switch (fieldName)
+                        {
+                            case "name":
+                                muscleToUpdate.Name = value?.ToString() ?? muscleToUpdate.Name;
+                                break;
+                                // Add other patchable fields as needed
+                        }
+                    }
+
+                    muscleToUpdate.LastUpdated = updatedMuscle.LastUpdated;
+                    workout.LastUpdated = DateTime.UtcNow;
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0)
+            {
+                _mongoDbContext.Workouts.UpdateRange(workouts.Where(w =>
+                    w.Exercise?.Muscles?.Any(m => m.Id == message.muscleId) == true));
+                await _mongoDbContext.SaveChangesAsync();
+                Console.WriteLine($"Patched muscle in {updatedCount} workout(s)");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB error: {ex.Message}");
+            throw;
         }
     }
 
-    private async Task PatchMuscleInExercise(Guid exerciseId, Table updatedMuscle, List<(string Path, object? Value)> changes)
+    private async Task PatchMuscleInExerciseOpenSearch(Guid exerciseId, Table updatedMuscle, List<(string Path, object? Value)> changes)
     {
-        // Get current exercise document
         var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
             exerciseId.ToString(),
             g => g.Index("exercises")
@@ -64,24 +129,19 @@ public class Handler
         }
 
         var exerciseDoc = getResponse.Source;
-
         if (exerciseDoc.Muscles == null || !exerciseDoc.Muscles.Any())
         {
             Console.WriteLine($"No muscles found in exercise {exerciseId}.");
             return;
         }
 
-        // Find the muscle to update
         var muscleToUpdate = exerciseDoc.Muscles.FirstOrDefault(m => m.Id == updatedMuscle.Id);
-
         if (muscleToUpdate != null)
         {
-            // Apply changes to the muscle
             foreach (var (path, value) in changes)
             {
-                var fieldName = path.TrimStart('/');
-
-                switch (fieldName.ToLowerInvariant())
+                var fieldName = path.TrimStart('/').ToLowerInvariant();
+                switch (fieldName)
                 {
                     case "name":
                         muscleToUpdate.Name = value?.ToString() ?? muscleToUpdate.Name;
@@ -90,10 +150,8 @@ public class Handler
                 }
             }
 
-            // Always update lastUpdated
             muscleToUpdate.LastUpdated = updatedMuscle.LastUpdated;
 
-            // Update the document in OpenSearch
             var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
                 exerciseId.ToString(),
                 u => u

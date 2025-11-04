@@ -408,7 +408,7 @@ public class Controller(
 
         _context.Exercises.Remove(exercise);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, parameters.IsDeleteWorkouts));
         await _hubContext.Clients.All.SendAsync("exercise-deleted", parameters.Id);
         return NoContent();
     }
