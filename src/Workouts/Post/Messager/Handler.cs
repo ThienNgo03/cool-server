@@ -25,19 +25,28 @@ public class Handler
     {
         if (message.weekPlans is null)
             return;
-
+        List<Databases.MongoDb.Collections.Workout.WeekPlan> mongoWeekPlans = new();
         foreach (var weekPlan in message.weekPlans)
         {
             var newWeekPlan = new WeekPlans.Table
             {
                 Id = Guid.NewGuid(),
-                WorkoutId = message.Id,
+                WorkoutId = message.workout.Id,
                 DateOfWeek = weekPlan.DateOfWeek,
                 Time = weekPlan.Time,
                 CreatedDate = DateTime.UtcNow,
                 LastUpdated = DateTime.UtcNow
             };
             _context.WeekPlans.Add(newWeekPlan);
+            var mongoWeekPlan = new Databases.MongoDb.Collections.Workout.WeekPlan()
+            {
+                Id = newWeekPlan.Id,
+                WorkoutId = message.workout.Id,
+                DateOfWeek = weekPlan.DateOfWeek,
+                Time = weekPlan.Time,
+                CreatedDate = newWeekPlan.CreatedDate,
+                LastUpdated = newWeekPlan.LastUpdated
+            };
 
             if (weekPlan.WeekPlanSets == null)
                 continue;
@@ -52,27 +61,21 @@ public class Handler
                     LastUpdated = DateTime.UtcNow
                 };
                 _context.WeekPlanSets.Add(newWeekPlanSet);
+                mongoWeekPlan.WeekPlanSets?.Add(new Databases.MongoDb.Collections.Workout.WeekPlanSet
+                {
+                    Id = newWeekPlanSet.Id,
+                    WeekPlanId = newWeekPlan.Id,
+                    Value = weekPlanSet.Value,
+                    CreatedDate = newWeekPlanSet.CreatedDate,
+                    LastUpdated = newWeekPlanSet.LastUpdated
+                });
             }
+            mongoWeekPlans.Add(mongoWeekPlan);
         }
         await _context.SaveChangesAsync();
 
-        var workout = await _context.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
-
-        if (workout == null)
-            return;
-
-        var weekPlans = await _context.WeekPlans
-            .Where(wp => wp.WorkoutId == workout.Id)
-            .ToListAsync();
-
-        var weekPlanIds = weekPlans.Select(wp => wp.Id).ToList();
-
-        var weekPlanSets = await _context.WeekPlanSets
-            .Where(wps => weekPlanIds.Contains(wps.WeekPlanId))
-            .ToListAsync();
-
         var exerciseMuscles = await _context.ExerciseMuscles
-            .Where(em => em.ExerciseId == workout.ExerciseId)
+            .Where(em => em.ExerciseId == message.workout.ExerciseId)
             .ToListAsync();
 
         var muscleIds = exerciseMuscles.Select(em => em.MuscleId).Distinct().ToList();
@@ -94,47 +97,15 @@ public class Handler
                         }).ToList()
             );
 
-        var weekPlanSetsByWeekPlanId = weekPlanSets
-            .GroupBy(wps => wps.WeekPlanId)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(wps => new Journal.Databases.MongoDb.Collections.Workout.WeekPlanSet
-                {
-                    Id = wps.Id,
-                    Value = wps.Value,
-                    WeekPlanId = wps.WeekPlanId,
-                    InsertedBy = wps.InsertedBy,
-                    UpdatedBy = wps.UpdatedBy,
-                    LastUpdated = wps.LastUpdated ?? DateTime.MinValue,
-                    CreatedDate = wps.CreatedDate
-                }).ToList()
-            );
-
-        var weekPlansByWorkoutId = weekPlans
-            .GroupBy(wp => wp.WorkoutId)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(wp => new Journal.Databases.MongoDb.Collections.Workout.WeekPlan
-                {
-                    Id = wp.Id,
-                    DateOfWeek = wp.DateOfWeek,
-                    Time = wp.Time,
-                    WorkoutId = wp.WorkoutId,
-                    CreatedDate = wp.CreatedDate,
-                    LastUpdated = wp.LastUpdated,
-                    WeekPlanSets = weekPlanSetsByWeekPlanId.GetValueOrDefault(wp.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlanSet>())
-                }).ToList()
-            );
-
-        var exercise = await _context.Exercises.FirstOrDefaultAsync(x => x.Id == workout.ExerciseId);
+        var exercise = await _context.Exercises.FirstOrDefaultAsync(x => x.Id == message.workout.ExerciseId);
 
         var workoutCollection = new Journal.Databases.MongoDb.Collections.Workout.Collection
         {
-            Id = workout.Id,
-            ExerciseId = workout.ExerciseId,
-            UserId = workout.UserId,
-            CreatedDate = workout.CreatedDate,
-            LastUpdated = workout.LastUpdated,
+            Id = message.workout.Id,
+            ExerciseId = message.workout.ExerciseId,
+            UserId = message.workout.UserId,
+            CreatedDate = message.workout.CreatedDate,
+            LastUpdated = message.workout.LastUpdated,
             Exercise = exercise != null ? new Journal.Databases.MongoDb.Collections.Workout.Exercise
             {
                 Id = exercise.Id,
@@ -145,7 +116,7 @@ public class Handler
                 LastUpdated = exercise.LastUpdated,
                 Muscles = musclesByExerciseId.GetValueOrDefault(exercise.Id, new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>())
             } : null,
-            WeekPlans = weekPlansByWorkoutId.GetValueOrDefault(workout.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlan>())
+            WeekPlans = mongoWeekPlans
         };
         try
         {

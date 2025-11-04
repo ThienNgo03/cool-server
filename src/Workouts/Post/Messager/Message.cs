@@ -1,4 +1,4 @@
 ﻿namespace Journal.Workouts.Post.Messager
 {
-    public record Message(Guid Id, ICollection<WeekPlan>? weekPlans);
+    public record Message(Table workout, ICollection<WeekPlan>? weekPlans);
 }

@@ -1,6 +1,7 @@
 ﻿namespace Journal.ExerciseMuscles.Post.Messager;
 
 using Journal.Databases;
+using Journal.Databases.MongoDb;
 using Microsoft.EntityFrameworkCore;
 using OpenSearch.Client;
 
@@ -8,46 +9,31 @@ public class Handler
 {
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
+    private readonly MongoDbContext _mongoDbContext;
 
-    public Handler(JournalDbContext context, IOpenSearchClient openSearchClient)
+    public Handler(
+        JournalDbContext context,
+        IOpenSearchClient openSearchClient,
+        MongoDbContext mongoDbContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
+        _mongoDbContext = mongoDbContext;
     }
 
     public async Task Handle(Message message)
     {
-        // Get the muscle information from database
+        // ===== GET MUSCLE DATA FROM CONTEXT =====
         var muscle = await _context.Muscles.FirstOrDefaultAsync(x => x.Id == message.exerciseMuscles.MuscleId);
 
         if (muscle == null)
         {
-            Console.WriteLine($"Muscle with ID {message.exerciseMuscles.MuscleId} not found.");
+            Console.WriteLine($"Muscle {message.exerciseMuscles.MuscleId} not found");
             return;
         }
 
-        // Get the current exercise document from OpenSearch
-        var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
-            message.exerciseMuscles.ExerciseId.ToString(),
-            g => g.Index("exercises")
-        );
-
-        if (!getResponse.IsValid)
-        {
-            Console.WriteLine($"Error retrieving exercise from OpenSearch: {getResponse.ServerError?.Error?.Reason ?? getResponse.DebugInformation}");
-            return;
-        }
-
-        var exerciseDoc = getResponse.Source;
-
-        // Initialize muscles list if null
-        if (exerciseDoc.Muscles == null)
-        {
-            exerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
-        }
-
-        // Create new muscle document
-        var newMuscle = new Databases.OpenSearch.Indexes.Muscle.Index
+        // Build muscle data for both OpenSearch and MongoDB
+        var openSearchMuscle = new Databases.OpenSearch.Indexes.Muscle.Index
         {
             Id = muscle.Id,
             Name = muscle.Name,
@@ -55,30 +41,92 @@ public class Handler
             LastUpdated = muscle.LastUpdated
         };
 
-        if (!exerciseDoc.Muscles.Any(m => m.Id == newMuscle.Id))
+        var mongoMuscle = new Journal.Databases.MongoDb.Collections.Workout.Muscle
         {
-            exerciseDoc.Muscles.Add(newMuscle);
+            Id = muscle.Id,
+            Name = muscle.Name,
+            CreatedDate = muscle.CreatedDate,
+            LastUpdated = muscle.LastUpdated
+        };
 
-            var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+        // ===== SYNC OPENSEARCH =====
+        try
+        {
+            var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
                 message.exerciseMuscles.ExerciseId.ToString(),
-                u => u
-                    .Index("exercises")
-                    .Doc(new
-                    {
-                        muscles = exerciseDoc.Muscles,
-                        lastUpdated = message.exerciseMuscles.CreatedDate
-                    })
-                    .DocAsUpsert(false)
+                g => g.Index("exercises")
             );
 
-            if (!updateResponse.IsValid)
+            var exerciseDoc = getResponse.Source;
+
+            if (exerciseDoc.Muscles == null)
             {
-                Console.WriteLine($"Error updating muscles in OpenSearch: {updateResponse.ServerError?.Error?.Reason ?? updateResponse.DebugInformation}");
+                exerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
+            }
+
+            if (!exerciseDoc.Muscles.Any(m => m.Id == openSearchMuscle.Id))
+            {
+                exerciseDoc.Muscles.Add(openSearchMuscle);
+
+                var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                    message.exerciseMuscles.ExerciseId.ToString(),
+                    u => u.Index("exercises")
+                          .Doc(new
+                          {
+                              muscles = exerciseDoc.Muscles,
+                              lastUpdated = message.exerciseMuscles.CreatedDate
+                          })
+                          .DocAsUpsert(false)
+                );
             }
         }
-        else
+        catch
         {
-            Console.WriteLine($"Muscle {newMuscle.Id} already exists in exercise {message.exerciseMuscles.ExerciseId}.");
+            Console.WriteLine($"OpenSearch Error");
         }
+
+        // ===== SYNC MONGODB =====
+        try
+        {
+            var workouts = await _mongoDbContext.Workouts
+                .Where(w => w.ExerciseId == message.exerciseMuscles.ExerciseId)
+                .ToListAsync();
+
+            if (!workouts.Any())
+            {
+                Console.WriteLine($"No workouts found for exercise {message.exerciseMuscles.ExerciseId}");
+                return;
+            }
+
+            foreach (var workout in workouts)
+            {
+                if (workout.Exercise == null)
+                    continue;
+
+                if (workout.Exercise.Muscles == null)
+                {
+                    workout.Exercise.Muscles = new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>();
+                }
+
+                if (!workout.Exercise.Muscles.Any(m => m.Id == mongoMuscle.Id))
+                {
+                    workout.Exercise.Muscles.Add(mongoMuscle);
+                    workout.LastUpdated = DateTime.UtcNow;
+                }
+            }
+
+            _mongoDbContext.Workouts.UpdateRange(workouts);
+            await _mongoDbContext.SaveChangesAsync();
+
+            Console.WriteLine($"Added muscle {muscle.Id} to {workouts.Count} workout(s)");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC CONTEXT TABLES =====
+        // No additional tables to sync for post operation
     }
 }
