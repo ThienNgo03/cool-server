@@ -1,4 +1,4 @@
 ﻿namespace Journal.WeekPlans.Post.Messager
 {
-    public record Message(Guid Id);
+    public record Message(Table weekPlan);
 }
