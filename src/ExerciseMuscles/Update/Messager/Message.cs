@@ -1,4 +1,5 @@
-﻿using Spectre.Console.Rendering;
+﻿using Journal.ExerciseMuscles.Tables.App;
+using Spectre.Console.Rendering;
 
 namespace Journal.ExerciseMuscles.Update.Messager;
 public record Message(

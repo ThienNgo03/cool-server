@@ -1,4 +1,6 @@
-﻿namespace Journal.Databases.App;
+﻿using Journal.ExerciseMuscles.Tables.App;
+
+namespace Journal.Databases.App;
 
 public class JournalDbContext : DbContext // database
 {
@@ -24,7 +26,7 @@ public class JournalDbContext : DbContext // database
     public DbSet<Tables.TeamPool.Table> TeamPools { get; set; }
     public DbSet<WorkoutLogSets.Table> WorkoutLogSets { get; set; }
     public DbSet<WeekPlanSets.Table> WeekPlanSets { get; set; }
-    public DbSet<ExerciseMuscles.Table> ExerciseMuscles { get; set; }
+    public DbSet<Table> ExerciseMuscles { get; set; }
     public DbSet<Tables.Sport.Table> Sport { get; set; }
 }
 

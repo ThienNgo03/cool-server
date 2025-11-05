@@ -1,3 +1,5 @@
-﻿namespace Journal.ExerciseMuscles.Patch.Messager;
+﻿using Journal.ExerciseMuscles.Tables.App;
 
-public record Message(ExerciseMuscles.Table entity, List<(string Path, object? Value)> changes);
+namespace Journal.ExerciseMuscles.Patch.Messager;
+
+public record Message(Table entity, List<(string Path, object? Value)> changes);

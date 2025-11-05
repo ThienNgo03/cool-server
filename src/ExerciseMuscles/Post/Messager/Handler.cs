@@ -10,15 +10,18 @@ public class Handler
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
     private readonly MongoDbContext _mongoDbContext;
+    private readonly Databases.CassandraCql.Context _cassandraContext;
 
     public Handler(
         JournalDbContext context,
         IOpenSearchClient openSearchClient,
-        MongoDbContext mongoDbContext)
+        MongoDbContext mongoDbContext,
+        Databases.CassandraCql.Context cassandraContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
         _mongoDbContext = mongoDbContext;
+        _cassandraContext = cassandraContext;
     }
 
     public async Task Handle(Message message)
@@ -126,6 +129,27 @@ public class Handler
             throw;
         }
 
+        #region Cassandra Sync
+        //// ===== SYNC CASSANDRA =====
+        //var exerciseMuscleByExerciseId = new ExerciseMuscles.Tables.CassandraTables.ByExerciseIds.Table
+        //{
+        //    Id = message.exerciseMuscles.Id,
+        //    ExerciseId = message.exerciseMuscles.ExerciseId,
+        //    MuscleId = message.exerciseMuscles.MuscleId,
+        //    CreatedDate = message.exerciseMuscles.CreatedDate,
+        //    LastUpdated = message.exerciseMuscles.LastUpdated
+        //};
+        //await _cassandraContext.ExerciseMuscleByExerciseIds.Insert(exerciseMuscleByExerciseId).ExecuteAsync();
+        //var exerciseMuscleByMuscleId = new ExerciseMuscles.Tables.CassandraTables.ByMuscleIds.Table
+        //{
+        //    Id = message.exerciseMuscles.Id,
+        //    ExerciseId = message.exerciseMuscles.ExerciseId,
+        //    MuscleId = message.exerciseMuscles.MuscleId,
+        //    CreatedDate = message.exerciseMuscles.CreatedDate,
+        //    LastUpdated = message.exerciseMuscles.LastUpdated
+        //};
+        //await _cassandraContext.ExerciseMuscleByMuscleIds.Insert(exerciseMuscleByMuscleId).ExecuteAsync();
+        #endregion
         // ===== SYNC CONTEXT TABLES =====
         // No additional tables to sync for post operation
     }
