@@ -1,94 +1,198 @@
 ﻿namespace Journal.ExerciseMuscles.Update.Messager;
 
-using Microsoft.Extensions.Options;
-using OpenSearch.Net;
 using Journal.Databases;
-using Journal.Databases.OpenSearch;
+using Journal.Databases.MongoDb;
+using Microsoft.EntityFrameworkCore;
+using OpenSearch.Client;
 
 public class Handler
 {
     private readonly JournalDbContext _context;
-    private readonly OpenSearchConfig _config;
+    private readonly IOpenSearchClient _openSearchClient;
+    private readonly MongoDbContext _mongoDbContext;
 
-    public Handler(JournalDbContext context, IOptions<OpenSearchConfig> config)
+    public Handler(
+        JournalDbContext context,
+        IOpenSearchClient openSearchClient,
+        MongoDbContext mongoDbContext)
     {
         _context = context;
-        _config = config.Value;
+        _openSearchClient = openSearchClient;
+        _mongoDbContext = mongoDbContext;
     }
 
     public async Task Handle(Message message)
     {
-        var builder = new ConnectionStringBuilder()
-            .WithHost(_config.Host)
-            .WithPort(_config.Port)
-            .WithUsername(_config.Username)
-            .WithPassword(_config.Password);
+        // ===== GET MUSCLE DATA FROM CONTEXT =====
+        var muscle = await _context.Muscles.FirstOrDefaultAsync(x => x.Id == message.newMuscleId);
 
-        if (_config.EnableSsl)
-            builder.WithSsl();
-
-        if (_config.SkipCertificateValidation)
-            builder.WithSkipCertificateValidation();
-
-        var uri = new Uri(builder.Build());
-        var pool = new SingleNodeConnectionPool(uri);
-        var settings = new ConnectionConfiguration(pool)
-            .BasicAuthentication(_config.Username, _config.Password);
-
-        if (_config.SkipCertificateValidation)
+        if (muscle == null)
         {
-            settings = settings.ServerCertificateValidationCallback((o, cert, chain, errors) => true);
+            Console.WriteLine($"Muscle {message.newMuscleId} not found");
+            return;
         }
 
-        var client = new OpenSearchLowLevelClient(settings);
-
-        // Get the exercise
-        var exercise = await _context.Exercises.AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == message.exerciseId);
-
-        if (exercise != null)
+        // Build muscle data for both OpenSearch and MongoDB
+        var openSearchMuscle = new Databases.OpenSearch.Indexes.Muscle.Index
         {
-            // Get all muscle IDs connected to this exercise
-            var muscleIds = await _context.ExerciseMuscles
-                .Where(em => em.ExerciseId == message.exerciseId)
-                .Select(em => em.MuscleId)
-                .ToListAsync();
-
-            // Get all muscles for those IDs
-            var muscles = await _context.Muscles
-                .Where(m => muscleIds.Contains(m.Id))
-                .AsNoTracking()
-                .ToListAsync();
-
-            var musclesList = muscles.Select(m => new
-            {
-                m.Id,
-                m.Name,
-                m.CreatedDate,
-                m.LastUpdated
-            }).ToList();
-
-            var bulkData = new List<object>
-        {
-            new { index = new { _index = "exercises", _id = message.exerciseId } },
-            new
-            {
-                exercise.Id,
-                exercise.Name,
-                exercise.Description,
-                exercise.Type,
-                muscles = musclesList,
-                exercise.CreatedDate,
-                exercise.LastUpdated
-            }
+            Id = muscle.Id,
+            Name = muscle.Name,
+            CreatedDate = muscle.CreatedDate,
+            LastUpdated = muscle.LastUpdated
         };
 
-            var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
+        var mongoMuscle = new Journal.Databases.MongoDb.Collections.Workout.Muscle
+        {
+            Id = muscle.Id,
+            Name = muscle.Name,
+            CreatedDate = muscle.CreatedDate,
+            LastUpdated = muscle.LastUpdated
+        };
 
-            if (!bulkResponse.Success)
+        // ===== SYNC OPENSEARCH =====
+        // Remove muscle from old exercise
+        try
+        {
+            var getOldResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
+                message.oldExerciseId.ToString(),
+                g => g.Index("exercises")
+            );
+
+            if (getOldResponse.IsValid)
             {
-                Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
+                var oldExerciseDoc = getOldResponse.Source;
+
+                if (oldExerciseDoc.Muscles != null && oldExerciseDoc.Muscles.Any())
+                {
+                    var muscleToRemove = oldExerciseDoc.Muscles.FirstOrDefault(m => m.Id == message.oldMuscleId);
+
+                    if (muscleToRemove != null)
+                    {
+                        oldExerciseDoc.Muscles.Remove(muscleToRemove);
+
+                        var updateOldResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                            message.oldExerciseId.ToString(),
+                            u => u.Index("exercises")
+                                  .Doc(new
+                                  {
+                                      muscles = oldExerciseDoc.Muscles,
+                                      lastUpdated = DateTime.UtcNow
+                                  })
+                                  .DocAsUpsert(false)
+                        );
+                    }
+                }
             }
         }
+        catch
+        {
+            Console.WriteLine($"Can't reach OpenSearch");
+        }
+
+        // Add muscle to new exercise
+        var getNewResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
+            message.newExerciseId.ToString(),
+            g => g.Index("exercises")
+        );
+
+        if (getNewResponse.IsValid)
+        {
+            var newExerciseDoc = getNewResponse.Source;
+
+            if (newExerciseDoc.Muscles == null)
+            {
+                newExerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
+            }
+
+            if (!newExerciseDoc.Muscles.Any(m => m.Id == openSearchMuscle.Id))
+            {
+                newExerciseDoc.Muscles.Add(openSearchMuscle);
+
+                var updateNewResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                    message.newExerciseId.ToString(),
+                    u => u.Index("exercises")
+                          .Doc(new
+                          {
+                              muscles = newExerciseDoc.Muscles,
+                              lastUpdated = message.exerciseMuscles.LastUpdated
+                          })
+                          .DocAsUpsert(false)
+                );
+
+                if (!updateNewResponse.IsValid)
+                {
+                    Console.WriteLine($"OpenSearch error: {updateNewResponse.ServerError?.Error?.Reason ?? updateNewResponse.DebugInformation}");
+                }
+            }
+        }
+
+        // ===== SYNC MONGODB =====
+        try
+        {
+            // Remove muscle from old exercise's workouts
+            var oldWorkouts = await _mongoDbContext.Workouts
+                .Where(w => w.ExerciseId == message.oldExerciseId)
+                .ToListAsync();
+
+            if (oldWorkouts.Any())
+            {
+                foreach (var workout in oldWorkouts)
+                {
+                    if (workout.Exercise?.Muscles != null)
+                    {
+                        var initialCount = workout.Exercise.Muscles.Count;
+                        workout.Exercise.Muscles.RemoveAll(m => m.Id == message.oldMuscleId);
+
+                        if (workout.Exercise.Muscles.Count < initialCount)
+                        {
+                            workout.LastUpdated = DateTime.UtcNow;
+                        }
+                    }
+                }
+
+                _mongoDbContext.Workouts.UpdateRange(oldWorkouts);
+                await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Removed muscle {message.oldMuscleId} from {oldWorkouts.Count} workout(s)");
+            }
+
+            // Add muscle to new exercise's workouts
+            var newWorkouts = await _mongoDbContext.Workouts
+                .Where(w => w.ExerciseId == message.newExerciseId)
+                .ToListAsync();
+
+            if (newWorkouts.Any())
+            {
+                foreach (var workout in newWorkouts)
+                {
+                    if (workout.Exercise == null)
+                        continue;
+
+                    if (workout.Exercise.Muscles == null)
+                    {
+                        workout.Exercise.Muscles = new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>();
+                    }
+
+                    if (!workout.Exercise.Muscles.Any(m => m.Id == mongoMuscle.Id))
+                    {
+                        workout.Exercise.Muscles.Add(mongoMuscle);
+                        workout.LastUpdated = DateTime.UtcNow;
+                    }
+                }
+
+                _mongoDbContext.Workouts.UpdateRange(newWorkouts);
+                await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Added muscle {message.newMuscleId} to {newWorkouts.Count} workout(s)");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC CONTEXT TABLES =====
+        // No additional tables to sync for update operation
     }
 }

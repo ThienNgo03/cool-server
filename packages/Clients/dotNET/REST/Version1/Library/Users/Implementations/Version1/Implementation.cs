@@ -20,32 +20,14 @@ public class Implementation : Interface
 
     #region [ Methods ]
 
-    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>>? AllAsync(All.Parameters? parameters = null)
+    public async Task<Models.PaginationResults.Model<Model>>? AllAsync(GET.Parameters? parameters = null)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        Models.Refit.GET.Parameters refitParameters;
-        if (parameters is null)
-            refitParameters = new()
-            {
-
-            };
-        else
-            refitParameters = new()
-            {
-                Id = parameters.Id,
-                PageIndex = parameters.PageIndex,
-                PageSize = parameters.PageSize,
-                SearchTerm = parameters.SearchTerm,
-                Name = parameters.Name,
-                Email = parameters.Email,
-                PhoneNumber = parameters.PhoneNumber,
-                IsSelf = parameters.IsSelf
-            };
-
+        
         try
         {
-            var response = await this.refitInterface.GET(refitParameters);
+            var response = await this.refitInterface.GET(parameters);
 
             stopwatch.Stop();
             var duration = stopwatch.ElapsedMilliseconds;
@@ -55,11 +37,10 @@ public class Implementation : Interface
                 return new()
                 {
 
-                    Title = "Couldn't reach to the server",
-                    Detail = $"Failed at {nameof(AllAsync)}, after make a request call through refit",
-                    Data = null,
-                    Duration = duration,
-                    IsSuccess = false
+                    Size = parameters.PageSize,
+                    Index = parameters.PageIndex,
+                    Items = new List<Model>(),
+                    Total = 0,
                 };
             }
 
@@ -67,11 +48,10 @@ public class Implementation : Interface
             {
                 return new()
                 {
-                    Title =$"Error: {response.StatusCode}",
-                    Detail = response.Error.Message,
-                    Data = null,
-                    Duration = duration,
-                    IsSuccess = false
+                    Size = parameters.PageSize,
+                    Index = parameters.PageIndex,
+                    Items = new List<Model>(),
+                    Total = 0,
                 };
             }
 
@@ -80,48 +60,16 @@ public class Implementation : Interface
             if(data is null || !data.Any())
             {
 
-                return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
+                return new()
                 {
-                    Title = "Success",
-                    Detail = $"Successfully fetched {items.Count} exercise(s)",
-                    Duration = duration,
-                    IsSuccess = true,
-                    Data = new Library.Models.PaginationResults.Model<Model>
-                    {
-                        Total = items.Count,
-                        Index = parameters is null ? null : parameters.PageIndex,
-                        Size = parameters is null ? null : parameters.PageSize,
-                        Items = items
-                    }
+                    Size = parameters.PageSize,
+                    Index = parameters.PageIndex,
+                    Items = new List<Model>(),
+                    Total = 0,
                 };
             }
 
-            foreach (var item in data)
-            {
-                items.Add(new()
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Email = item.Email,
-                    PhoneNumber = item.PhoneNumber,
-                    ProfilePicture = item.ProfilePicture,
-                });
-            }
-
-            return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
-            {
-                Title = "Success",
-                Detail = $"Successfully fetched {items.Count} exercise(s)",
-                Duration = duration,
-                IsSuccess = true,
-                Data = new Library.Models.PaginationResults.Model<Model>
-                {
-                    Total = items.Count,
-                    Index = parameters is null ? null : parameters.PageIndex,
-                    Size = parameters is null ? null : parameters.PageSize,
-                    Items = items
-                }
-            };
+            return response.Content;
         }
         catch (ApiException ex)
         {
@@ -130,17 +78,17 @@ public class Implementation : Interface
         }
     }
 
-    public async Task CreateAsync(Create.Payload payload)
+    public async Task CreateAsync(POST.Payload payload)
     {
         throw new NotImplementedException();
     }
 
-    public async Task UpdateAsync(Update.Payload payload)
+    public async Task UpdateAsync(PUT.Payload payload)
     {
         throw new NotImplementedException();
     }
 
-    public async Task DeleteAsync(Delete.Parameters parameters)
+    public async Task DeleteAsync(DELETE.Parameters parameters)
     {
         throw new NotImplementedException();
     }

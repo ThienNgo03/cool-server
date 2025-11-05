@@ -1,4 +1,4 @@
 ﻿namespace Journal.WeekPlans.Delete.Messager
 {
-    public record Message(Guid Id);
+    public record Message(Delete.Parameters parameters, Guid workoutId);
 }

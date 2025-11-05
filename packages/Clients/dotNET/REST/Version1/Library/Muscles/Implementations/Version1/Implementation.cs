@@ -1,5 +1,4 @@
-﻿using Library.Muscles.All;
-using Library.Muscles.Create;
+﻿using Library.Competitions.All;
 using Refit;
 using System.Diagnostics;
 
@@ -20,28 +19,14 @@ public class Implementation : Interface
     #endregion
 
     #region [Methods]
-    public async Task<Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>> AllAsync(Parameters parameters)
+    public async Task<Models.PaginationResults.Model<Model>> AllAsync( GET.Parameters parameters)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-        Models.Refit.GET.Parameters refitParameters;
-        if (parameters is null)
-            refitParameters = new();
-        else
-        {
-            refitParameters = new()
-            {
-                Id = parameters.Id,
-                PageIndex = parameters.PageIndex,
-                PageSize = parameters.PageSize,
-                Name = parameters.Name,
-                CreatedDate = parameters.CreatedDate,
-                LastUpdated = parameters.LastUpdated
-            };
-        }
+        
 
         try
         {
-            var response = await this.refitInterface.GET(refitParameters);
+            var response = await this.refitInterface.GET(parameters);
 
             stopwatch.Stop();
             var duration = stopwatch.ElapsedMilliseconds;
@@ -50,12 +35,10 @@ public class Implementation : Interface
             {
                 return new()
                 {
-
-                    Title = "Couldn't reach to the server",
-                    Detail = $"Failed at {nameof(AllAsync)}, after make a request call through refit",
-                    Data = null,
-                    Duration = duration,
-                    IsSuccess = false
+                    Size = parameters.PageSize,
+                    Index = parameters.PageIndex,
+                    Items = new List<Model>(),
+                    Total = 0,
                 };
             }
 
@@ -63,11 +46,10 @@ public class Implementation : Interface
             {
                 return new()
                 {
-                    Title = $"Error: {response.StatusCode}",
-                    Detail = response.Error.Message,
-                    Data = null,
-                    Duration = duration,
-                    IsSuccess = false
+                    Size = parameters.PageSize,
+                    Index = parameters.PageIndex,
+                    Items = new List<Model>(),
+                    Total = 0,
                 };
             }
 
@@ -75,103 +57,68 @@ public class Implementation : Interface
             var data = response.Content.Items;
             if (data is null || !data.Any())
             {
-
-                return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
+                return new()
                 {
-                    Title = "Success",
-                    Detail = $"Successfully fetched {items.Count} muscle(s)",
-                    Duration = duration,
-                    IsSuccess = true,
-                    Data = new Library.Models.PaginationResults.Model<Model>
-                    {
-                        Total = items.Count,
-                        Index = parameters is null ? null : parameters.PageIndex,
-                        Size = parameters is null ? null : parameters.PageSize,
-                        Items = items
-                    }
+                    Size = parameters.PageSize,
+                    Index = parameters.PageIndex,
+                    Items = new List<Model>(),
+                    Total = 0,
                 };
             }
 
-            foreach (var item in data)
-            {
-                items.Add(new()
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    CreatedDate = item.CreatedDate,
-                    LastUpdated = item.LastUpdated,
-                });
-            }
-
-            return new Library.Models.Response.Model<Library.Models.PaginationResults.Model<Model>>
-            {
-                Title = "Success",
-                Detail = $"Successfully fetched {items.Count} muscle(s)",
-                Duration = duration,
-                IsSuccess = true,
-                Data = new Library.Models.PaginationResults.Model<Model>
-                {
-                    Total = items.Count,
-                    Index = parameters is null ? null : parameters.PageIndex,
-                    Size = parameters is null ? null : parameters.PageSize,
-                    Items = items
-                }
-            };
+            return response.Content;
         }
         catch (ApiException ex)
         {
-            throw new NotImplementedException();
+            throw new HttpRequestException(
+                $"Server returned error {ex.StatusCode}: {ex.Message}",
+                ex,
+                ex.StatusCode);
         }
     }
 
-    public async Task CreateAsync(Payload payload)
+    public async Task CreateAsync(POST.Payload payload)
     {
         try
         {
-            var refitPayload = new Models.Refit.POST.Payload
-            {
-                Name = payload.Name
-            };
-
-            var response = await this.refitInterface.POST(refitPayload);
+            var response = await this.refitInterface.POST(payload);
         }
         catch (ApiException ex)
         {
-            throw new NotImplementedException();
+            throw new HttpRequestException(
+                $"Server returned error {ex.StatusCode}: {ex.Message}",
+                ex,
+                ex.StatusCode);
         }
     }
 
-    public async Task UpdateAsync(Update.Payload payload)
+    public async Task UpdateAsync(PUT.Payload payload)
     {
         try
         {
-            var refitPayload = new Models.Refit.PUT.Payload
-            {
-                Id = payload.Id,
-                Name = payload.Name
-            };
-            var response = await this.refitInterface.PUT(refitPayload);
+            var response = await this.refitInterface.PUT(payload);
         }
         catch (ApiException ex)
         {
-            throw new NotImplementedException();
+            throw new HttpRequestException(
+                $"Server returned error {ex.StatusCode}: {ex.Message}",
+                ex,
+                ex.StatusCode);
         }
     }
 
-    public async Task DeleteAsync(Delete.Parameters parameters)
+    public async Task DeleteAsync(DELETE.Parameters parameters)
     {
         try
         {
-            var refitParameters = new Models.Refit.DELETE.Parameters
-            {
-                Id = parameters.Id
-            };
-
-            var response = await this.refitInterface.DELETE(refitParameters);
+            var response = await this.refitInterface.DELETE(parameters);
         }
         catch (ApiException ex)
         {
-            throw new NotImplementedException();
+            throw new HttpRequestException(
+                $"Server returned error {ex.StatusCode}: {ex.Message}",
+                ex,
+                ex.StatusCode);
         }
     }
     #endregion

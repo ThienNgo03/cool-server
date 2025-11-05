@@ -23,13 +23,8 @@ public class Handler
 
     public async Task Handle(Message message)
     {
-        var workout = await _context.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
-
-        if (workout == null)
-            return;
-
         var exerciseMuscles = await _context.ExerciseMuscles
-            .Where(em => em.ExerciseId == workout.ExerciseId)
+            .Where(em => em.ExerciseId == message.workout.ExerciseId)
             .ToListAsync();
 
         var muscleIds = exerciseMuscles.Select(em => em.MuscleId).Distinct().ToList();
@@ -51,17 +46,17 @@ public class Handler
                         }).ToList()
             );
 
-        var exercise = await _context.Exercises.FirstOrDefaultAsync(x => x.Id == workout.ExerciseId);
+        var exercise = await _context.Exercises.FirstOrDefaultAsync(x => x.Id == message.workout.ExerciseId);
         try
         {
-            var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.Id);
+            var mongoWorkout = await _mongoDbContext.Workouts.FirstOrDefaultAsync(x => x.Id == message.workout.Id);
 
             if (mongoWorkout == null)
                 return;
 
-            mongoWorkout.ExerciseId = workout.ExerciseId;
-            mongoWorkout.UserId = workout.UserId;
-            mongoWorkout.LastUpdated = workout.LastUpdated;
+            mongoWorkout.ExerciseId = message.workout.ExerciseId;
+            mongoWorkout.UserId = message.workout.UserId;
+            mongoWorkout.LastUpdated = message.workout.LastUpdated;
             mongoWorkout.Exercise = exercise != null ? new Journal.Databases.MongoDb.Collections.Workout.Exercise
             {
                 Id = exercise.Id,

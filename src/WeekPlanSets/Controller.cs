@@ -29,6 +29,7 @@ public class Controller : ControllerBase
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query = _context.WeekPlanSets.AsQueryable();
+        var all = query;
 
         if (!string.IsNullOrEmpty(parameters.Ids))
         {
@@ -83,6 +84,7 @@ public class Controller : ControllerBase
         }).ToList();
 
         var paginationResults = new Builder<Get.Response>()
+            .WithAll(await all.CountAsync())
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(response.Count)
@@ -129,7 +131,7 @@ public class Controller : ControllerBase
 
         _context.WeekPlanSets.Add(weekPlanSet);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Post.Messager.Message(weekPlanSet.Id));
+        await _messageBus.PublishAsync(new Post.Messager.Message(weekPlanSet));
         await _hubContext.Clients.All.SendAsync("week-plan-set-created", weekPlanSet.Id);
         return CreatedAtAction(nameof(Get), weekPlanSet.Id);
     }
@@ -146,11 +148,15 @@ public class Controller : ControllerBase
         if (userId is null)
             return Unauthorized("User Id not found");
 
+        var changes = new List<(string Path, object? Value)>();
         foreach (var op in patchDoc.Operations)
-            if(op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
+        {
+            if (op.OperationType != OperationType.Replace && op.OperationType != OperationType.Test)
                 return BadRequest("Only Replace and Test operations are allowed in this patch request.");
+            changes.Add((op.path, op.value));
+        }
 
-        if(patchDoc is null)
+        if (patchDoc is null)
             return BadRequest("Patch document cannot be null.");
 
         var entity = await _context.WeekPlanSets.FindAsync(id, cancellationToken);
@@ -171,7 +177,7 @@ public class Controller : ControllerBase
         _context.WeekPlanSets.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("week-plan-set-updated", entity.Id);
-
+        await _messageBus.PublishAsync(new Patch.Messager.Message(entity.Id, changes));
         return NoContent();
     }
 
@@ -197,6 +203,7 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
+        var oldWeekPlanId = weekPlanSet.WeekPlanId;
 
         var existingWeekPlan = await _context.WeekPlans.FindAsync(payload.WeekPlanId);
         if (existingWeekPlan == null)
@@ -215,7 +222,7 @@ public class Controller : ControllerBase
         weekPlanSet.UpdatedBy = Guid.Parse(userId);
         _context.WeekPlanSets.Update(weekPlanSet);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Update.Messager.Message(payload.Id));
+        await _messageBus.PublishAsync(new Update.Messager.Message(weekPlanSet, oldWeekPlanId));
         await _hubContext.Clients.All.SendAsync("week-plan-set-updated", payload.Id);
         return NoContent();
     }
@@ -242,10 +249,11 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
+        var weekPlanId = weekPlanSet.WeekPlanId;
 
         _context.WeekPlanSets.Remove(weekPlanSet);
         await _context.SaveChangesAsync();
-        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id));
+        await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, weekPlanId));
         await _hubContext.Clients.All.SendAsync("week-plan-set-deleted", parameters.Id);
         return NoContent();
     }

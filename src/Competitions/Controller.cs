@@ -32,6 +32,7 @@ public class Controller : ControllerBase
     {
 
         var query =_dbContext.Competitions.AsQueryable();
+        var all = query;
 
         if (parameters.Id.HasValue)
         {
@@ -160,6 +161,7 @@ public class Controller : ControllerBase
         }
 
         var paginationResults = new Builder<Get.Response>()
+            .WithAll(await all.CountAsync())
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
             .WithTotal(response.Count)

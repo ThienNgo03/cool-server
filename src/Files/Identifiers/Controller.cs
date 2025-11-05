@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using JasperFx.MultiTenancy;
 using Journal.Files.Identifiers;
 using Journal.Models.PaginationResults;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +25,7 @@ public class Controller : ControllerBase
     }
 
     [HttpGet("sas-token")]
-    public ActionResult<Uri> CreateServiceSASContainer([FromQuery]string? identifierId)
+    public ActionResult<Uri> CreateServiceSASContainer([FromQuery] double? time, [FromQuery] string? permissions)
     {
         // Check if BlobContainerClient object has been authorized with Shared Key
         if (_blobContainerClient.CanGenerateSasUri)
@@ -35,23 +36,19 @@ public class Controller : ControllerBase
                 BlobContainerName = _blobContainerClient.Name,
                 Resource = "c"
             };
-
-            if (identifierId == null)
+            if (time.HasValue && !string.IsNullOrEmpty(permissions))
             {
-                sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddDays(3);
-                sasBuilder.SetPermissions(BlobContainerSasPermissions.All);
+                sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(time.Value);
+                sasBuilder.SetPermissions(permissions);
             }
-            else
-            {
-                sasBuilder.Identifier = identifierId;
-            }
-
             Uri sasUri = _blobContainerClient.GenerateSasUri(sasBuilder);
             return Ok(sasUri);
         }
         // Client object is not authorized via Shared Key
         return NotFound("Container client is not authorized with Shared Key");
     }
+
+    
 
     [HttpGet]
     public async Task<ActionResult> Get([FromQuery] Get.Parameters parameters)

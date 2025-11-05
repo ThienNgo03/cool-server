@@ -1,90 +1,92 @@
 ﻿namespace Journal.Exercises.Update.Messager;
 
-using Microsoft.Extensions.Options;
-using OpenSearch.Net;
-using Journal.Databases;
-using Journal.Databases.OpenSearch;
+using Journal.Databases.MongoDb;
+using OpenSearch.Client;
 
 public class Handler
 {
     private readonly JournalDbContext _context;
-    private readonly OpenSearchConfig _config;
+    private readonly IOpenSearchClient _openSearchClient;
+    private readonly MongoDbContext _mongoDbContext;
 
-    public Handler(JournalDbContext context, IOptions<OpenSearchConfig> config)
+    public Handler(
+        JournalDbContext context,
+        IOpenSearchClient openSearchClient,
+        MongoDbContext mongoDbContext)
     {
         _context = context;
-        _config = config.Value;
+        _openSearchClient = openSearchClient;
+        _mongoDbContext = mongoDbContext;
     }
 
     public async Task Handle(Message message)
     {
-        var builder = new ConnectionStringBuilder()
-            .WithHost(_config.Host)
-            .WithPort(_config.Port)
-            .WithUsername(_config.Username)
-            .WithPassword(_config.Password);
+        if (message.exercise == null)
+            return;
 
-        if (_config.EnableSsl)
-            builder.WithSsl();
-
-        if (_config.SkipCertificateValidation)
-            builder.WithSkipCertificateValidation();
-
-        var uri = new Uri(builder.Build());
-        var pool = new SingleNodeConnectionPool(uri);
-        var settings = new ConnectionConfiguration(pool)
-            .BasicAuthentication(_config.Username, _config.Password);
-
-        if (_config.SkipCertificateValidation)
+        // Build update data
+        var exerciseData = new
         {
-            settings = settings.ServerCertificateValidationCallback((o, cert, chain, errors) => true);
+            name = message.exercise.Name,
+            description = message.exercise.Description,
+            type = message.exercise.Type,
+            lastUpdated = message.exercise.LastUpdated
+        };
+
+        // ===== SYNC OPENSEARCH =====
+        try
+        {
+            var openSearchResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                message.exercise.Id.ToString(),
+                u => u.Index("exercises")
+                      .Doc(exerciseData)
+                      .DocAsUpsert(false)
+            );
+        }
+        catch
+        {
+            Console.WriteLine($"Can't reach OpenSearch");
         }
 
-        var client = new OpenSearchLowLevelClient(settings);
-
-        var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
-        var exercise = exercises.FirstOrDefault(e => e.Id == message.Id);
-        var muscleIds = await _context.ExerciseMuscles
-                .Where(em => em.ExerciseId == message.Id)
-                .Select(em => em.MuscleId)
+        // ===== SYNC MONGODB =====
+        try
+        {
+            var workouts = await _mongoDbContext.Workouts
+                .Where(w => w.ExerciseId == message.exercise.Id)
                 .ToListAsync();
 
-        var muscles = await _context.Muscles
-            .Where(m => muscleIds.Contains(m.Id))
-            .AsNoTracking()
-            .ToListAsync();
-
-        var musclesList = muscles.Select(m => new
-        {
-            m.Id,
-            m.Name,
-            m.CreatedDate,
-            m.LastUpdated
-        }).ToList();
-
-
-        if (exercise != null)
-        {
-            var bulkData = new List<object>
+            if (!workouts.Any())
             {
-                new { index = new { _index = "exercises", _id = exercise.Id } },
-                new
-                {
-                    exercise.Id,
-                    exercise.Name,
-                    exercise.Description,
-                    exercise.Type,
-                    muscles = musclesList,
-                    exercise.CreatedDate,
-                    exercise.LastUpdated
-                }
-            };
-
-            var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
-            if (!bulkResponse.Success)
-            {
-                Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
+                Console.WriteLine($"No workouts found for exercise {message.exercise.Id}");
+                return;
             }
+
+            foreach (var workout in workouts)
+            {
+                if (workout.Exercise == null)
+                    continue;
+
+                workout.Exercise.Name = message.exercise.Name;
+                workout.Exercise.Description = message.exercise.Description;
+                workout.Exercise.Type = message.exercise.Type;
+                workout.Exercise.LastUpdated = message.exercise.LastUpdated;
+                // Note: Muscles are intentionally not updated
+
+                workout.LastUpdated = DateTime.UtcNow;
+            }
+
+            _mongoDbContext.Workouts.UpdateRange(workouts);
+            await _mongoDbContext.SaveChangesAsync();
+
+            Console.WriteLine($"Updated {workouts.Count} workout(s) for exercise {message.exercise.Id}");
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC CONTEXT TABLES =====
+        // No additional tables to sync for update operation
     }
 }

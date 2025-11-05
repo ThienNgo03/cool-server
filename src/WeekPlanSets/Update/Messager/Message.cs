@@ -1,4 +1,4 @@
 ﻿namespace Journal.WeekPlanSets.Update.Messager
 {
-    public record Message(Guid Id);
+    public record Message(Table weekPlanSet, Guid oldWeekPlanId);
 }

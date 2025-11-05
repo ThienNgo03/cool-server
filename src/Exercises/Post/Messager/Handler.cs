@@ -1,71 +1,41 @@
 ﻿namespace Journal.Exercises.Post.Messager;
 
-using Microsoft.Extensions.Options;
-using OpenSearch.Net;
-using Journal.Databases;
-using Journal.Databases.OpenSearch;
+using OpenSearch.Client;
 
 public class Handler
 {
     private readonly JournalDbContext _context;
-    private readonly OpenSearchConfig _config;
+    private readonly IOpenSearchClient _openSearchClient;
 
-    public Handler(JournalDbContext context, IOptions<OpenSearchConfig> config)
+    public Handler(JournalDbContext context, IOpenSearchClient openSearchClient)
     {
         _context = context;
-        _config = config.Value;
+        _openSearchClient = openSearchClient;
     }
 
     public async Task Handle(Message message)
     {
-        var builder = new ConnectionStringBuilder()
-            .WithHost(_config.Host)
-            .WithPort(_config.Port)
-            .WithUsername(_config.Username)
-            .WithPassword(_config.Password);
-
-        if (_config.EnableSsl)
-            builder.WithSsl();
-
-        if (_config.SkipCertificateValidation)
-            builder.WithSkipCertificateValidation();
-
-        var uri = new Uri(builder.Build());
-        var pool = new SingleNodeConnectionPool(uri);
-        var settings = new ConnectionConfiguration(pool)
-            .BasicAuthentication(_config.Username, _config.Password);
-
-        if (_config.SkipCertificateValidation)
+        if (message.exercise != null)
         {
-            settings = settings.ServerCertificateValidationCallback((o, cert, chain, errors) => true);
-        }
-
-        var client = new OpenSearchLowLevelClient(settings);
-
-        var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
-        var exercise = exercises.FirstOrDefault(e => e.Id == message.Id);
-
-        if (exercise != null)
-        {
-            var bulkData = new List<object>
+            var document = new Databases.OpenSearch.Indexes.Exercise.Index
             {
-                new { index = new { _index = "exercises", _id = exercise.Id } },
-                new
-                {
-                    exercise.Id,
-                    exercise.Name,
-                    exercise.Description,
-                    exercise.Type,
-                    muscles = new List<object>(), // để trống lúc này
-                    exercise.CreatedDate,
-                    exercise.LastUpdated
-                }
+                Id = message.exercise.Id,
+                Name = message.exercise.Name,
+                Description = message.exercise.Description,
+                Type = message.exercise.Type,
+                Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>(), // Empty at creation
+                CreatedDate = message.exercise.CreatedDate,
+                LastUpdated = message.exercise.LastUpdated
             };
 
-            var bulkResponse = await client.BulkAsync<StringResponse>(PostData.MultiJson(bulkData));
-            if (!bulkResponse.Success)
+            var indexResponse = await _openSearchClient.IndexAsync(document, i => i
+                .Index("exercises")
+                .Id(message.exercise.Id.ToString())
+            );
+
+            if (!indexResponse.IsValid)
             {
-                Console.WriteLine($"Error indexing document: {bulkResponse.DebugInformation}");
+                Console.WriteLine($"Error indexing document: {indexResponse.ServerError?.Error?.Reason ?? indexResponse.DebugInformation}");
             }
         }
     }
