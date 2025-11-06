@@ -1,4 +1,5 @@
 ﻿using Cassandra.Data.Linq;
+using Journal.ExerciseMuscles.Tables.App;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Journal.ExerciseMuscles;
@@ -10,48 +11,61 @@ public class Controller : ControllerBase
 {
     private readonly IMessageBus _messageBus;
     private readonly JournalDbContext _context;
-    private readonly Databases.CassandraCql.Context _cassandraContext;
     private readonly ILogger<Controller> _logger;
     private readonly IHubContext<Hub> _hubContext;
 
     public Controller(IMessageBus messageBus, 
         JournalDbContext context, 
         ILogger<Controller> logger, 
-        IHubContext<Hub> hubContext,
-        Databases.CassandraCql.Context cassandraContext)
+        IHubContext<Hub> hubContext
+        
+        )
     {
         _context = context;
         _logger = logger;
         _messageBus = messageBus;
         _hubContext = hubContext;
-        _cassandraContext = cassandraContext;
     }
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
-        CqlQuery<Table> exerciseMuscles = _cassandraContext.ExerciseMuscles;
-        var query = await exerciseMuscles.ExecuteAsync();
+        var query = _context.ExerciseMuscles.AsQueryable();
         var all = query.Count();
 
-        if (parameters.PartitionKey.HasValue)
+        if (!string.IsNullOrEmpty(parameters.Ids))
         {
-            query = query.Where(x => x.MuscleId == parameters.PartitionKey);
-            if (!string.IsNullOrEmpty(parameters.Ids))
-            {
-                var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
-                .Where(guid => guid.HasValue)
-                .Select(guid => guid.Value)
-                .ToList();
-                query = query.Where(x => ids.Contains(x.Id));
-            }
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+            .Where(guid => guid.HasValue)
+            .Select(guid => guid.Value)
+            .ToList();
+            query = query.Where(x => ids.Contains(x.Id));
         }
+
+        if (parameters.ExerciseId.HasValue)
+            query = query.Where(x => x.ExerciseId == parameters.ExerciseId);
+        if (parameters.MuscleId.HasValue)
+            query = query.Where(x => x.MuscleId == parameters.MuscleId);
 
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
-        var result =  query.ToList();
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
+        var result = await query.AsNoTracking().ToListAsync();
+
 
         var paginationResults = new Builder<Table>()
           .WithAll(all)
@@ -91,7 +105,7 @@ public class Controller : ControllerBase
             });
         }
 
-        var exerciseMuscle = new Table
+        var exerciseMuscle = new ExerciseMuscles.Tables.App.Table
         {
             Id = Guid.NewGuid(),
             ExerciseId = payload.ExerciseId,
@@ -99,15 +113,16 @@ public class Controller : ControllerBase
             CreatedDate = DateTime.UtcNow,
             LastUpdated = DateTime.UtcNow
         };
-        await _cassandraContext.ExerciseMuscles.Insert(exerciseMuscle).ExecuteAsync();
+        _context.ExerciseMuscles.Add(exerciseMuscle);
+        await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Post.Messager.Message(exerciseMuscle));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-created", exerciseMuscle.Id);
         return CreatedAtAction(nameof(Get), exerciseMuscle.Id);
     }
 
     [HttpPatch]
-    public async Task<IActionResult> Patch([FromQuery] Guid id, Guid partitionKey,
-                                       [FromBody] JsonPatchDocument<ExerciseMuscles.Table> patchDoc,
+    public async Task<IActionResult> Patch([FromQuery] Guid id,
+                                       [FromBody] JsonPatchDocument<Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)
@@ -128,10 +143,7 @@ public class Controller : ControllerBase
         if (patchDoc is null)
             return BadRequest("Patch document cannot be null.");
 
-        var entity = await _cassandraContext.ExerciseMuscles
-            .Where(x => x.MuscleId == partitionKey && x.Id == id)
-            .FirstOrDefault()
-            .ExecuteAsync();
+        var entity = await _context.ExerciseMuscles.FindAsync(id);
         if (entity == null)
             return NotFound(new ProblemDetails
             {
@@ -148,17 +160,14 @@ public class Controller : ControllerBase
         _context.ExerciseMuscles.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", entity.Id);
-        await _messageBus.PublishAsync(new Patch.Messager.Message(entity, changes));
+        
         return NoContent();
     }
 
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
-        var exerciseMuscle = await _cassandraContext.ExerciseMuscles
-            .Where(x=>x.MuscleId==payload.PartitionKey&&x.Id==payload.Id)
-            .FirstOrDefault()
-            .ExecuteAsync();
+        var exerciseMuscle = await _context.ExerciseMuscles.FindAsync(payload.Id);
         if (exerciseMuscle == null)
         {
             return NotFound();
@@ -189,20 +198,14 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
-        await _cassandraContext.ExerciseMuscles
-               .Where(x => x.MuscleId == payload.PartitionKey && x.Id == payload.Id)
-               .Delete().ExecuteAsync();
         
-        var newExerciseMuscle = new Table
-        {
-            Id = Guid.NewGuid(),
-            ExerciseId = payload.NewExerciseId,
-            MuscleId = payload.NewMuscleId,
-            LastUpdated = DateTime.UtcNow
-        };
-        await _cassandraContext.ExerciseMuscles.Insert(newExerciseMuscle).ExecuteAsync();
+        exerciseMuscle.ExerciseId = payload.NewExerciseId;
+        exerciseMuscle.MuscleId = payload.NewMuscleId;
+        exerciseMuscle.LastUpdated = DateTime.UtcNow;
 
-        await _messageBus.PublishAsync(new Update.Messager.Message(newExerciseMuscle, oldExerciseId, oldMuscleId, payload.NewExerciseId, payload.NewMuscleId));
+        _context.ExerciseMuscles.Update(exerciseMuscle);
+        await _context.SaveChangesAsync();
+        await _messageBus.PublishAsync(new Update.Messager.Message(exerciseMuscle, oldExerciseId, oldMuscleId, payload.NewExerciseId, payload.NewMuscleId));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", payload.Id);
         return NoContent();
     }
@@ -211,10 +214,8 @@ public class Controller : ControllerBase
 
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
-        var exerciseMuscle = await _cassandraContext.ExerciseMuscles
-            .Where(x => x.MuscleId == parameters.PartitionKey && x.Id == parameters.Id)
-            .FirstOrDefault()
-            .ExecuteAsync();
+        var exerciseMuscle = await _context.ExerciseMuscles.FindAsync(parameters.Id);
+        
         if (exerciseMuscle == null)
         {
             return NotFound(new ProblemDetails
@@ -227,10 +228,8 @@ public class Controller : ControllerBase
         }
         var exerciseId = exerciseMuscle.ExerciseId;
         var muscleId = exerciseMuscle.MuscleId;
-
-        await _cassandraContext.ExerciseMuscles
-                .Where(x => x.MuscleId == parameters.PartitionKey && x.Id == parameters.Id)
-                .Delete().ExecuteAsync();
+        _context.ExerciseMuscles.Remove(exerciseMuscle);
+        await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Delete.Messager.Message(parameters.Id, exerciseId, muscleId));
         await _hubContext.Clients.All.SendAsync("exercise-muscle-deleted", parameters.Id);
         return NoContent();

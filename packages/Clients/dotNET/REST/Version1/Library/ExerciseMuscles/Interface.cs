@@ -1,4 +1,4 @@
-﻿namespace Library.Users;
+﻿namespace Library.ExerciseMuscles;
 
 public interface Interface
 {

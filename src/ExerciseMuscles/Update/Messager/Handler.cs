@@ -1,5 +1,6 @@
 ﻿namespace Journal.ExerciseMuscles.Update.Messager;
 
+using Cassandra.Data.Linq;
 using Journal.Databases;
 using Journal.Databases.MongoDb;
 using Microsoft.EntityFrameworkCore;
@@ -10,15 +11,17 @@ public class Handler
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
     private readonly MongoDbContext _mongoDbContext;
-
+    private readonly Databases.CassandraCql.Context _cassandraContext;
     public Handler(
         JournalDbContext context,
         IOpenSearchClient openSearchClient,
-        MongoDbContext mongoDbContext)
+        MongoDbContext mongoDbContext,
+        Databases.CassandraCql.Context cassandraContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
         _mongoDbContext = mongoDbContext;
+        _cassandraContext = cassandraContext;
     }
 
     public async Task Handle(Message message)
@@ -192,6 +195,33 @@ public class Handler
             throw;
         }
 
+        #region Cassandra Sync
+        //// ===== SYNC CASSANDRA =====
+        //await _cassandraContext.ExerciseMuscleByExerciseIds
+        //       .Where(x => x.ExerciseId == message.oldExerciseId && x.Id == message.exerciseMuscles.Id)
+        //       .Delete().ExecuteAsync();
+        //await _cassandraContext.ExerciseMuscleByMuscleIds
+        //       .Where(x => x.MuscleId == message.oldMuscleId && x.Id == message.exerciseMuscles.Id)
+        //       .Delete().ExecuteAsync();
+        //var updatedExerciseMuscleByExerciseIds = new ExerciseMuscles.Tables.CassandraTables.ByExerciseIds.Table
+        //{
+        //    Id = message.exerciseMuscles.Id,
+        //    ExerciseId = message.newExerciseId,
+        //    MuscleId = message.newMuscleId,
+        //    CreatedDate = message.exerciseMuscles.CreatedDate,
+        //    LastUpdated = DateTime.UtcNow
+        //};
+        //await _cassandraContext.ExerciseMuscleByExerciseIds.Insert(updatedExerciseMuscleByExerciseIds).ExecuteAsync();
+        //var updatedExerciseMuscleByMuscleIds = new ExerciseMuscles.Tables.CassandraTables.ByMuscleIds.Table
+        //{
+        //    Id = message.exerciseMuscles.Id,
+        //    ExerciseId = message.newExerciseId,
+        //    MuscleId = message.newMuscleId,
+        //    CreatedDate = message.exerciseMuscles.CreatedDate,
+        //    LastUpdated = DateTime.UtcNow
+        //};
+        //await _cassandraContext.ExerciseMuscleByMuscleIds.Insert(updatedExerciseMuscleByMuscleIds).ExecuteAsync();
+        #endregion
         // ===== SYNC CONTEXT TABLES =====
         // No additional tables to sync for update operation
     }

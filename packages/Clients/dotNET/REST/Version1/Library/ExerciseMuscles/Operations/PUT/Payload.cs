@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Journal.ExerciseMuscles.Update;
+﻿namespace Library.ExerciseMuscles.PUT;
 
 public class Payload
 {
+    public Guid PartitionKey { get; set; }
+
     public Guid Id { get; set; }
 
     public Guid NewExerciseId { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace Journal.ExerciseMuscles;
+﻿namespace Journal.ExerciseMuscles.Tables.App;
 
 public class Model: Models.Base
 {

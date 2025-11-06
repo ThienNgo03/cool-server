@@ -1,11 +1,12 @@
 ﻿using Azure.Storage.Blobs;
+using Cassandra;
 using Library;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Text.Json;
-using Test.Databases.Identity;
 using Test.Databases.App;
+using Test.Databases.Identity;
 using local = Test.Constant;
 
 namespace Test;
@@ -25,6 +26,22 @@ public class BaseTest
         Library.Config locaHostConfig = new("https://localhost:7011");
         var services = new ServiceCollection();
         services.AddEndpoints(locaHostConfig);
+
+        #region Cassandra
+        if ((local.Config.CassandraContactPoint != string.Empty || local.Config.CassandraContactPoint != "")
+            &&local.Config.CassandraPort!=0
+            &&(local.Config.CassandraKeyspace!=string.Empty||local.Config.CassandraKeyspace!=""))
+        {
+            Cluster cluster = Cluster.Builder()
+                .AddContactPoint(local.Config.CassandraContactPoint)
+                .WithPort(local.Config.CassandraPort)
+                .Build();
+
+            Cassandra.ISession session = cluster.Connect(local.Config.CassandraKeyspace);
+            services.AddSingleton<Databases.CassandraCql.Context>();
+            services.AddSingleton(session);
+        }
+        #endregion
 
         services.AddDbContext<JournalDbContext>(options =>
            options.UseSqlServer(local.Config.JournalConnectionString));

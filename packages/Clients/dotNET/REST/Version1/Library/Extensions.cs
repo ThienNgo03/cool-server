@@ -14,6 +14,7 @@ using Library.Muscles;
 
 using Microsoft.Extensions.DependencyInjection;
 using Library.Files.Identifiers;
+using Library.ExerciseMuscles;
 
 namespace Library;
 
@@ -25,6 +26,7 @@ public static class Extensions
 
         services.RegisterAuthentication(config);
         services.RegisterExercises(config);
+        services.RegisterExerciseMuscles(config);
         services.RegisterWorkouts(config);
         services.RegisterWeekPlans(config);
         services.RegisterCompetitions(config);

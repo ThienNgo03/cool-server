@@ -1,5 +1,6 @@
 ﻿namespace Journal.ExerciseMuscles.Delete.Messager;
 
+using Cassandra.Data.Linq;
 using Journal.Databases.MongoDb;
 using OpenSearch.Client;
 
@@ -8,15 +9,17 @@ public class Handler
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
     private readonly MongoDbContext _mongoDbContext;
-
+    private readonly Databases.CassandraCql.Context _cassandraContext;
     public Handler(
         JournalDbContext context,
         IOpenSearchClient openSearchClient,
-        MongoDbContext mongoDbContext)
+        MongoDbContext mongoDbContext,
+        Databases.CassandraCql.Context cassandraContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
         _mongoDbContext = mongoDbContext;
+        _cassandraContext = cassandraContext;
     }
 
     public async Task Handle(Message message)
@@ -113,6 +116,17 @@ public class Handler
             throw;
         }
 
+        #region Cassandra Sync
+        //// ===== SYNC CASSANDRA =====
+        //await _cassandraContext.ExerciseMuscleByExerciseIds
+        //    .Where(x=>x.ExerciseId==message.exerciseId&&x.Id==message.id)
+        //    .Delete()
+        //    .ExecuteAsync();
+        //await _cassandraContext.ExerciseMuscleByMuscleIds
+        //    .Where(x=>x.MuscleId==message.muscleId&&x.Id==message.id)
+        //    .Delete()
+        //    .ExecuteAsync();
+        #endregion
         // ===== SYNC CONTEXT TABLES =====
         // No additional tables to sync for delete operation
     }

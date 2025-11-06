@@ -96,7 +96,7 @@ public class SeedFactory
                         .Where(x => x.Field<string>("Id") != null &&
                                     x.Field<string>("ExerciseId") != null&&
                                     x.Field<string>("MuscleId") != null)
-                        .Select(row => new ExerciseMuscles.Table
+                        .Select(row => new ExerciseMuscles.Tables.App.Table
                         {
                             Id = Guid.Parse(row["Id"].ToString()!),
                             ExerciseId = Guid.Parse(row["ExerciseId"].ToString()!),
