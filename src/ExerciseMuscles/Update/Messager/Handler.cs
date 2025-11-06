@@ -11,17 +11,14 @@ public class Handler
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
     private readonly MongoDbContext _mongoDbContext;
-    private readonly Databases.CassandraCql.Context _cassandraContext;
     public Handler(
         JournalDbContext context,
         IOpenSearchClient openSearchClient,
-        MongoDbContext mongoDbContext,
-        Databases.CassandraCql.Context cassandraContext)
+        MongoDbContext mongoDbContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
         _mongoDbContext = mongoDbContext;
-        _cassandraContext = cassandraContext;
     }
 
     public async Task Handle(Message message)

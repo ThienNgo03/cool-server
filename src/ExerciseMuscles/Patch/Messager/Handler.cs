@@ -26,8 +26,8 @@ public class Handler
         if (message.changes == null || !message.changes.Any())
             return;
 
-        Guid newMuscleId = message.entity.MuscleId;
-        Guid newExerciseId = message.entity.ExerciseId;
+        Guid newMuscleId = Guid.Empty;
+        Guid newExerciseId = Guid.Empty;
 
         // Parse changes
         var muscleIdChange = message.changes.FirstOrDefault(c =>
@@ -36,19 +36,22 @@ public class Handler
         var exerciseIdChange = message.changes.FirstOrDefault(c =>
             c.Path.TrimStart('/').Equals("ExerciseId", StringComparison.OrdinalIgnoreCase));
 
-        var hasMusclIdChange = muscleIdChange.Path != null && Guid.TryParse(muscleIdChange.Value?.ToString(), out newMuscleId);
+        var hasMuscleIdChange = muscleIdChange.Path != null && Guid.TryParse(muscleIdChange.Value?.ToString(), out newMuscleId);
         var hasExerciseIdChange = exerciseIdChange.Path != null && Guid.TryParse(exerciseIdChange.Value?.ToString(), out newExerciseId);
 
-        if (!hasMusclIdChange && !hasExerciseIdChange)
+        if (!hasMuscleIdChange && !hasExerciseIdChange)
             return;
 
+        // Determine which IDs to use
+        var targetMuscleId = hasMuscleIdChange ? newMuscleId : message.entity.MuscleId;
+        var targetExerciseId = hasExerciseIdChange ? newExerciseId : message.entity.ExerciseId;
+
         // ===== GET MUSCLE DATA FROM CONTEXT =====
-        var muscleIdToUse = hasMusclIdChange ? newMuscleId : message.entity.MuscleId;
-        var muscle = await _context.Muscles.FirstOrDefaultAsync(x => x.Id == muscleIdToUse);
+        var muscle = await _context.Muscles.FirstOrDefaultAsync(x => x.Id == targetMuscleId);
 
         if (muscle == null)
         {
-            Console.WriteLine($"Muscle {muscleIdToUse} not found");
+            Console.WriteLine($"Muscle {targetMuscleId} not found");
             return;
         }
 
@@ -72,61 +75,26 @@ public class Handler
         // ===== SYNC OPENSEARCH =====
         try
         {
-            if (hasMusclIdChange && !hasExerciseIdChange)
+            // Remove muscle from old exercise
+            var getOldResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
+                message.oldExerciseId.ToString(),
+                g => g.Index("exercises")
+            );
+
+            if (getOldResponse.IsValid)
             {
-                // Replace muscle in same exercise
-                var getResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
-                    message.entity.ExerciseId.ToString(),
-                    g => g.Index("exercises")
-                );
+                var oldExerciseDoc = getOldResponse.Source;
 
-                if (getResponse.IsValid)
+                if (oldExerciseDoc.Muscles != null && oldExerciseDoc.Muscles.Any())
                 {
-                    var exerciseDoc = getResponse.Source;
+                    var muscleToRemove = oldExerciseDoc.Muscles.FirstOrDefault(m => m.Id == message.oldMuscleId);
 
-                    if (exerciseDoc.Muscles == null)
+                    if (muscleToRemove != null)
                     {
-                        exerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
-                    }
-
-                    exerciseDoc.Muscles.RemoveAll(m => m.Id == message.entity.MuscleId);
-
-                    if (!exerciseDoc.Muscles.Any(m => m.Id == openSearchMuscle.Id))
-                    {
-                        exerciseDoc.Muscles.Add(openSearchMuscle);
-                    }
-
-                    var updateResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
-                        message.entity.ExerciseId.ToString(),
-                        u => u.Index("exercises")
-                              .Doc(new
-                              {
-                                  muscles = exerciseDoc.Muscles,
-                                  lastUpdated = DateTime.UtcNow
-                              })
-                              .DocAsUpsert(false)
-                    );
-                }
-            }
-            else if (hasExerciseIdChange)
-            {
-                // Move muscle to different exercise
-                // Remove from old exercise
-                var getOldResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
-                    message.entity.ExerciseId.ToString(),
-                    g => g.Index("exercises")
-                );
-
-                if (getOldResponse.IsValid)
-                {
-                    var oldExerciseDoc = getOldResponse.Source;
-
-                    if (oldExerciseDoc.Muscles != null)
-                    {
-                        oldExerciseDoc.Muscles.RemoveAll(m => m.Id == message.entity.MuscleId);
+                        oldExerciseDoc.Muscles.Remove(muscleToRemove);
 
                         var updateOldResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
-                            message.entity.ExerciseId.ToString(),
+                            message.oldExerciseId.ToString(),
                             u => u.Index("exercises")
                                   .Doc(new
                                   {
@@ -137,36 +105,41 @@ public class Handler
                         );
                     }
                 }
+            }
 
-                // Add to new exercise
-                var getNewResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
-                    newExerciseId.ToString(),
-                    g => g.Index("exercises")
-                );
+            // Add muscle to new exercise
+            var getNewResponse = await _openSearchClient.GetAsync<Databases.OpenSearch.Indexes.Exercise.Index>(
+                targetExerciseId.ToString(),
+                g => g.Index("exercises")
+            );
 
-                if (getNewResponse.IsValid)
+            if (getNewResponse.IsValid)
+            {
+                var newExerciseDoc = getNewResponse.Source;
+
+                if (newExerciseDoc.Muscles == null)
                 {
-                    var newExerciseDoc = getNewResponse.Source;
+                    newExerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
+                }
 
-                    if (newExerciseDoc.Muscles == null)
+                if (!newExerciseDoc.Muscles.Any(m => m.Id == openSearchMuscle.Id))
+                {
+                    newExerciseDoc.Muscles.Add(openSearchMuscle);
+
+                    var updateNewResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
+                        targetExerciseId.ToString(),
+                        u => u.Index("exercises")
+                              .Doc(new
+                              {
+                                  muscles = newExerciseDoc.Muscles,
+                                  lastUpdated = DateTime.UtcNow
+                              })
+                              .DocAsUpsert(false)
+                    );
+
+                    if (!updateNewResponse.IsValid)
                     {
-                        newExerciseDoc.Muscles = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
-                    }
-
-                    if (!newExerciseDoc.Muscles.Any(m => m.Id == openSearchMuscle.Id))
-                    {
-                        newExerciseDoc.Muscles.Add(openSearchMuscle);
-
-                        var updateNewResponse = await _openSearchClient.UpdateAsync<Databases.OpenSearch.Indexes.Exercise.Index, object>(
-                            newExerciseId.ToString(),
-                            u => u.Index("exercises")
-                                  .Doc(new
-                                  {
-                                      muscles = newExerciseDoc.Muscles,
-                                      lastUpdated = DateTime.UtcNow
-                                  })
-                                  .DocAsUpsert(false)
-                        );
+                        Console.WriteLine($"OpenSearch error: {updateNewResponse.ServerError?.Error?.Reason ?? updateNewResponse.DebugInformation}");
                     }
                 }
             }
@@ -179,13 +152,9 @@ public class Handler
         // ===== SYNC MONGODB =====
         try
         {
-            var oldExerciseId = message.entity.ExerciseId;
-            var oldMuscleId = message.entity.MuscleId;
-            var targetExerciseId = hasExerciseIdChange ? newExerciseId : oldExerciseId;
-
-            // Remove from old workouts
+            // Remove muscle from old exercise's workouts
             var oldWorkouts = await _mongoDbContext.Workouts
-                .Where(w => w.ExerciseId == oldExerciseId)
+                .Where(w => w.ExerciseId == message.oldExerciseId)
                 .ToListAsync();
 
             if (oldWorkouts.Any())
@@ -195,7 +164,7 @@ public class Handler
                     if (workout.Exercise?.Muscles != null)
                     {
                         var initialCount = workout.Exercise.Muscles.Count;
-                        workout.Exercise.Muscles.RemoveAll(m => m.Id == oldMuscleId);
+                        workout.Exercise.Muscles.RemoveAll(m => m.Id == message.oldMuscleId);
 
                         if (workout.Exercise.Muscles.Count < initialCount)
                         {
@@ -206,9 +175,11 @@ public class Handler
 
                 _mongoDbContext.Workouts.UpdateRange(oldWorkouts);
                 await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Removed muscle {message.oldMuscleId} from {oldWorkouts.Count} workout(s)");
             }
 
-            // Add to new workouts
+            // Add muscle to new exercise's workouts
             var newWorkouts = await _mongoDbContext.Workouts
                 .Where(w => w.ExerciseId == targetExerciseId)
                 .ToListAsync();
@@ -234,6 +205,8 @@ public class Handler
 
                 _mongoDbContext.Workouts.UpdateRange(newWorkouts);
                 await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Added muscle {targetMuscleId} to {newWorkouts.Count} workout(s)");
             }
         }
         catch (Exception ex)

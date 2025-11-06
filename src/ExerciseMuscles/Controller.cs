@@ -153,6 +153,9 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
 
+        var oldExerciseId = entity.ExerciseId;
+        var oldMuscleId = entity.MuscleId;
+
         patchDoc.ApplyTo(entity);
 
         entity.LastUpdated = DateTime.UtcNow;
@@ -160,7 +163,7 @@ public class Controller : ControllerBase
         _context.ExerciseMuscles.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         await _hubContext.Clients.All.SendAsync("exercise-muscle-updated", entity.Id);
-        
+        await _messageBus.PublishAsync(new Patch.Messager.Message(entity, changes, oldExerciseId, oldMuscleId));
         return NoContent();
     }
 
