@@ -12,13 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddNewtonsoftJson();
 
 builder.Services.Configure<DbConfig>(
-    builder.Configuration.GetSection("JournalDb"));
+	builder.Configuration.GetSection("JournalDb"));
 builder.Services.Configure<DbConfig>(
-    builder.Configuration.GetSection("IdentityDb"));
+	builder.Configuration.GetSection("IdentityDb"));
 builder.Services.Configure<OpenSearchConfig>(
-    builder.Configuration.GetSection("OpenSearch"));
+	builder.Configuration.GetSection("OpenSearch"));
 builder.Services.Configure<Journal.Databases.MongoDb.DbConfig>(
-    builder.Configuration.GetSection("MongoDb"));
+	builder.Configuration.GetSection("MongoDb"));
 
 builder.Services.AddDatabases(builder.Configuration);
 
@@ -29,8 +29,23 @@ builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddFile(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowLocalhost5173", policy =>
+	{
+		policy.WithOrigins("http://localhost:5173")
+			  .AllowAnyHeader()
+			  .AllowAnyMethod()
+			  .AllowCredentials();
+	});
+});
+
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+	app.UseCors("AllowLocalhost5173");
+}
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

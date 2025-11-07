@@ -1,369 +1,103 @@
-import * as React from "react"
-import {
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
-    type ColumnDef,
-    type SortingState,
-    type VisibilityState,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { type ColDef, type ValueFormatterParams } from 'ag-grid-community';
+import { type CustomCellRendererProps } from 'ag-grid-react';
+import type { IExercise } from '@/interfaces/models/exercise';
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
+import { useSearchParams } from 'react-router';
+import { useEffect } from 'react';
+import { useListExercise } from '../_hooks/use-list-exercise';
 
-import { Badge } from "@/components/ui/badge"
-import type { IExercise } from "@/interfaces/models/exercise";
-import type { GetExerciseRequest } from "../_apis/get-exercise"
-import debounce from "lodash.debounce";
-import { format } from "date-fns"
-import { useNavigate } from "react-router"
+import { Badge } from '@/components/ui/badge';
+import { BaseGrid } from '@/components/base/base-grid';
+import { GridActions } from './grid/grid-actions';
 
-const columns: ColumnDef<IExercise>[] = [
+import { format } from 'date-fns';
+import { GridToolbar } from './grid/grid-toolbar';
+import { GridPagination } from './grid/grid-pagination';
+import { useUpdateUrlParams } from '@/lib/updateUrlParams';
+
+const descriptionCellStyle = {
+    'whiteSpace': 'normal',
+    'lineHeight': '1.5',
+    "paddingTop": "8px",
+    "paddingBottom": "8px",
+    "overflow": "hidden",
+    "display": "-webkit-box",
+    "WebkitBoxOrient": "vertical",
+    "WebkitLineClamp": 2
+}
+
+const colDefs: ColDef<IExercise>[] = [
     {
-        id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
+        field: "id",
+        minWidth: 200,
     },
     {
-        accessorKey: "id",
-        header: "ID",
-        cell: ({ row }) => (
-            <div className="text-wrap">{row.getValue("id")}</div>
-        ),
+        field: "name",
+        width: 150,
+        flex: 1
     },
     {
-        accessorKey: "name",
-        header: ({ column }) => {
+        field: "description",
+        width: 400,
+        cellStyle: descriptionCellStyle,
+        flex: 2
+    },
+    {
+        field: "type",
+        width: 150,
+        cellRenderer: (params: CustomCellRendererProps) => {
             return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Name
-                    <ArrowUpDown />
-                </Button>
+                <Badge>{params.value}</Badge>
             )
-        },
-        cell: ({ row }) => (
-            <Badge>
-                {row.getValue("name")}
-            </Badge>
-        ),
-        enableSorting: true
-    },
-    {
-        accessorKey: "description",
-        header: "Description",
-        cell: ({ row }) => (
-            <div className="text-wrap line-clamp-3">{row.getValue("description")}</div>
-        ),
-    },
-    {
-        accessorKey: "type",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Type
-                    <ArrowUpDown />
-                </Button>
-            )
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("type")}</div>
-        ),
-        enableSorting: true
-    },
-    {
-        accessorKey: "createdDate",
-        header: "Created Date",
-        cell: ({ row }) => (
-            <div>{format(new Date(row.getValue("createdDate")), "dd/MM/yyyy")}</div>
-        ),
-    },
-    {
-        accessorKey: "updatedDate",
-        header: "Updated Date",
-        cell: ({ row }) => {
-            const updatedDate = row.getValue("updatedDate");
-            if (!updatedDate) {
-                return <div>N/A</div>;
-            }
-            return <div>{format(new Date(row.getValue("updatedDate")), "PPP")}</div>;
         }
     },
     {
-        id: "actions",
-        enableHiding: false,
-        cell: ({ row }) => {
-            const exercise = row.original;
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(exercise.id)}
-                        >
-                            Copy exercise ID
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                            View details
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
+        field: "createdDate",
+        width: 150,
+        valueFormatter: (params: ValueFormatterParams) => {
+            return format(params.value, "dd/MM/yyyy");
         },
     },
+    {
+        colId: "actions",
+        headerName: "Actions",
+        width: 100,
+        cellRenderer: GridActions,
+    }
 ]
 
-type GridViewProps = {
-    data: IExercise[];
-    isLoading: boolean;
-    query: GetExerciseRequest;
-    onQueryChange: React.Dispatch<React.SetStateAction<GetExerciseRequest>>;
+const config = {
+    pageIndex: 1,
+    pageSize: 20,
 }
 
-export function GridView({ data, query: { pageSize, pageIndex }, onQueryChange }: GridViewProps) {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnVisibility, setColumnVisibility] =
-        React.useState<VisibilityState>({})
-    const [rowSelection, setRowSelection] = React.useState({})
-    const [filter, setFilter] = React.useState("");
-    const [pagination, setPagination] = React.useState({
-        pageIndex: pageIndex ?? 0, //initial page index
-        pageSize: pageSize ?? 10, //default page size
-    });
+export function GridView() {
+    const [searchParams] = useSearchParams();
+    const { update } = useUpdateUrlParams();
+    const { data, refetch, isLoading } = useListExercise();
 
-    const table = useReactTable({
-        data,
-        columns,
-        onSortingChange: setSorting,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        state: {
-            sorting,
-            columnVisibility,
-            rowSelection,
-            pagination
-        },
-    });
-    const navigate = useNavigate();
-
-    const debouncedSearchChange = React.useMemo(() => {
-        return debounce((value: string) => {
-            onQueryChange((prev) => ({
-                ...prev,
-                name: value,
-                description: value,
-                type: value,
-            }))
-        }, 700);
-    }, [onQueryChange]);
-
-
-    // useEffect(() => {
-    //     let connection: ReturnType<typeof getConnection> | undefined;
-    //     const setupSignalR = async () => {
-    //         const conn = await startConnection();
-    //         conn.on('{event-name}', () => {
-    //           refetch();
-    //         });
-    //         return conn;
-    //     };
-    //     setupSignalR().then((conn) => (connection = conn));
-    //     return () => {
-    //         connection?.off('{event-name}');
-    //     };
-    // }, []);
-
-    React.useEffect(() => {
-        return () => {
-            debouncedSearchChange.cancel();
-        };
-    }, [debouncedSearchChange]);
+    useEffect(() => {
+        const pageIndex = searchParams.get("pageIndex");
+        const pageSize = searchParams.get("pageSize");
+        update({
+            pageIndex: pageIndex ?? config.pageIndex.toString(),
+            pageSize: pageSize ?? config.pageSize.toString()
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
-        <div className="w-full">
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter text..."
-                    value={filter}
-                    onChange={(event) => {
-                        setFilter(event.target.value)
-                        debouncedSearchChange(event.target.value)
-                    }}
-                    className="max-w-sm"
+        <div>
+            <GridToolbar refetch={refetch} />
+            <div className="h-[calc(100vh-210px)] my-2">
+                <BaseGrid<IExercise>
+                    data={data?.items || []}
+                    isLoading={isLoading}
+                    colDefs={colDefs}
+                    rowHeight={80}
                 />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
-            <div className="overflow-hidden rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                    onClick={() => navigate(`/exercises/${row.original.id}`)}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="text-muted-foreground flex-1 text-sm">
-                    Page Size:
-                    <Input
-                        type="number"
-                        value={pageSize}
-                        onChange={(e) => {
-
-                            onQueryChange((prev) => ({
-                                ...prev,
-                                pageSize: Number(e.target.value),
-                                pageIndex: 0,
-                            }))
-                            setPagination((prev) => ({
-                                ...prev,
-                                pageSize: Number(e.target.value),
-                                pageIndex: 0,
-                            }))
-                        }}
-                        className="w-16 mr-2"
-                    />
-                    Page {(pageIndex ?? 0) + 1} Size {pageSize}
-                </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onQueryChange((prev) => ({ ...prev, pageIndex: Math.max((pageIndex ?? 0) - 1, 0) }))}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onQueryChange((prev) => ({ ...prev, pageIndex: Math.max((pageIndex ?? 0) + 1, 0) }))}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
+            <GridPagination totalItems={data?.all || 0} />
         </div>
     )
 }

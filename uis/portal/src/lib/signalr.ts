@@ -2,7 +2,7 @@ import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signal
 
 let connection: HubConnection | null = null;
 
-export const startConnection = async (path: string): Promise<HubConnection> => {
+export async function startConnection(path: string): Promise<HubConnection> {
     if (!connection) {
         connection = new HubConnectionBuilder()
             .withUrl(`${import.meta.env.VITE_PORTAL_BASEURL}${path.startsWith('/') ? '' : '/'}${path}`)

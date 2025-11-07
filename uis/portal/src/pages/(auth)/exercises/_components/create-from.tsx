@@ -16,7 +16,6 @@ export function CreateFrom() {
         mutate(data, {
             onSuccess() {
                 navigate(-1);
-                form.reset();
             },
             onError(error) {
                 toast.error("Error creating exercise", {
@@ -102,7 +101,6 @@ export function CreateFrom() {
                             </FormItem>
                         )}
                     />
-
                 </form>
             </Form>
         </>

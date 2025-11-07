@@ -41,6 +41,7 @@
         "@tailwindcss/vite": "^4.1.16",
         "@tanstack/react-query": "^5.90.5",
         "@tanstack/react-table": "^8.21.3",
+        "ag-grid-react": "^34.3.1",
         "axios": "^1.13.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

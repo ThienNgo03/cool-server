@@ -4,7 +4,7 @@ import { CreateFrom } from "./_components/create-from";
 export default function Page() {
     return (
         <div>
-            <div className="flex flex-row justify-between items-center mb-4">
+            <div className="flex flex-row justify-between items-center">
                 <h2 className="text-xl font-bold">Create Exercise Page</h2>
                 <div>
                     <Button form="create" type="reset" variant="outline">
