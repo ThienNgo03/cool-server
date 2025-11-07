@@ -60,47 +60,80 @@ public class Handler
         // ===== SYNC MONGODB =====
         try
         {
+            var exercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == message.exercise.Id);
+
+            if (exercise == null)
+            {
+                Console.WriteLine($"Exercise {message.exercise.Id} not found in MongoDB");
+                return;
+            }
+
+            foreach (var change in message.changes)
+            {
+                var fieldName = change.Path.TrimStart('/').ToLowerInvariant();
+                var value = change.Value?.ToString();
+
+                switch (fieldName)
+                {
+                    case "name":
+                        exercise.Name = value;
+                        break;
+                    case "description":
+                        exercise.Description = value;
+                        break;
+                    case "type":
+                        exercise.Type = value;
+                        break;
+                }
+            }
+
+            exercise.LastUpdated = message.exercise.LastUpdated;
+
+            _mongoDbContext.Exercises.Update(exercise);
+            await _mongoDbContext.SaveChangesAsync();
+
+            Console.WriteLine($"Patched exercise {message.exercise.Id} in MongoDB");
+
+            // Also update exercise data in workouts that reference this exercise
             var workouts = await _mongoDbContext.Workouts
                 .Where(w => w.ExerciseId == message.exercise.Id)
                 .ToListAsync();
 
-            if (!workouts.Any())
+            if (workouts.Any())
             {
-                Console.WriteLine($"No workouts found for exercise {message.exercise.Id}");
-                return;
-            }
-
-            foreach (var workout in workouts)
-            {
-                if (workout.Exercise == null)
-                    continue;
-
-                foreach (var change in message.changes)
+                foreach (var workout in workouts)
                 {
-                    var fieldName = change.Path.TrimStart('/').ToLowerInvariant();
-                    var value = change.Value?.ToString();
+                    if (workout.Exercise == null)
+                        continue;
 
-                    switch (fieldName)
+                    foreach (var change in message.changes)
                     {
-                        case "name":
-                            workout.Exercise.Name = value;
-                            break;
-                        case "description":
-                            workout.Exercise.Description = value;
-                            break;
-                        case "type":
-                            workout.Exercise.Type = value;
-                            break;
+                        var fieldName = change.Path.TrimStart('/').ToLowerInvariant();
+                        var value = change.Value?.ToString();
+
+                        switch (fieldName)
+                        {
+                            case "name":
+                                workout.Exercise.Name = value;
+                                break;
+                            case "description":
+                                workout.Exercise.Description = value;
+                                break;
+                            case "type":
+                                workout.Exercise.Type = value;
+                                break;
+                        }
                     }
+
+                    workout.LastUpdated = DateTime.UtcNow;
                 }
 
-                workout.LastUpdated = DateTime.UtcNow;
+                _mongoDbContext.Workouts.UpdateRange(workouts);
+                await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Updated {workouts.Count} workout(s) for exercise {message.exercise.Id}");
             }
-
-            _mongoDbContext.Workouts.UpdateRange(workouts);
-            await _mongoDbContext.SaveChangesAsync();
-
-            Console.WriteLine($"Updated {workouts.Count} workout(s) for exercise {message.exercise.Id}");
         }
         catch (Exception ex)
         {

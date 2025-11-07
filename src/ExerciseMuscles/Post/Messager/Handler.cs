@@ -10,18 +10,15 @@ public class Handler
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
     private readonly MongoDbContext _mongoDbContext;
-    //private readonly Databases.CassandraCql.Context _cassandraContext;
 
     public Handler(
         JournalDbContext context,
         IOpenSearchClient openSearchClient,
         MongoDbContext mongoDbContext)
-        //Databases.CassandraCql.Context cassandraContext)
     {
         _context = context;
         _openSearchClient = openSearchClient;
         _mongoDbContext = mongoDbContext;
-        //_cassandraContext = cassandraContext;
     }
 
     public async Task Handle(Message message)
@@ -44,7 +41,7 @@ public class Handler
             LastUpdated = muscle.LastUpdated
         };
 
-        var mongoMuscle = new Journal.Databases.MongoDb.Collections.Workout.Muscle
+        var mongoMuscle = new Journal.Databases.MongoDb.Collections.Exercise.Muscle
         {
             Id = muscle.Id,
             Name = muscle.Name,
@@ -88,7 +85,41 @@ public class Handler
             Console.WriteLine($"OpenSearch Error");
         }
 
-        // ===== SYNC MONGODB =====
+        // ===== SYNC MONGODB EXERCISES COLLECTION =====
+        try
+        {
+            var mongoExercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == message.exerciseMuscles.ExerciseId);
+
+            if (mongoExercise == null)
+            {
+                Console.WriteLine($"Exercise {message.exerciseMuscles.ExerciseId} not found in MongoDB");
+                return;
+            }
+
+            if (mongoExercise.Muscles == null)
+            {
+                mongoExercise.Muscles = new List<Journal.Databases.MongoDb.Collections.Exercise.Muscle>();
+            }
+
+            if (!mongoExercise.Muscles.Any(m => m.Id == mongoMuscle.Id))
+            {
+                mongoExercise.Muscles.Add(mongoMuscle);
+                mongoExercise.LastUpdated = DateTime.UtcNow;
+
+                _mongoDbContext.Exercises.Update(mongoExercise);
+                await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Added muscle {muscle.Id} to exercise {mongoExercise.Id} in MongoDB");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB Exercises error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC MONGODB WORKOUTS COLLECTION =====
         try
         {
             var workouts = await _mongoDbContext.Workouts
@@ -101,6 +132,14 @@ public class Handler
                 return;
             }
 
+            var workoutMuscle = new Journal.Databases.MongoDb.Collections.Workout.Muscle
+            {
+                Id = muscle.Id,
+                Name = muscle.Name,
+                CreatedDate = muscle.CreatedDate,
+                LastUpdated = muscle.LastUpdated
+            };
+
             foreach (var workout in workouts)
             {
                 if (workout.Exercise == null)
@@ -111,9 +150,9 @@ public class Handler
                     workout.Exercise.Muscles = new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>();
                 }
 
-                if (!workout.Exercise.Muscles.Any(m => m.Id == mongoMuscle.Id))
+                if (!workout.Exercise.Muscles.Any(m => m.Id == workoutMuscle.Id))
                 {
-                    workout.Exercise.Muscles.Add(mongoMuscle);
+                    workout.Exercise.Muscles.Add(workoutMuscle);
                     workout.LastUpdated = DateTime.UtcNow;
                 }
             }
@@ -125,7 +164,7 @@ public class Handler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"MongoDB error: {ex.Message}");
+            Console.WriteLine($"MongoDB Workouts error: {ex.Message}");
             throw;
         }
 

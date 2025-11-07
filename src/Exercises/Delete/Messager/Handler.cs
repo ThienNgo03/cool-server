@@ -37,6 +37,22 @@ public class Handler
         // ===== SYNC MONGODB =====
         try
         {
+            // Delete the exercise document itself
+            var exercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == message.Id);
+
+            if (exercise != null)
+            {
+                _mongoDbContext.Exercises.Remove(exercise);
+                await _mongoDbContext.SaveChangesAsync();
+                Console.WriteLine($"Deleted exercise {message.Id} from MongoDB");
+            }
+            else
+            {
+                Console.WriteLine($"Exercise {message.Id} not found in MongoDB");
+            }
+
+            // Handle workouts that reference this exercise
             var workouts = await _mongoDbContext.Workouts
                 .Where(w => w.ExerciseId == message.Id)
                 .ToListAsync();
@@ -60,7 +76,6 @@ public class Handler
                         workout.Exercise = null;
                         workout.LastUpdated = DateTime.UtcNow;
                     }
-
                     _mongoDbContext.Workouts.UpdateRange(workouts);
                     Console.WriteLine($"Unlinked {workouts.Count} workout(s) from exercise {message.Id}");
                 }
