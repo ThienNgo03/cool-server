@@ -1,6 +1,6 @@
-﻿namespace Journal.Exercises;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-public class Table : Model
-{
+namespace Journal.Exercises;
 
-}
+[Table("exercises", Schema = "journal")]
+public class Table : Model { }

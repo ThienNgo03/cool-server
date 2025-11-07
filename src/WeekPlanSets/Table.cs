@@ -1,5 +1,7 @@
-﻿namespace Journal.WeekPlanSets;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-public class Table : Model
-{
-}
+namespace Journal.WeekPlanSets;
+
+[Table("week-plan-sets", Schema = "journal")]
+public class Table : Model { }
+

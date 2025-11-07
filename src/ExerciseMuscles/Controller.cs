@@ -1,5 +1,4 @@
 ﻿using Cassandra.Data.Linq;
-using Journal.ExerciseMuscles.Tables.App;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Journal.ExerciseMuscles;
@@ -105,7 +104,7 @@ public class Controller : ControllerBase
             });
         }
 
-        var exerciseMuscle = new ExerciseMuscles.Tables.App.Table
+        var exerciseMuscle = new Table
         {
             Id = Guid.NewGuid(),
             ExerciseId = payload.ExerciseId,

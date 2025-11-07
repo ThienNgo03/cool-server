@@ -7,7 +7,7 @@ public class SeedFactory
     public async Task SeedExercise(JournalDbContext context)
     {
 
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases/App/Tables/Exercise/Exercises.xlsx");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exercises/Exercises.xlsx");
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 
@@ -43,7 +43,7 @@ public class SeedFactory
     public async Task SeedMuscle(JournalDbContext context)
     {
 
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases/App/Tables/Muscle/Muscle.xlsx");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Muscles/Muscles.xlsx");
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 
@@ -75,7 +75,7 @@ public class SeedFactory
     public async Task SeedExerciseMuscle(JournalDbContext context)
     {
 
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Databases/App/Tables/ExerciseMuscle/ExerciseMuscle.xlsx");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExerciseMuscles/ExerciseMuscles.xlsx");
         using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
         using var reader = ExcelReaderFactory.CreateReader(stream);
 
@@ -96,7 +96,7 @@ public class SeedFactory
                         .Where(x => x.Field<string>("Id") != null &&
                                     x.Field<string>("ExerciseId") != null&&
                                     x.Field<string>("MuscleId") != null)
-                        .Select(row => new ExerciseMuscles.Tables.App.Table
+                        .Select(row => new ExerciseMuscles.Table
                         {
                             Id = Guid.Parse(row["Id"].ToString()!),
                             ExerciseId = Guid.Parse(row["ExerciseId"].ToString()!),
@@ -110,7 +110,7 @@ public class SeedFactory
     public async Task SeedAdmins(JournalDbContext context)
     {
         var id = Guid.Parse("fdfa4136-ada3-41dc-b16e-8fd9556d4574");
-        var testAdmin = new Users.Table
+        var testAdmin = new Profiles.Table
         {
             Id = id,
             Name = "systemtester",
@@ -119,7 +119,7 @@ public class SeedFactory
             ProfilePicture = null,
             CreatedDate = DateTime.UtcNow
         };
-        context.Users.Add(testAdmin);
+        context.Profiles.Add(testAdmin);
         await context.SaveChangesAsync();
     }
 }

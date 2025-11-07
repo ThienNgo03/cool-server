@@ -78,9 +78,9 @@ public class Controller : ControllerBase
             WeekPlanId = x.WeekPlanId,
             Value = x.Value,
             CreatedDate = x.CreatedDate,
-            InsertedBy = x.InsertedBy,
+            CreatedById = x.CreatedById,
             LastUpdated = x.LastUpdated,
-            UpdatedBy = x.UpdatedBy
+            UpdatedById = x.UpdatedById
         }).ToList();
 
         var paginationResults = new Builder<Get.Response>()
@@ -125,7 +125,7 @@ public class Controller : ControllerBase
             WeekPlanId = payload.WeekPlanId,
             Value = payload.Value,
             CreatedDate = DateTime.UtcNow,
-            InsertedBy = Guid.Parse(userId),
+            CreatedById = Guid.Parse(userId),
             LastUpdated = DateTime.UtcNow
         };
 
@@ -172,7 +172,7 @@ public class Controller : ControllerBase
         patchDoc.ApplyTo(entity);
 
         entity.LastUpdated = DateTime.UtcNow;
-        entity.UpdatedBy = Guid.Parse(userId);
+        entity.UpdatedById = Guid.Parse(userId);
 
         _context.WeekPlanSets.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
@@ -219,7 +219,7 @@ public class Controller : ControllerBase
         weekPlanSet.WeekPlanId = payload.WeekPlanId;
         weekPlanSet.Value = payload.Value;
         weekPlanSet.LastUpdated = DateTime.UtcNow;
-        weekPlanSet.UpdatedBy = Guid.Parse(userId);
+        weekPlanSet.UpdatedById = Guid.Parse(userId);
         _context.WeekPlanSets.Update(weekPlanSet);
         await _context.SaveChangesAsync();
         await _messageBus.PublishAsync(new Update.Messager.Message(weekPlanSet, oldWeekPlanId));

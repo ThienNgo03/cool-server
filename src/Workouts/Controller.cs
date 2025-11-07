@@ -217,8 +217,8 @@ public class Controller : ControllerBase
                                         Id = wps.Id,
                                         Value = wps.Value,
                                         WeekPlanId = wps.WeekPlanId,
-                                        InsertedBy = wps.InsertedBy,
-                                        UpdatedBy = wps.UpdatedBy,
+                                        CreatedById = wps.CreatedById,
+                                        UpdatedById = wps.UpdatedById,
                                         LastUpdated = wps.LastUpdated,
                                         CreatedDate = wps.CreatedDate
                                     }).ToList();
@@ -339,8 +339,8 @@ public class Controller : ControllerBase
                                     Id = set.Id,
                                     Value = set.Value,
                                     WeekPlanId = set.WeekPlanId,
-                                    InsertedBy = set.InsertedBy,
-                                    UpdatedBy = set.UpdatedBy,
+                                    CreatedById = set.CreatedById,
+                                    UpdatedById = set.UpdatedById,
                                     LastUpdated = set.LastUpdated,
                                     CreatedDate = set.CreatedDate
                                 });
@@ -448,8 +448,8 @@ public class Controller : ControllerBase
                         Id = wps.Id,
                         Value = wps.Value,
                         WeekPlanId = wps.WeekPlanId,
-                        InsertedBy = wps.InsertedBy,
-                        UpdatedBy = wps.UpdatedBy,
+                        CreatedById = wps.CreatedById,
+                        UpdatedById = wps.UpdatedById,
                         LastUpdated = wps.LastUpdated,
                         CreatedDate = wps.CreatedDate
                     }).ToList()
@@ -534,7 +534,7 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
-        var existingUser = await _context.Users.FindAsync(payload.UserId);
+        var existingUser = await _context.Profiles.FindAsync(payload.UserId);
         if (existingUser == null)
         {
             return NotFound(new ProblemDetails
@@ -636,7 +636,7 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
-        var existingUser = await _context.Users.FindAsync(payload.UserId);
+        var existingUser = await _context.Profiles.FindAsync(payload.UserId);
         if (existingUser == null)
         {
             return NotFound(new ProblemDetails

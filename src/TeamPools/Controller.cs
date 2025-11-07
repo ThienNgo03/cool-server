@@ -57,7 +57,7 @@ public class Controller : ControllerBase
         }
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<Databases.App.Tables.TeamPool.Table>()
+        var paginationResults = new Builder<TeamPools.Table>()
                 .WithAll(await all.CountAsync())
                 .WithIndex(parameters.PageIndex)
                 .WithSize(parameters.PageSize)
@@ -96,7 +96,7 @@ public class Controller : ControllerBase
         if (refereeId != Guid.Parse(userId))
             return BadRequest("Not match Referee");
 
-        var teamPool = new Databases.App.Tables.TeamPool.Table
+        var teamPool = new TeamPools.Table
         {
             Id = Guid.NewGuid(),
             Position = payload.Position,
@@ -155,7 +155,7 @@ public class Controller : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> Patch([FromQuery] Guid id,
-                                       [FromBody] JsonPatchDocument<Databases.App.Tables.TeamPool.Table> patchDoc,
+                                       [FromBody] JsonPatchDocument<TeamPools.Table> patchDoc,
                                        CancellationToken cancellationToken = default!)
     {
         if (User.Identity is null)

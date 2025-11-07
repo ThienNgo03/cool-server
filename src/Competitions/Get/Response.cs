@@ -1,6 +1,6 @@
 ﻿namespace Journal.Competitions.Get;
 
-public class Response : Databases.App.Tables.Competition.Table
+public class Response : Table
 {
     public SoloPool? SoloPool { get; set; }
     public ICollection<TeamPool>? TeamPools { get; set; }

@@ -107,8 +107,8 @@ public class WeekPlanSet
     public DateTime LastUpdated { get; set; }
 
     [BsonElement("insertedBy")]
-    public Guid InsertedBy { get; set; }
+    public Guid CreatedById { get; set; }
 
     [BsonElement("updatedBy")]
-    public Guid UpdatedBy { get; set; }
+    public Guid UpdatedById { get; set; }
 }

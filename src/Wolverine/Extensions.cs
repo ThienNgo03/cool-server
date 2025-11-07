@@ -10,9 +10,9 @@ public static class Extensions
             options.PublishMessage<Journal.Journeys.Post.Messager.Message>().ToLocalQueue("journey-post");
             options.PublishMessage<Journal.Journeys.Update.Messager.Message>().ToLocalQueue("journey-update");
 
-            options.PublishMessage<Journal.Users.Delete.Messager.Message>().ToLocalQueue("user-delete");
-            options.PublishMessage<Journal.Users.Post.Messager.Message>().ToLocalQueue("user-post");
-            options.PublishMessage<Journal.Users.Update.Messager.Message>().ToLocalQueue("user-update");
+            options.PublishMessage<Journal.Profiles.Delete.Messager.Message>().ToLocalQueue("user-delete");
+            options.PublishMessage<Journal.Profiles.Post.Messager.Message>().ToLocalQueue("user-post");
+            options.PublishMessage<Journal.Profiles.Update.Messager.Message>().ToLocalQueue("user-update");
 
             options.PublishMessage<Journal.Notes.Delete.Messager.Message>().ToLocalQueue("note-delete");
             options.PublishMessage<Journal.Notes.Post.Messager.Message>().ToLocalQueue("note-post");
