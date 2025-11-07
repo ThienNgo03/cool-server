@@ -48,37 +48,54 @@ public class Handler
             Console.WriteLine($"Can't reach OpenSearch");
         }
 
-        // ===== SYNC MONGODB =====
+        // ===== SYNC MONGODB(Exercise) =====
         try
         {
+            var exercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == message.exercise.Id);
+
+            if (exercise == null)
+            {
+                Console.WriteLine($"Exercise {message.exercise.Id} not found in MongoDB");
+                return;
+            }
+
+            exercise.Name = message.exercise.Name;
+            exercise.Description = message.exercise.Description;
+            exercise.Type = message.exercise.Type;
+            exercise.LastUpdated = message.exercise.LastUpdated;
+            // Note: Muscles are intentionally not updated
+
+            _mongoDbContext.Exercises.Update(exercise);
+            await _mongoDbContext.SaveChangesAsync();
+
+            Console.WriteLine($"Updated exercise {message.exercise.Id} in MongoDB");
+
+            // Also update exercise data in workouts that reference this exercise
             var workouts = await _mongoDbContext.Workouts
                 .Where(w => w.ExerciseId == message.exercise.Id)
                 .ToListAsync();
 
-            if (!workouts.Any())
+            if (workouts.Any())
             {
-                Console.WriteLine($"No workouts found for exercise {message.exercise.Id}");
-                return;
+                foreach (var workout in workouts)
+                {
+                    if (workout.Exercise == null)
+                        continue;
+
+                    workout.Exercise.Name = message.exercise.Name;
+                    workout.Exercise.Description = message.exercise.Description;
+                    workout.Exercise.Type = message.exercise.Type;
+                    workout.Exercise.LastUpdated = message.exercise.LastUpdated;
+                    // Note: Muscles are intentionally not updated
+                    workout.LastUpdated = DateTime.UtcNow;
+                }
+
+                _mongoDbContext.Workouts.UpdateRange(workouts);
+                await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Updated {workouts.Count} workout(s) for exercise {message.exercise.Id}");
             }
-
-            foreach (var workout in workouts)
-            {
-                if (workout.Exercise == null)
-                    continue;
-
-                workout.Exercise.Name = message.exercise.Name;
-                workout.Exercise.Description = message.exercise.Description;
-                workout.Exercise.Type = message.exercise.Type;
-                workout.Exercise.LastUpdated = message.exercise.LastUpdated;
-                // Note: Muscles are intentionally not updated
-
-                workout.LastUpdated = DateTime.UtcNow;
-            }
-
-            _mongoDbContext.Workouts.UpdateRange(workouts);
-            await _mongoDbContext.SaveChangesAsync();
-
-            Console.WriteLine($"Updated {workouts.Count} workout(s) for exercise {message.exercise.Id}");
         }
         catch (Exception ex)
         {

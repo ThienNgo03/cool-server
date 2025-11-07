@@ -64,7 +64,7 @@ public class Handler
             LastUpdated = muscle.LastUpdated
         };
 
-        var mongoMuscle = new Journal.Databases.MongoDb.Collections.Workout.Muscle
+        var mongoMuscle = new Journal.Databases.MongoDb.Collections.Exercise.Muscle
         {
             Id = muscle.Id,
             Name = muscle.Name,
@@ -149,9 +149,71 @@ public class Handler
             Console.WriteLine($"Can't reach OpenSearch");
         }
 
-        // ===== SYNC MONGODB =====
+        // ===== SYNC MONGODB EXERCISES COLLECTION =====
         try
         {
+            // Remove muscle from old exercise
+            var oldMongoExercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == message.oldExerciseId);
+
+            if (oldMongoExercise != null)
+            {
+                if (oldMongoExercise.Muscles != null && oldMongoExercise.Muscles.Any())
+                {
+                    var initialCount = oldMongoExercise.Muscles.Count;
+                    oldMongoExercise.Muscles.RemoveAll(m => m.Id == message.oldMuscleId);
+
+                    if (oldMongoExercise.Muscles.Count < initialCount)
+                    {
+                        oldMongoExercise.LastUpdated = DateTime.UtcNow;
+                        _mongoDbContext.Exercises.Update(oldMongoExercise);
+                        await _mongoDbContext.SaveChangesAsync();
+
+                        Console.WriteLine($"Removed muscle {message.oldMuscleId} from exercise {message.oldExerciseId} in MongoDB");
+                    }
+                }
+            }
+
+            // Add muscle to new exercise
+            var newMongoExercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == targetExerciseId);
+
+            if (newMongoExercise != null)
+            {
+                if (newMongoExercise.Muscles == null)
+                {
+                    newMongoExercise.Muscles = new List<Journal.Databases.MongoDb.Collections.Exercise.Muscle>();
+                }
+
+                if (!newMongoExercise.Muscles.Any(m => m.Id == mongoMuscle.Id))
+                {
+                    newMongoExercise.Muscles.Add(mongoMuscle);
+                    newMongoExercise.LastUpdated = DateTime.UtcNow;
+
+                    _mongoDbContext.Exercises.Update(newMongoExercise);
+                    await _mongoDbContext.SaveChangesAsync();
+
+                    Console.WriteLine($"Added muscle {targetMuscleId} to exercise {targetExerciseId} in MongoDB");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB Exercises error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC MONGODB WORKOUTS COLLECTION =====
+        try
+        {
+            var workoutMuscle = new Journal.Databases.MongoDb.Collections.Workout.Muscle
+            {
+                Id = muscle.Id,
+                Name = muscle.Name,
+                CreatedDate = muscle.CreatedDate,
+                LastUpdated = muscle.LastUpdated
+            };
+
             // Remove muscle from old exercise's workouts
             var oldWorkouts = await _mongoDbContext.Workouts
                 .Where(w => w.ExerciseId == message.oldExerciseId)
@@ -196,9 +258,9 @@ public class Handler
                         workout.Exercise.Muscles = new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>();
                     }
 
-                    if (!workout.Exercise.Muscles.Any(m => m.Id == mongoMuscle.Id))
+                    if (!workout.Exercise.Muscles.Any(m => m.Id == workoutMuscle.Id))
                     {
-                        workout.Exercise.Muscles.Add(mongoMuscle);
+                        workout.Exercise.Muscles.Add(workoutMuscle);
                         workout.LastUpdated = DateTime.UtcNow;
                     }
                 }
@@ -211,7 +273,7 @@ public class Handler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"MongoDB error: {ex.Message}");
+            Console.WriteLine($"MongoDB Workouts error: {ex.Message}");
             throw;
         }
 

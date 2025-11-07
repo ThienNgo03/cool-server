@@ -60,7 +60,62 @@ public class Handler
             Console.WriteLine("Can't reach OpenSearch");
         }
 
-        // ===== SYNC MONGODB =====
+        // ===== SYNC MONGODB EXERCISES COLLECTION =====
+        try
+        {
+            var exercises = await _mongoDbContext.Exercises
+                .Where(e => exerciseIds.Contains(e.Id))
+                .ToListAsync();
+
+            if (!exercises.Any())
+            {
+                Console.WriteLine($"No exercises found in MongoDB with muscle {message.muscleId}");
+            }
+            else
+            {
+                int updatedCount = 0;
+                foreach (var exercise in exercises)
+                {
+                    if (exercise.Muscles == null || !exercise.Muscles.Any())
+                        continue;
+
+                    var muscleToUpdate = exercise.Muscles.FirstOrDefault(m => m.Id == updatedMuscle.Id);
+                    if (muscleToUpdate != null)
+                    {
+                        foreach (var (path, value) in message.changes)
+                        {
+                            var fieldName = path.TrimStart('/').ToLowerInvariant();
+                            switch (fieldName)
+                            {
+                                case "name":
+                                    muscleToUpdate.Name = value?.ToString() ?? muscleToUpdate.Name;
+                                    break;
+                                    // Add other patchable fields as needed
+                            }
+                        }
+
+                        muscleToUpdate.LastUpdated = updatedMuscle.LastUpdated;
+                        exercise.LastUpdated = DateTime.UtcNow;
+                        updatedCount++;
+                    }
+                }
+
+                if (updatedCount > 0)
+                {
+                    _mongoDbContext.Exercises.UpdateRange(exercises.Where(e =>
+                        e.Muscles?.Any(m => m.Id == message.muscleId) == true));
+                    await _mongoDbContext.SaveChangesAsync();
+                    Console.WriteLine($"Patched muscle in {updatedCount} exercise(s) in MongoDB");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB Exercises error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC MONGODB WORKOUTS COLLECTION =====
         try
         {
             var workouts = await _mongoDbContext.Workouts
@@ -110,7 +165,7 @@ public class Handler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"MongoDB error: {ex.Message}");
+            Console.WriteLine($"MongoDB Workouts error: {ex.Message}");
             throw;
         }
     }
