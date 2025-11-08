@@ -22,21 +22,21 @@ public class Controller : ControllerBase
     public async Task<IActionResult> All([FromQuery] All.Parameters parameters, CancellationToken cancellationToken = default!)
     {
         var exercises = await _context.Exercises.ToListAsync(cancellationToken);
-        var response = exercises.Select(e => new All.Response
+        var items = exercises.Select(e => new All.Item
         {
             Id = e.Id,
             Title = e.Name,
             Description = e.Description
         }).ToList();
 
-        _mapper.All.SetSubTitle(response);
-        _mapper.All.AttachImageUrls(response);
-        _mapper.All.SetBadge(response);
-        _mapper.All.SetPercentageCompletion(response);
-        _mapper.All.SetPercentageCompletionString(response);
-        _mapper.All.SetBadgeTextColor(response);
-        _mapper.All.SetBadgeBackgroundColor(response);
-        return Ok(response);
+        _mapper.All.SetSubTitle(items);
+        _mapper.All.AttachImageUrls(items);
+        _mapper.All.SetBadge(items);
+        _mapper.All.SetPercentageCompletion(items);
+        _mapper.All.SetPercentageCompletionString(items);
+        _mapper.All.SetBadgeTextColor(items);
+        _mapper.All.SetBadgeBackgroundColor(items);
+        return Ok(items);
     }
 
     [HttpGet("categories")]

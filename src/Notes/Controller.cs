@@ -62,13 +62,13 @@
 
             // check UserId
             var userId = payload.UserId;
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await _context.Profiles.FirstOrDefaultAsync(x => x.Id == userId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            var note = new Databases.App.Tables.Note.Table //tạo một hàng dữ liệu mới
+            var note = new Table //tạo một hàng dữ liệu mới
             {
                 Id = Guid.NewGuid(),
                 UserId = payload.UserId,
@@ -110,7 +110,7 @@
 
             // check UserId
             var userId = payload.UserId;
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await _context.Profiles.FirstOrDefaultAsync(x => x.Id == userId);
             if (user == null)
             {
                 return NotFound();

@@ -8,4 +8,6 @@ public class MongoDbContext : DbContext // database
         Database.AutoTransactionBehavior = AutoTransactionBehavior.Never;
     }
     public DbSet<Collections.Workout.Collection> Workouts { get; init; }
+
+    public DbSet<Collections.Exercise.Collection> Exercises { get; init; }
 }

@@ -1,7 +1,6 @@
-﻿using Cassandra.Mapping.Attributes;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Journal.ExerciseMuscles;
-[Table("exercise_muscle")]
-public class Table: Model
-{
-}
+
+[Table("exercise-muscles", Schema = "journal")]
+public class Table: Model { }

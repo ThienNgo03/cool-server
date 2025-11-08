@@ -20,7 +20,7 @@ public class Implementation : Interface
 
     #region [ Methods ]
 
-    public async Task<Models.PaginationResults.Model<Model>>? AllAsync(GET.Parameters? parameters = null)
+    public async Task<Models.PaginationResults.Model<Model>> AllAsync(GET.Parameters parameters)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 

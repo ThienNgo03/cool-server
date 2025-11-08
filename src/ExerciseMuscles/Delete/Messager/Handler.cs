@@ -1,5 +1,6 @@
 ﻿namespace Journal.ExerciseMuscles.Delete.Messager;
 
+using Cassandra.Data.Linq;
 using Journal.Databases.MongoDb;
 using OpenSearch.Client;
 
@@ -8,7 +9,6 @@ public class Handler
     private readonly JournalDbContext _context;
     private readonly IOpenSearchClient _openSearchClient;
     private readonly MongoDbContext _mongoDbContext;
-
     public Handler(
         JournalDbContext context,
         IOpenSearchClient openSearchClient,
@@ -75,7 +75,47 @@ public class Handler
             Console.WriteLine($"Can't reach OpenSearch");
         }
 
-        // ===== SYNC MONGODB =====
+        // ===== SYNC MONGODB EXERCISES COLLECTION =====
+        try
+        {
+            var mongoExercise = await _mongoDbContext.Exercises
+                .FirstOrDefaultAsync(e => e.Id == message.exerciseId);
+
+            if (mongoExercise == null)
+            {
+                Console.WriteLine($"Exercise {message.exerciseId} not found in MongoDB");
+                return;
+            }
+
+            if (mongoExercise.Muscles == null || !mongoExercise.Muscles.Any())
+            {
+                Console.WriteLine($"No muscles found for exercise {message.exerciseId} in MongoDB");
+                return;
+            }
+
+            var initialCount = mongoExercise.Muscles.Count;
+            mongoExercise.Muscles.RemoveAll(m => m.Id == message.muscleId);
+
+            if (mongoExercise.Muscles.Count < initialCount)
+            {
+                mongoExercise.LastUpdated = DateTime.UtcNow;
+                _mongoDbContext.Exercises.Update(mongoExercise);
+                await _mongoDbContext.SaveChangesAsync();
+
+                Console.WriteLine($"Removed muscle {message.muscleId} from exercise {message.exerciseId} in MongoDB");
+            }
+            else
+            {
+                Console.WriteLine($"Muscle {message.muscleId} not found in exercise {message.exerciseId} in MongoDB");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MongoDB Exercises error: {ex.Message}");
+            throw;
+        }
+
+        // ===== SYNC MONGODB WORKOUTS COLLECTION =====
         try
         {
             var workouts = await _mongoDbContext.Workouts
@@ -109,10 +149,21 @@ public class Handler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"MongoDB error: {ex.Message}");
+            Console.WriteLine($"MongoDB Workouts error: {ex.Message}");
             throw;
         }
 
+        #region Cassandra Sync
+        //// ===== SYNC CASSANDRA =====
+        //await _cassandraContext.ExerciseMuscleByExerciseIds
+        //    .Where(x=>x.ExerciseId==message.exerciseId&&x.Id==message.id)
+        //    .Delete()
+        //    .ExecuteAsync();
+        //await _cassandraContext.ExerciseMuscleByMuscleIds
+        //    .Where(x=>x.MuscleId==message.muscleId&&x.Id==message.id)
+        //    .Delete()
+        //    .ExecuteAsync();
+        #endregion
         // ===== SYNC CONTEXT TABLES =====
         // No additional tables to sync for delete operation
     }
