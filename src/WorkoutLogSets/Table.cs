@@ -1,5 +1,6 @@
-﻿namespace Journal.WorkoutLogSets;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-public class Table: Model
-{
-}
+namespace Journal.WorkoutLogSets;
+
+[Table("workout-log-sets", Schema = "journal")]
+public class Table : Model { }

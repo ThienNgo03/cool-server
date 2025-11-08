@@ -1,15 +1,5 @@
-﻿using Humanizer;
-using Journal.Databases.MongoDb;
-using Journal.Models.PaginationResults;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
-using Microsoft.AspNetCore.SignalR;
-using MongoDB.Bson;
+﻿using Journal.Databases.MongoDb;
 using MongoDB.Driver;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Channels;
 
 namespace Journal.Workouts;
 
@@ -77,14 +67,14 @@ public class Controller : ControllerBase
             // Apply sorting
             if (!string.IsNullOrEmpty(parameters.SortBy))
             {
-                var sortBy = typeof(Journal.Databases.MongoDb.Collections.Workout.Collection)
+                var sortBy = typeof(Databases.MongoDb.Collections.Workout.Collection)
                     .GetProperties()
                     .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
                     ?.Name;
 
                 if (sortBy != null)
                 {
-                    var prop = typeof(Journal.Databases.MongoDb.Collections.Workout.Collection).GetProperty(sortBy);
+                    var prop = typeof(Databases.MongoDb.Collections.Workout.Collection).GetProperty(sortBy);
                     if (prop != null)
                     {
                         mongoQuery = parameters.SortOrder?.ToLower() == "desc"
@@ -199,8 +189,8 @@ public class Controller : ControllerBase
                                                 Id = wps.Id,
                                                 Value = wps.Value,
                                                 WeekPlanId = wps.WeekPlanId,
-                                                InsertedBy = wps.InsertedBy,
-                                                UpdatedBy = wps.UpdatedBy,
+                                                CreatedById = wps.CreatedById,
+                                                UpdatedById = wps.UpdatedById,
                                                 LastUpdated = wps.LastUpdated,
                                                 CreatedDate = wps.CreatedDate
                                             }).ToList();
@@ -379,8 +369,8 @@ public class Controller : ControllerBase
                                     Id = set.Id,
                                     Value = set.Value,
                                     WeekPlanId = set.WeekPlanId,
-                                    InsertedBy = set.InsertedBy,
-                                    UpdatedBy = set.UpdatedBy,
+                                    CreatedById = set.CreatedById,
+                                    UpdatedById = set.UpdatedById,
                                     LastUpdated = set.LastUpdated,
                                     CreatedDate = set.CreatedDate
                                 });
@@ -473,7 +463,7 @@ public class Controller : ControllerBase
                 .ToDictionary(
                     g => g.Key,
                     g => g.Where(em => muscles.ContainsKey(em.MuscleId))
-                          .Select(em => new Journal.Databases.MongoDb.Collections.Workout.Muscle
+                          .Select(em => new Databases.MongoDb.Collections.Workout.Muscle
                           {
                               Id = muscles[em.MuscleId].Id,
                               Name = muscles[em.MuscleId].Name,
@@ -486,13 +476,13 @@ public class Controller : ControllerBase
                 .GroupBy(wps => wps.WeekPlanId)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(wps => new Journal.Databases.MongoDb.Collections.Workout.WeekPlanSet
+                    g => g.Select(wps => new Databases.MongoDb.Collections.Workout.WeekPlanSet
                     {
                         Id = wps.Id,
                         Value = wps.Value,
                         WeekPlanId = wps.WeekPlanId,
-                        InsertedBy = wps.InsertedBy,
-                        UpdatedBy = wps.UpdatedBy,
+                        CreatedById = wps.CreatedById,
+                        UpdatedById = wps.UpdatedById,
                         LastUpdated = wps.LastUpdated,
                         CreatedDate = wps.CreatedDate
                     }).ToList()
@@ -502,7 +492,7 @@ public class Controller : ControllerBase
                 .GroupBy(wp => wp.WorkoutId)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(wp => new Journal.Databases.MongoDb.Collections.Workout.WeekPlan
+                    g => g.Select(wp => new Databases.MongoDb.Collections.Workout.WeekPlan
                     {
                         Id = wp.Id,
                         DateOfWeek = wp.DateOfWeek,
@@ -510,24 +500,24 @@ public class Controller : ControllerBase
                         WorkoutId = wp.WorkoutId,
                         CreatedDate = wp.CreatedDate,
                         LastUpdated = wp.LastUpdated,
-                        WeekPlanSets = weekPlanSetsByWeekPlanId.GetValueOrDefault(wp.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlanSet>())
+                        WeekPlanSets = weekPlanSetsByWeekPlanId.GetValueOrDefault(wp.Id, new List<Databases.MongoDb.Collections.Workout.WeekPlanSet>())
                     }).ToList()
                 );
 
-            var workoutCollections = new List<Journal.Databases.MongoDb.Collections.Workout.Collection>();
+            var workoutCollections = new List<Databases.MongoDb.Collections.Workout.Collection>();
 
             foreach (var workout in workouts)
             {
                 var exercise = exercises.FirstOrDefault(e => e.Id == workout.ExerciseId);
 
-                var workoutCollection = new Journal.Databases.MongoDb.Collections.Workout.Collection
+                var workoutCollection = new Databases.MongoDb.Collections.Workout.Collection
                 {
                     Id = workout.Id,
                     ExerciseId = workout.ExerciseId,
                     UserId = workout.UserId,
                     CreatedDate = workout.CreatedDate,
                     LastUpdated = workout.LastUpdated,
-                    Exercise = exercise != null ? new Journal.Databases.MongoDb.Collections.Workout.Exercise
+                    Exercise = exercise != null ? new Databases.MongoDb.Collections.Workout.Exercise
                     {
                         Id = exercise.Id,
                         Name = exercise.Name,
@@ -535,9 +525,9 @@ public class Controller : ControllerBase
                         Type = exercise.Type,
                         CreatedDate = exercise.CreatedDate,
                         LastUpdated = exercise.LastUpdated,
-                        Muscles = musclesByExerciseId.GetValueOrDefault(exercise.Id, new List<Journal.Databases.MongoDb.Collections.Workout.Muscle>())
+                        Muscles = musclesByExerciseId.GetValueOrDefault(exercise.Id, new List<Databases.MongoDb.Collections.Workout.Muscle>())
                     } : null,
-                    WeekPlans = weekPlansByWorkoutId.GetValueOrDefault(workout.Id, new List<Journal.Databases.MongoDb.Collections.Workout.WeekPlan>())
+                    WeekPlans = weekPlansByWorkoutId.GetValueOrDefault(workout.Id, new List<Databases.MongoDb.Collections.Workout.WeekPlan>())
                 };
 
                 workoutCollections.Add(workoutCollection);
@@ -577,7 +567,7 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
-        var existingUser = await _context.Users.FindAsync(payload.UserId);
+        var existingUser = await _context.Profiles.FindAsync(payload.UserId);
         if (existingUser == null)
         {
             return NotFound(new ProblemDetails
@@ -679,7 +669,7 @@ public class Controller : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
-        var existingUser = await _context.Users.FindAsync(payload.UserId);
+        var existingUser = await _context.Profiles.FindAsync(payload.UserId);
         if (existingUser == null)
         {
             return NotFound(new ProblemDetails

@@ -48,29 +48,22 @@
   </ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Databases\App\Tables\ExerciseMuscle\ExerciseMuscle.xlsx">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Databases\App\Tables\Exercise\Exercises.xlsx">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Databases\App\Tables\Muscle\Muscle.xlsx">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Databases\App\Migrations\" />
-	  <Folder Include="Databases\App\Tables\WeekPlanSet\" />
-	  <Folder Include="Databases\App\Tables\WeekPlan\" />
-	  <Folder Include="Databases\App\Tables\WorkoutLogSet\" />
-	  <Folder Include="Databases\App\Tables\WorkoutLog\" />
-	  <Folder Include="Databases\App\Tables\Workout\" />
 	  <Folder Include="Databases\Identity\Migrations\" />
 	  <Folder Include="Notes\Create\" />
 	</ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Notes\Create\create.proto" GrpcServices="Server" />
 		<Protobuf Include="Notes\Search\search.proto" GrpcServices="Server" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="ExerciseMuscles\ExerciseMuscles.xlsx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Exercises\Exercises.xlsx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Muscles\Muscles.xlsx">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>

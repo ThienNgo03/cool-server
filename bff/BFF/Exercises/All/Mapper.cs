@@ -5,19 +5,19 @@ namespace BFF.Exercises.All;
 
 public interface IMapper
 {
-    void AttachImageUrls(List<Response> responses);
+    void AttachImageUrls(List<Item> responses);
 
-    void SetSubTitle(List<Response> responses);
+    void SetSubTitle(List<Item> responses);
 
-    void SetBadge(List<Response> responses);
+    void SetBadge(List<Item> responses);
 
-    void SetPercentageCompletion(List<Response> responses);
+    void SetPercentageCompletion(List<Item> responses);
 
-    void SetPercentageCompletionString(List<Response> responses);
+    void SetPercentageCompletionString(List<Item> responses);
 
-    void SetBadgeTextColor(List<Response> responses);
+    void SetBadgeTextColor(List<Item> responses);
 
-    void SetBadgeBackgroundColor(List<Response> responses);
+    void SetBadgeBackgroundColor(List<Item> responses);
 }
 
 public class Mapper : IMapper
@@ -30,7 +30,7 @@ public class Mapper : IMapper
         this.faker = new Faker();
     }
 
-    public void SetSubTitle(List<Response> responses)
+    public void SetSubTitle(List<Item> responses)
     {
         var muscleGroups = context.Muscles.ToDictionary(m => m.Id, m => m.Name);
         var exerciseMuscles = context.ExerciseMuscles
@@ -54,7 +54,7 @@ public class Mapper : IMapper
         }
     }
 
-    public void AttachImageUrls(List<Response> responses)
+    public void AttachImageUrls(List<Item> responses)
     {
         foreach (var response in responses)
         {
@@ -63,7 +63,7 @@ public class Mapper : IMapper
         }
     }
 
-    public void SetBadge(List<Response> responses)
+    public void SetBadge(List<Item> responses)
     {
         //use faker generate badge with in range Easy, Medium, Hard
         var badges = new[] { "Easy", "Medium", "Hard" };
@@ -74,7 +74,7 @@ public class Mapper : IMapper
     }
 
 
-    public void SetBadgeTextColor(List<Response> responses)
+    public void SetBadgeTextColor(List<Item> responses)
     {
         foreach (var response in responses)
         {
@@ -88,7 +88,7 @@ public class Mapper : IMapper
         }
     }
 
-    public void SetBadgeBackgroundColor(List<Response> responses)
+    public void SetBadgeBackgroundColor(List<Item> responses)
     {
         foreach (var response in responses)
         {
@@ -102,7 +102,7 @@ public class Mapper : IMapper
         }
     }
 
-    public void SetPercentageCompletion(List<Response> responses)
+    public void SetPercentageCompletion(List<Item> responses)
     {
         //use faker to generate percentage between 0 and 100
         foreach (var response in responses)
@@ -111,7 +111,7 @@ public class Mapper : IMapper
         }
     }
 
-    public void SetPercentageCompletionString(List<Response> responses)
+    public void SetPercentageCompletionString(List<Item> responses)
     {
         //get the percentage complete from each response and convert to string with % sign
         foreach (var response in responses)
