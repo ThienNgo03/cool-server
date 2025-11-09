@@ -14,7 +14,7 @@ public class Collection
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     [BsonElement("name")]
     public string Name { get; set; } = string.Empty;
@@ -38,7 +38,7 @@ public class Muscle
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     [BsonElement("name")]
     public string Name { get; set; } = string.Empty;

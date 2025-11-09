@@ -17,7 +17,7 @@ public class Collection
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     [BsonElement("exercise")]
     public Exercise? Exercise { get; set; }
@@ -44,7 +44,7 @@ public class Exercise
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     [BsonElement("muscles")]
     public List<Muscle>? Muscles { get; set; } = new();
@@ -62,7 +62,7 @@ public class Muscle
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 }
 
 public class WeekPlan
@@ -83,7 +83,7 @@ public class WeekPlan
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     [BsonElement("weekPlanSets")]
     public List<WeekPlanSet>? WeekPlanSets { get; set; } = new();
@@ -104,11 +104,11 @@ public class WeekPlanSet
     public DateTime CreatedDate { get; set; }
 
     [BsonElement("lastUpdated")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     [BsonElement("insertedBy")]
     public Guid CreatedById { get; set; }
 
     [BsonElement("updatedBy")]
-    public Guid UpdatedById { get; set; }
+    public Guid? UpdatedById { get; set; }
 }

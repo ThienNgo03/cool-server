@@ -8,5 +8,5 @@ public class Index
     public string Type { get; set; }
     public List<Muscle.Index> Muscles { get; set; }
     public DateTime CreatedDate { get; set; }
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 }

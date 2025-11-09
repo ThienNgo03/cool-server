@@ -49,6 +49,7 @@
   </ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Databases\App\Migrations\" />
 	  <Folder Include="Databases\Identity\Migrations\" />
 	  <Folder Include="Notes\Create\" />
 	</ItemGroup>
