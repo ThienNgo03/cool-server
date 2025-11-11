@@ -1,8 +1,6 @@
 ﻿using BFF.Databases.App;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using static Azure.Core.HttpHeader;
 
 namespace BFF.Exercises;
 
