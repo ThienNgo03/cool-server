@@ -1,4 +1,22 @@
 services:
+
+  journal:
+    image: coolserver/journal:latest
+    build:
+      context: .
+      dockerfile: src/Journal/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 6000:80
+    depends_on:
+      - sqlserver
+      - postgres
+      - mongodb
+      - cassandra
+      - opensearch
+
   postgres:
     image: postgres
     environment:
@@ -43,8 +61,22 @@ services:
       - sqlserverdata:/var/opt/mssql
     hostname: sqlserver
 
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=MySecure@Pass123!
+      - DISABLE_SECURITY_PLUGIN=false
+    ports:
+      - 9200:9200
+      - 9600:9600
+    volumes:
+      - opensearchdata:/usr/share/opensearch/data
+
 volumes:
   pgdata:
   mongodata:
   cassandradb:
   sqlserverdata:
+  opensearchdata:
