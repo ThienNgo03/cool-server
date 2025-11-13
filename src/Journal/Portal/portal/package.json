@@ -11,6 +11,8 @@
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
+        "@lineiconshq/free-icons": "^1.0.3",
+        "@lineiconshq/react-lineicons": "^1.0.5",
         "@microsoft/signalr": "^9.0.6",
         "@radix-ui/react-accordion": "^1.2.12",
         "@radix-ui/react-alert-dialog": "^1.1.15",
