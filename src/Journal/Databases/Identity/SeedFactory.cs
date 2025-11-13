@@ -6,6 +6,12 @@ public class SeedFactory
 {
     public async Task SeedAdmins(IdentityContext context)
     {
+        if (context.Users.Any())
+        {
+            Console.WriteLine("✓ Exercises already seeded. Skipping...");
+            return;
+        }
+
         var id = "fdfa4136-ada3-41dc-b16e-8fd9556d4574";
         var password = "NewPassword@1";
 

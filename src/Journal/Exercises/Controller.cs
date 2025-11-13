@@ -308,6 +308,11 @@ public class Controller(
     [HttpPost("sync-data-to-mongodb")]
     public async Task<IActionResult> SyncDataToMongoDB()
     {
+        if (_mongoDbContext.Exercises.Any())
+        {
+            Console.WriteLine("✓ Exercises already synced to MongoDB. Skipping...");
+            return Ok("Exercises already synced to MongoDB. Skipping...");
+        }
         try
         {
             var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
@@ -379,73 +384,85 @@ public class Controller(
     [HttpPost("sync-open-search")]
     public async Task<IActionResult> SeedingOpenSearch()
     {
-        var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
-        var exerciseIds = exercises.Select(x => x.Id).ToList();
-
-        if (!exerciseIds.Any())
-            return Ok("No exercises to index.");
-
-        var exerciseMuscles = await _context.ExerciseMuscles
-            .Where(x => exerciseIds.Contains(x.ExerciseId))
-            .ToListAsync();
-
-        var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
-        var muscles = await _context.Muscles
-            .Where(x => muscleIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id);
-
-        var exerciseMuscleGroups = exerciseMuscles
-            .GroupBy(x => x.ExerciseId)
-            .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId).ToList());
-
-        // Create documents to index
-        var documentsToIndex = new List<Databases.OpenSearch.Indexes.Exercise.Index>();
-
-        foreach (var exercise in exercises)
+        if (await _openSearchClient.CountAsync<Databases.OpenSearch.Indexes.Exercise.Index>(c => c.Index("exercises")) is { Count: > 0 })
         {
-            var musclesToIndex = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
+            Console.WriteLine("✓ Exercises already indexed to OpenSearch. Skipping...");
+            return Ok("Exercises already indexed to OpenSearch. Skipping...");
+        }
+        try
+        {
+            var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
+            var exerciseIds = exercises.Select(x => x.Id).ToList();
 
-            if (exerciseMuscleGroups.TryGetValue(exercise.Id, out var muscleIdsForExercise))
+            if (!exerciseIds.Any())
+                return Ok("No exercises to index.");
+
+            var exerciseMuscles = await _context.ExerciseMuscles
+                .Where(x => exerciseIds.Contains(x.ExerciseId))
+                .ToListAsync();
+
+            var muscleIds = exerciseMuscles.Select(x => x.MuscleId).Distinct().ToList();
+            var muscles = await _context.Muscles
+                .Where(x => muscleIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id);
+
+            var exerciseMuscleGroups = exerciseMuscles
+                .GroupBy(x => x.ExerciseId)
+                .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId).ToList());
+
+            // Create documents to index
+            var documentsToIndex = new List<Databases.OpenSearch.Indexes.Exercise.Index>();
+
+            foreach (var exercise in exercises)
             {
-                musclesToIndex = muscleIdsForExercise
-                    .Where(muscleId => muscles.ContainsKey(muscleId))
-                    .Select(muscleId => new Databases.OpenSearch.Indexes.Muscle.Index
-                    {
-                        Id = muscles[muscleId].Id,
-                        Name = muscles[muscleId].Name,
-                        CreatedDate = muscles[muscleId].CreatedDate,
-                        LastUpdated = muscles[muscleId].LastUpdated
-                    })
-                    .ToList();
+                var musclesToIndex = new List<Databases.OpenSearch.Indexes.Muscle.Index>();
+
+                if (exerciseMuscleGroups.TryGetValue(exercise.Id, out var muscleIdsForExercise))
+                {
+                    musclesToIndex = muscleIdsForExercise
+                        .Where(muscleId => muscles.ContainsKey(muscleId))
+                        .Select(muscleId => new Databases.OpenSearch.Indexes.Muscle.Index
+                        {
+                            Id = muscles[muscleId].Id,
+                            Name = muscles[muscleId].Name,
+                            CreatedDate = muscles[muscleId].CreatedDate,
+                            LastUpdated = muscles[muscleId].LastUpdated
+                        })
+                        .ToList();
+                }
+
+                documentsToIndex.Add(new Databases.OpenSearch.Indexes.Exercise.Index
+                {
+                    Id = exercise.Id,
+                    Name = exercise.Name,
+                    Description = exercise.Description,
+                    Type = exercise.Type,
+                    Muscles = musclesToIndex,
+                    CreatedDate = exercise.CreatedDate,
+                    LastUpdated = exercise.LastUpdated
+                });
             }
 
-            documentsToIndex.Add(new Databases.OpenSearch.Indexes.Exercise.Index
+            // Bulk index using high-level client
+            var bulkResponse = await _openSearchClient.BulkAsync(b => b
+                .Index("exercises")
+                .IndexMany(documentsToIndex, (descriptor, doc) => descriptor
+                    .Id(doc.Id.ToString())
+                    .Document(doc)
+                )
+            );
+
+            if (!bulkResponse.IsValid)
             {
-                Id = exercise.Id,
-                Name = exercise.Name,
-                Description = exercise.Description,
-                Type = exercise.Type,
-                Muscles = musclesToIndex,
-                CreatedDate = exercise.CreatedDate,
-                LastUpdated = exercise.LastUpdated
-            });
+                return StatusCode(500, $"Bulk indexing failed: {bulkResponse.ServerError?.Error?.Reason ?? bulkResponse.DebugInformation}");
+            }
+
+            return Ok($"Successfully indexed {exercises.Count} exercises.");
         }
-
-        // Bulk index using high-level client
-        var bulkResponse = await _openSearchClient.BulkAsync(b => b
-            .Index("exercises")
-            .IndexMany(documentsToIndex, (descriptor, doc) => descriptor
-                .Id(doc.Id.ToString())
-                .Document(doc)
-            )
-        );
-
-        if (!bulkResponse.IsValid)
+        catch (Exception ex)
         {
-            return StatusCode(500, $"Bulk indexing failed: {bulkResponse.ServerError?.Error?.Reason ?? bulkResponse.DebugInformation}");
+            return StatusCode(500, $"An error occurred during indexing: {ex.Message}");
         }
-
-        return Ok($"Successfully indexed {exercises.Count} exercises.");
     }
 
     [HttpPost]

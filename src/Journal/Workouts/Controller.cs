@@ -408,6 +408,11 @@ public class Controller : ControllerBase
     [HttpPost("sync-data-to-mongodb")]
     public async Task<IActionResult> SyncData()
     {
+        if (_mongoDbContext.Workouts.Any())
+        {
+            Console.WriteLine("✓ Workouts already synced to MongoDB. Skipping...");
+            return Ok("Workouts already synced to MongoDB. Skipping...");
+        }
         try
         {
             var workouts = await _context.Workouts.AsNoTracking().ToListAsync();

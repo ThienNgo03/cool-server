@@ -120,10 +120,12 @@ public static class Extensions
         var openSearchConnectionString = new OpenSearch.ConnectionStringBuilder()
             .WithHost(openSearchConfig.Host)
             .WithPort(openSearchConfig.Port)
+            .WithSsl()
             .Build();
 
         var connectionSettings = new ConnectionSettings(new Uri(openSearchConnectionString))
-            .BasicAuthentication(openSearchConfig.Username, openSearchConfig.Password);
+            .BasicAuthentication(openSearchConfig.Username, openSearchConfig.Password)
+            .ServerCertificateValidationCallback((o, certificate, chain, errors) => true);
 
         var openSearchClient = new OpenSearchClient(connectionSettings);
         services.AddSingleton<IOpenSearchClient>(openSearchClient);
