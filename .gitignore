@@ -480,4 +480,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-/uis/portal/.vite/deps
+.vite/
