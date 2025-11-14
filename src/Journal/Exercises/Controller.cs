@@ -308,11 +308,49 @@ public class Controller(
     [HttpPost("sync-data-to-mongodb")]
     public async Task<IActionResult> SyncDataToMongoDB()
     {
+        var isMongoDbConnected = false;
+        const int maxRetries = 3;
+        const int delayMilliseconds = 2000;
+        const int timeoutMilliseconds = 10000;
+
+        for (int i = 0; i < maxRetries; i++)
+        {
+            try
+            {
+                var pingTask = Task.Run(async () =>
+                {
+                    await _mongoDbContext.Exercises.FirstOrDefaultAsync();
+                });
+
+                if (await Task.WhenAny(pingTask, Task.Delay(timeoutMilliseconds)) == pingTask)
+                {
+                    isMongoDbConnected = true;
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"⏳ MongoDB ping timeout (attempt {i + 1}/{maxRetries})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ MongoDB ping failed (attempt {i + 1}/{maxRetries}): {ex.Message}");
+            }
+
+            await Task.Delay(delayMilliseconds);
+        }
+
+        if (!isMongoDbConnected)
+        {
+            throw new Exception("❌ Unable to connect to MongoDB after multiple attempts.");
+        }
+
         if (_mongoDbContext.Exercises.Any())
         {
             Console.WriteLine("✓ Exercises already synced to MongoDB. Skipping...");
             return Ok("Exercises already synced to MongoDB. Skipping...");
         }
+
         try
         {
             var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
@@ -384,11 +422,49 @@ public class Controller(
     [HttpPost("sync-open-search")]
     public async Task<IActionResult> SeedingOpenSearch()
     {
+        var isOpenSearchConnected = false;
+        const int maxRetries = 3;
+        const int delayMilliseconds = 2000;
+        const int timeoutMilliseconds = 10000;
+
+        for (int i = 0; i < maxRetries; i++)
+        {
+            try
+            {
+                var pingTask = Task.Run(async () =>
+                {
+                    await _openSearchClient.PingAsync(); // hoặc CountAsync nếu không có Ping
+                });
+
+                if (await Task.WhenAny(pingTask, Task.Delay(timeoutMilliseconds)) == pingTask)
+                {
+                    isOpenSearchConnected = true;
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"⏳ OpenSearch ping timeout (attempt {i + 1}/{maxRetries})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ OpenSearch ping failed (attempt {i + 1}/{maxRetries}): {ex.Message}");
+            }
+
+            await Task.Delay(delayMilliseconds);
+        }
+
+        if (!isOpenSearchConnected)
+        {
+            throw new Exception("❌ Unable to connect to OpenSearch after multiple attempts.");
+        }
+
         if (await _openSearchClient.CountAsync<Databases.OpenSearch.Indexes.Exercise.Index>(c => c.Index("exercises")) is { Count: > 0 })
         {
             Console.WriteLine("✓ Exercises already indexed to OpenSearch. Skipping...");
             return Ok("Exercises already indexed to OpenSearch. Skipping...");
         }
+
         try
         {
             var exercises = await _context.Exercises.AsNoTracking().ToListAsync();

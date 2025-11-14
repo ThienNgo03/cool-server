@@ -1,6 +1,7 @@
 ﻿using ExcelDataReader;
 using Journal.Databases.MongoDb;
 using OpenSearch.Client;
+using OpenSearch.Net;
 using System.Data;
 namespace Journal.Databases.App;
 
@@ -115,7 +116,7 @@ public class SeedFactory
 
         var exerciseMuscle = table.AsEnumerable()
                         .Where(x => x.Field<string>("Id") != null &&
-                                    x.Field<string>("ExerciseId") != null&&
+                                    x.Field<string>("ExerciseId") != null &&
                                     x.Field<string>("MuscleId") != null)
                         .Select(row => new ExerciseMuscles.Table
                         {
@@ -152,14 +153,51 @@ public class SeedFactory
 
     public async Task CopyExercisesToMongoDb(JournalDbContext _context, MongoDbContext _mongoDbContext)
     {
-        if (_mongoDbContext.Exercises.Any())
-        {
-            Console.WriteLine("✓ Exercises already synced to MongoDB. Skipping...");
-            return;
-        }
-
         try
         {
+            var isMongoDbConnected = false;
+            const int maxRetries = 5;
+            const int delayMilliseconds = 2000;
+            const int timeoutMilliseconds = 10000;
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    var pingTask = Task.Run(async () =>
+                    {
+                        await _mongoDbContext.Exercises.FirstOrDefaultAsync();
+                    });
+
+                    if (await Task.WhenAny(pingTask, Task.Delay(timeoutMilliseconds)) == pingTask)
+                    {
+                        isMongoDbConnected = true;
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⏳ MongoDB ping timeout (attempt {i + 1}/{maxRetries})");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ MongoDB ping failed (attempt {i + 1}/{maxRetries}): {ex.Message}");
+                }
+
+                await Task.Delay(delayMilliseconds);
+            }
+
+            if (!isMongoDbConnected)
+            {
+                throw new Exception("❌ Unable to connect to MongoDB after multiple attempts.");
+            }
+
+            if (_mongoDbContext.Exercises.Any())
+            {
+                Console.WriteLine("✓ Exercises already synced to MongoDB. Skipping...");
+                return;
+            }
+
             var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
             var exerciseIds = exercises.Select(x => x.Id).ToList();
 
@@ -231,14 +269,51 @@ public class SeedFactory
 
     public async Task CopyWorkoutsToMongoDb(JournalDbContext _context, MongoDbContext _mongoDbContext)
     {
-        if (_mongoDbContext.Workouts.Any())
-        {
-            Console.WriteLine("✓ Workouts already synced to MongoDB. Skipping...");
-            return;
-        }
-
         try
         {
+            var isMongoDbConnected = false;
+            const int maxRetries = 5;
+            const int delayMilliseconds = 2000;
+            const int timeoutMilliseconds = 10000;
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    var pingTask = Task.Run(async () =>
+                    {
+                        await _mongoDbContext.Workouts.FirstOrDefaultAsync();
+                    });
+
+                    if (await Task.WhenAny(pingTask, Task.Delay(timeoutMilliseconds)) == pingTask)
+                    {
+                        isMongoDbConnected = true;
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⏳ MongoDB ping timeout (attempt {i + 1}/{maxRetries})");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ MongoDB ping failed (attempt {i + 1}/{maxRetries}): {ex.Message}");
+                }
+
+                await Task.Delay(delayMilliseconds);
+            }
+
+            if (!isMongoDbConnected)
+            {
+                throw new Exception("❌ Unable to connect to MongoDB after multiple attempts.");
+            }
+
+            if (_mongoDbContext.Workouts.Any())
+            {
+                Console.WriteLine("✓ Workouts already synced to MongoDB. Skipping...");
+                return;
+            }
+
             var workouts = await _context.Workouts.AsNoTracking().ToListAsync();
             var workoutIds = workouts.Select(x => x.Id).ToList();
 
@@ -362,14 +437,61 @@ public class SeedFactory
 
     public async Task CopyExercisesToOpenSearch(JournalDbContext _context, IOpenSearchClient _openSearchClient)
     {
-        if (await _openSearchClient.CountAsync<Databases.OpenSearch.Indexes.Exercise.Index>(c => c.Index("exercises")) is { Count: > 0 })
-        {
-            Console.WriteLine("✓ Exercises already indexed to OpenSearch. Skipping...");
-            return;
-        }
-
         try
         {
+            var isOpenSearchReady = false;
+            const int maxRetries = 5;
+            const int delayMilliseconds = 12000;
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    var healthResponse = await _openSearchClient.Cluster.HealthAsync();
+
+                    if (healthResponse != null && healthResponse.IsValid)
+                    {
+                        var status = healthResponse.Status.ToString()?.ToLowerInvariant();
+                        if (status == "green" || status == "yellow")
+                        {
+                            isOpenSearchReady = true;
+                            Console.WriteLine($"✓ OpenSearch is ready (status: {status}) (attempt {i + 1}/{maxRetries})");
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"⏳ OpenSearch not ready yet (status: {status}) (attempt {i + 1}/{maxRetries})");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️ OpenSearch health response invalid (attempt {i + 1}/{maxRetries})");
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ OpenSearch health check error (attempt {i + 1}/{maxRetries}): {ex.Message}");
+                }
+
+                if (i < maxRetries - 1)
+                {
+                    await Task.Delay(delayMilliseconds);
+                }
+            }
+
+
+            if (!isOpenSearchReady)
+            {
+                throw new Exception("❌ Unable to connect to OpenSearch after multiple attempts.");
+            }
+
+            if (await _openSearchClient.CountAsync<Databases.OpenSearch.Indexes.Exercise.Index>(c => c.Index("exercises")) is { Count: > 0 })
+            {
+                Console.WriteLine("✓ Exercises already indexed to OpenSearch. Skipping...");
+                return;
+            }
+
             var exercises = await _context.Exercises.AsNoTracking().ToListAsync();
             var exerciseIds = exercises.Select(x => x.Id).ToList();
 
@@ -392,7 +514,6 @@ public class SeedFactory
                 .GroupBy(x => x.ExerciseId)
                 .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId).ToList());
 
-            // Create documents to index
             var documentsToIndex = new List<Databases.OpenSearch.Indexes.Exercise.Index>();
 
             foreach (var exercise in exercises)
@@ -424,7 +545,7 @@ public class SeedFactory
                     LastUpdated = exercise.LastUpdated
                 });
             }
-            // Bulk index using high-level client
+
             var bulkResponse = await _openSearchClient.BulkAsync(b => b
                 .Index("exercises")
                 .IndexMany(documentsToIndex, (descriptor, doc) => descriptor
@@ -435,18 +556,16 @@ public class SeedFactory
 
             if (!bulkResponse.IsValid)
             {
-                Console.WriteLine($"Bulk indexing failed: {bulkResponse.ServerError?.Error?.Reason ?? bulkResponse.DebugInformation}");
+                Console.WriteLine($"❌ Bulk indexing failed: {bulkResponse.ServerError?.Error?.Reason ?? bulkResponse.DebugInformation}");
                 return;
             }
 
-
             Console.WriteLine($"✓ Indexed {documentsToIndex.Count} exercises to OpenSearch.");
-            return;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error indexing exercises to OpenSearch: {ex.Message}");
+            Console.WriteLine($"❌ Error indexing exercises to OpenSearch: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
-
 }

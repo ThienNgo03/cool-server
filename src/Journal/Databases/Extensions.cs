@@ -62,26 +62,17 @@ public static class Extensions
         services.AddDbContext<JournalDbContext>(x =>
         {
             x.EnableSensitiveDataLogging();
-            x.UseSqlServer(journalConnectionString) // Thêm connection string vào đây
-                .UseSeeding((context, _) =>
-                {
-                    var journalContext = (JournalDbContext)context;
-                    App.SeedFactory seedFactory = new();
-                    seedFactory.SeedAdmins(journalContext).Wait();
-                    seedFactory.SeedExercise(journalContext).Wait();
-                    seedFactory.SeedMuscle(journalContext).Wait();
-                    seedFactory.SeedExerciseMuscle(journalContext).Wait();
-                });
+            x.UseSqlServer(journalConnectionString, sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null));
         });
 
         services.AddDbContext<IdentityContext>(x => 
-            x.UseSqlServer(identityConnectionString)
-                .UseSeeding((context, _) =>
-                {
-                    var identityContext = (IdentityContext)context;
-                    Identity.SeedFactory seedFactory = new();
-                    seedFactory.SeedAdmins(identityContext).Wait();
-                }));
+            x.UseSqlServer(identityConnectionString, sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null)));
 
         services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>()
@@ -125,7 +116,8 @@ public static class Extensions
 
         var connectionSettings = new ConnectionSettings(new Uri(openSearchConnectionString))
             .BasicAuthentication(openSearchConfig.Username, openSearchConfig.Password)
-            .ServerCertificateValidationCallback((o, certificate, chain, errors) => true);
+            .ServerCertificateValidationCallback((o, certificate, chain, errors) => true)
+            .DisableDirectStreaming();
 
         var openSearchClient = new OpenSearchClient(connectionSettings);
         services.AddSingleton<IOpenSearchClient>(openSearchClient);

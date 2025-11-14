@@ -408,11 +408,49 @@ public class Controller : ControllerBase
     [HttpPost("sync-data-to-mongodb")]
     public async Task<IActionResult> SyncData()
     {
+        var isMongoDbConnected = false;
+        const int maxRetries = 3;
+        const int delayMilliseconds = 2000;
+        const int timeoutMilliseconds = 10000;
+
+        for (int i = 0; i < maxRetries; i++)
+        {
+            try
+            {
+                var pingTask = Task.Run(async () =>
+                {
+                    await _mongoDbContext.Workouts.FirstOrDefaultAsync();
+                });
+
+                if (await Task.WhenAny(pingTask, Task.Delay(timeoutMilliseconds)) == pingTask)
+                {
+                    isMongoDbConnected = true;
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"⏳ MongoDB ping timeout (attempt {i + 1}/{maxRetries})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ MongoDB ping failed (attempt {i + 1}/{maxRetries}): {ex.Message}");
+            }
+
+            await Task.Delay(delayMilliseconds);
+        }
+
+        if (!isMongoDbConnected)
+        {
+            throw new Exception("❌ Unable to connect to MongoDB after multiple attempts.");
+        }
+
         if (_mongoDbContext.Workouts.Any())
         {
             Console.WriteLine("✓ Workouts already synced to MongoDB. Skipping...");
             return Ok("Workouts already synced to MongoDB. Skipping...");
         }
+
         try
         {
             var workouts = await _context.Workouts.AsNoTracking().ToListAsync();
