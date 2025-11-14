@@ -34,7 +34,7 @@ namespace BFF.Exercises.Configurations
         }
 
         [HttpPost("save")]
-        public async Task<IActionResult> Save([FromBody] Save.Payload payload)
+        public async Task<IActionResult> Save([FromBody] Save.Payload payload, [FromRoute] Guid? id)
         {
             if (User.Identity is null)
                 return Unauthorized();
@@ -42,21 +42,21 @@ namespace BFF.Exercises.Configurations
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
                 return Unauthorized("User Id not found");
-
-            await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
-            {
-                ExerciseId = payload.ExerciseId,
-                UserId = payload.UserId,
-                WeekPlans = payload.WeekPlans?.Select(wp => new Library.Workouts.POST.WeekPlan
+            if(id!=null)
+                await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
                 {
-                    DateOfWeek = wp.DateOfWeek,
-                    Time = wp.Time,
-                    WeekPlanSets = wp.WeekPlanSets?.Select(wps => new Library.Workouts.POST.WeekPlanSet
+                    ExerciseId = (Guid)id,
+                    UserId = payload.UserId,
+                    WeekPlans = payload.WeekPlans?.Select(wp => new Library.Workouts.POST.WeekPlan
                     {
-                        Value = wps.Value
+                        DateOfWeek = wp.DateOfWeek,
+                        Time = wp.Time,
+                        WeekPlanSets = wp.WeekPlanSets?.Select(wps => new Library.Workouts.POST.WeekPlanSet
+                        {
+                            Value = wps.Value
+                        }).ToList()
                     }).ToList()
-                }).ToList()
-            });
+                });
 
             return NoContent();
         }
