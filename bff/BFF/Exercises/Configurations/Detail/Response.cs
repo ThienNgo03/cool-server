@@ -1,4 +1,4 @@
-﻿namespace BFF.ExerciseConfigurations.Detail;
+﻿namespace BFF.Exercises.Configurations.Detail;
 
 public class Response 
 {

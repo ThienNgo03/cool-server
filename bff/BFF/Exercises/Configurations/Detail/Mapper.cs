@@ -1,6 +1,6 @@
 ﻿using Bogus;
 
-namespace BFF.ExerciseConfigurations.Detail;
+namespace BFF.Exercises.Configurations.Detail;
 
 
 public interface IMapper

@@ -1,7 +1,7 @@
 ﻿using BFF.Databases.App;
 using Microsoft.EntityFrameworkCore;
 
-namespace BFF.ExerciseConfigurations.Save.Messager;
+namespace BFF.Exercises.Configurations.Save.Messager;
 
 public class Handler
 {

@@ -1,4 +1,4 @@
-﻿namespace BFF.ExerciseConfigurations;
+﻿namespace BFF.Exercises.Configurations;
 
 public static class Extensions
 {
