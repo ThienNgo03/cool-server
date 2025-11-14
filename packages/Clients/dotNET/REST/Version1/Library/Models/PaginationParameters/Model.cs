@@ -2,7 +2,7 @@
 
 public class Model
 {
-    public Guid? Id { get; set; }
+    public string? Ids { get; set; }
     public int? PageIndex { get; set; }
     public int? PageSize { get; set; }
     public string? SearchTerm { get; set; }

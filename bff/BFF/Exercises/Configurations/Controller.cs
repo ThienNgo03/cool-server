@@ -10,9 +10,8 @@ using Wolverine;
 
 namespace BFF.Exercises.Configurations
 {
-    [Route("api/exercises/configs")]
-    //[Authorize]
-    [AllowAnonymous]
+    [Route("api/exercises/{id}/configs")]
+    [Authorize]
     [ApiController]
     public class Controller : ControllerBase
     {
@@ -35,49 +34,53 @@ namespace BFF.Exercises.Configurations
         }
 
         [HttpPost("save")]
-        public async Task<IActionResult> Save([FromBody] Save.Payload payload)
+        public async Task<IActionResult> Save([FromBody] Save.Payload payload, [FromRoute] Guid? id)
         {
-            //if (User.Identity is null)
-            //    return Unauthorized();
+            if (User.Identity is null)
+                return Unauthorized();
 
-            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //if (userId is null)
-            //    return Unauthorized("User Id not found");
-
-            await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
-            {
-                ExerciseId = payload.ExerciseId,
-                UserId = payload.UserId,
-                WeekPlans = payload.WeekPlans?.Select(wp => new Library.Workouts.POST.WeekPlan
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
+            if(id!=null)
+                await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
                 {
-                    DateOfWeek = wp.DateOfWeek,
-                    Time = wp.Time,
-                    WeekPlanSets = wp.WeekPlanSets?.Select(wps => new Library.Workouts.POST.WeekPlanSet
+                    ExerciseId = (Guid)id,
+                    UserId = payload.UserId,
+                    WeekPlans = payload.WeekPlans?.Select(wp => new Library.Workouts.POST.WeekPlan
                     {
-                        Value = wps.Value
+                        DateOfWeek = wp.DateOfWeek,
+                        Time = wp.Time,
+                        WeekPlanSets = wp.WeekPlanSets?.Select(wps => new Library.Workouts.POST.WeekPlanSet
+                        {
+                            Value = wps.Value
+                        }).ToList()
                     }).ToList()
-                }).ToList()
-            });
+                });
 
-            return Ok();
+            return NoContent();
         }
 
-        [HttpGet("{id}/detail")]
-        public async Task<IActionResult> Detail([FromQuery] Parameters parameters, Guid? id)
+        [HttpGet("detail")]
+        public async Task<IActionResult> Detail([FromQuery] Parameters parameters, [FromRoute] Guid? id)
         {
-            //if (User.Identity is null)
-            //    return Unauthorized();
+            if (User.Identity is null)
+                return Unauthorized();
 
-            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //if (userId is null)
-            //    return Unauthorized("User Id not found");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
 
             var list = await _workoutInterface.GetAsync(new()
             {
-                Id= id,
-                ExerciseId = parameters.ExerciseId,
+                ExerciseId = id,
                 UserId = parameters.UserId,
-                Include= "exercise.muscles, weekplans.weekplansets"
+                Include = parameters.Include,
+                PageSize = parameters.PageSize,
+                PageIndex = parameters.PageIndex,
+                SearchTerm = parameters.SearchTerm,
+                CreatedDate = parameters.CreatedDate,
+                LastUpdated = parameters.LastUpdated
             });
 
             return Ok(list);
