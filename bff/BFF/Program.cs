@@ -23,7 +23,7 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddWolverine(builder.Configuration);
 builder.Services.AddAuthentication(builder.Configuration);
 
-Library.Config locaHostConfig = new("https://localhost:6000/");
+Library.Config locaHostConfig = new("http://localhost:6000/");
 Library.Config devTunnelEnviroment = new("https://k7ql47j3-7011.asse.devtunnels.ms/");
 Library.Config productionEnviroment = new("https://storm-ergshka6h7a0bngn.southeastasia-01.azurewebsites.net/");
 builder.Services.AddEndpoints(locaHostConfig);
