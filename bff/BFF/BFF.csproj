@@ -28,7 +28,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ExerciseConfigurations\" />
+    <Folder Include="ExerciseDetails\" />
     <Folder Include="Mobile\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\packages\Clients\dotNET\REST\Version1\Library\Library.csproj" />
   </ItemGroup>
 
 </Project>

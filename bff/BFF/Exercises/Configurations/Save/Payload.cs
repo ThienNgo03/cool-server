@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BFF.ExerciseConfigurations.Save;
+namespace BFF.Exercises.Configurations.Save;
 
 public class Payload
 {

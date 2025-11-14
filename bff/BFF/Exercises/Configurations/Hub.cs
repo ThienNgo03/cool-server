@@ -1,6 +1,6 @@
 ﻿using BFF.Databases.App;
 using Microsoft.AspNetCore.SignalR;
-namespace BFF.ExerciseConfigurations;
+namespace BFF.Exercises.Configurations;
 
 public sealed class Hub : Microsoft.AspNetCore.SignalR.Hub
 {

@@ -26,7 +26,7 @@ public static class Extension
         }
         #endregion
 
-        #region MSSQL
+        #region [ MSSQL ]
 
         var journalDbConfig = configuration.GetSection("JournalDb").Get<DbConfig>();
         var identityDbConfig = configuration.GetSection("IdentityDb").Get<DbConfig>();
