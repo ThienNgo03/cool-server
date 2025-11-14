@@ -10,9 +10,8 @@ using Wolverine;
 
 namespace BFF.Exercises.Configurations
 {
-    [Route("api/exercises/configs")]
-    //[Authorize]
-    [AllowAnonymous]
+    [Route("api/exercises/{id}/configs")]
+    [Authorize]
     [ApiController]
     public class Controller : ControllerBase
     {
@@ -37,12 +36,12 @@ namespace BFF.Exercises.Configurations
         [HttpPost("save")]
         public async Task<IActionResult> Save([FromBody] Save.Payload payload)
         {
-            //if (User.Identity is null)
-            //    return Unauthorized();
+            if (User.Identity is null)
+                return Unauthorized();
 
-            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //if (userId is null)
-            //    return Unauthorized("User Id not found");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
 
             await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
             {
@@ -59,25 +58,29 @@ namespace BFF.Exercises.Configurations
                 }).ToList()
             });
 
-            return Ok();
+            return NoContent();
         }
 
-        [HttpGet("{id}/detail")]
-        public async Task<IActionResult> Detail([FromQuery] Parameters parameters, Guid? id)
+        [HttpGet("detail")]
+        public async Task<IActionResult> Detail([FromQuery] Parameters parameters, [FromRoute] Guid? id)
         {
-            //if (User.Identity is null)
-            //    return Unauthorized();
+            if (User.Identity is null)
+                return Unauthorized();
 
-            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //if (userId is null)
-            //    return Unauthorized("User Id not found");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized("User Id not found");
 
             var list = await _workoutInterface.GetAsync(new()
             {
-                Id= id,
-                ExerciseId = parameters.ExerciseId,
+                ExerciseId = id,
                 UserId = parameters.UserId,
-                Include= "exercise.muscles, weekplans.weekplansets"
+                Include = parameters.Include,
+                PageSize = parameters.PageSize,
+                PageIndex = parameters.PageIndex,
+                SearchTerm = parameters.SearchTerm,
+                CreatedDate = parameters.CreatedDate,
+                LastUpdated = parameters.LastUpdated
             });
 
             return Ok(list);
