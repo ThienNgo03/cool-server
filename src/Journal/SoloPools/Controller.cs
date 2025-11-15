@@ -35,10 +35,15 @@ public class Controller : ControllerBase
     {
         var query = _dbContext.SoloPools.AsQueryable();
         var all = query;
-        // Filtering
-        if (parameters.Id.HasValue)
+
+        if (!string.IsNullOrEmpty(parameters.Ids))
         {
-            query = query.Where(x => x.Id == parameters.Id.Value);
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+            .Where(guid => guid.HasValue)
+            .Select(guid => guid.Value)
+            .ToList();
+            query = query.Where(x => ids.Contains(x.Id));
         }
         if (parameters.WinnerId.HasValue)
         {
@@ -61,15 +66,30 @@ public class Controller : ControllerBase
         {
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
         }
+
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
+
         var result = await query.AsNoTracking().ToListAsync();
 
-        var paginationResults = new Builder<SoloPools.Table>()
-                .WithAll(await all.CountAsync())
-                .WithIndex(parameters.PageIndex)
-                .WithSize(parameters.PageSize)
-                .WithTotal(result.Count)
-                .WithItems(result)
-                .Build();
+        var paginationResults = new Builder<Table>()
+          .WithAll(await all.CountAsync())
+          .WithIndex(parameters.PageIndex)
+          .WithSize(parameters.PageSize)
+          .WithTotal(result.Count)
+          .WithItems(result)
+          .Build();
 
         return Ok(paginationResults);
     }

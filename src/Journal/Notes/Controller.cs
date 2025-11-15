@@ -21,9 +21,17 @@
         public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)// phải có dấu ? sau mỗi property, cho phép để trống chúng khi Get, nếu không sẽ lỗi
         {
             var query = _context.Notes.AsQueryable(); //lấy table ra, nhưng chưa đâm xuống Database
-            //Query Id
-            if (parameters.id.HasValue)
-                query = query.Where(x => x.Id == parameters.id);
+            var all = query;
+
+            if (!string.IsNullOrEmpty(parameters.Ids))
+            {
+                var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+                .Where(guid => guid.HasValue)
+                .Select(guid => guid.Value)
+                .ToList();
+                query = query.Where(x => ids.Contains(x.Id));
+            }
             //Query UserId
             if (parameters.userId.HasValue)
                 query = query.Where(x => x.UserId == parameters.userId);
@@ -40,11 +48,34 @@
             if (!string.IsNullOrEmpty(parameters.mood))
                 query = query.Where(x => x.Mood.Contains(parameters.mood));
             //chia trang
-            if (parameters.pageSize.HasValue && parameters.pageIndex.HasValue && parameters.pageSize > 0 && parameters.pageIndex >= 0)
-                query = query.Skip(parameters.pageIndex.Value * parameters.pageSize.Value).Take(parameters.pageSize.Value);
+            if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
+                query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
+
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+            {
+                var sortBy = typeof(Table)
+                    .GetProperties()
+                    .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                    ?.Name;
+                if (sortBy != null)
+                {
+                    query = parameters.SortOrder?.ToLower() == "desc"
+                        ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                        : query.OrderBy(x => EF.Property<object>(x, sortBy));
+                }
+            }
 
             var result = await query.AsNoTracking().ToListAsync();
-            return Ok(result);
+
+            var paginationResults = new Builder<Table>()
+              .WithAll(await all.CountAsync())
+              .WithIndex(parameters.PageIndex)
+              .WithSize(parameters.PageSize)
+              .WithTotal(result.Count)
+              .WithItems(result)
+              .Build();
+
+            return Ok(paginationResults);
 
         }
 

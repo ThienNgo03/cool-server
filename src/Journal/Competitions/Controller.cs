@@ -30,42 +30,46 @@ public class Controller : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
+        List<Get.Response> responses = new();
+        int totalCount = 0;
 
-        var query =_dbContext.Competitions.AsQueryable();
+        // ===== MAIN QUERY =====
+        var query = _dbContext.Competitions.AsQueryable();
         var all = query;
 
-        if (parameters.Id.HasValue)
+        // Handle Ids parameter
+        if (!string.IsNullOrEmpty(parameters.Ids))
         {
-            query = query.Where(c => c.Id == parameters.Id.Value);
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+                .Where(guid => guid.HasValue)
+                .Select(guid => guid.Value)
+                .ToList();
+            query = query.Where(x => ids.Contains(x.Id));
         }
+
+        // Apply filters
         if (parameters.RefereeId.HasValue)
-        {
             query = query.Where(c => c.RefereeId == parameters.RefereeId.Value);
-        }
+
         if (!string.IsNullOrEmpty(parameters.Title))
-        {
             query = query.Where(c => c.Title.ToLower().Trim().Contains(parameters.Title.ToLower().Trim()));
-        }
+
         if (!string.IsNullOrEmpty(parameters.Description))
-        {
             query = query.Where(c => c.Description.ToLower().Trim().Contains(parameters.Description.ToLower().Trim()));
-        }
+
         if (!string.IsNullOrEmpty(parameters.Location))
-        {
             query = query.Where(c => c.Location.ToLower().Trim().Contains(parameters.Location.ToLower().Trim()));
-        }
+
         if (parameters.DateTime.HasValue)
-        {
             query = query.Where(c => c.DateTime.Date == parameters.DateTime.Value.Date);
-        }
+
         if (parameters.CreatedDate.HasValue)
-        {
             query = query.Where(c => c.CreatedDate.Date == parameters.CreatedDate.Value.Date);
-        }
+
         if (!string.IsNullOrEmpty(parameters.Type))
-        {
             query = query.Where(c => c.Type.ToLower().Trim() == parameters.Type.ToLower().Trim());
-        }
+
         if (!string.IsNullOrEmpty(parameters.ParticipantIds))
         {
             var idStrings = parameters.ParticipantIds
@@ -84,88 +88,126 @@ public class Controller : ControllerBase
 
             query = query.Where(c => c.ParticipantIds.Any(id => guidList.Contains(id)));
         }
-        if(parameters.ExerciseId.HasValue)
-        {
+
+        if (parameters.ExerciseId.HasValue)
             query = query.Where(c => c.ExerciseId == parameters.ExerciseId.Value);
+
+        // Apply sorting
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
         }
+
+        // Get total count before pagination
+        totalCount = await all.CountAsync();
+
+        // Apply pagination
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
-        {
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
-        }
 
-        var queryResult = await query.AsNoTracking().ToListAsync();
+        var result = await query.AsNoTracking().ToListAsync();
 
-        List<Get.Response> response = new();
-        foreach (var item in queryResult) {
-            Get.Response competitionResponse = new()
-            {
-                Id = item.Id,
-                Title = item.Title,
-                Description = item.Description,
-                ParticipantIds = item.ParticipantIds,
-                ExerciseId = item.ExerciseId,
-                Location = item.Location,
-                DateTime = item.DateTime,
-                CreatedDate = item.CreatedDate,
-                Type = item.Type,
-                RefereeId = item.RefereeId
-            };
-            response.Add(competitionResponse);
-        }
-
-        if (parameters.IsIncludeSoloPool)
+        // Build base responses
+        responses = result.Select(competition => new Get.Response
         {
-            var soloPool = await _dbContext.SoloPools
-                .FirstOrDefaultAsync(x => x.CompetitionId == parameters.Id);
+            Id = competition.Id,
+            RefereeId = competition.RefereeId,
+            Title = competition.Title,
+            Description = competition.Description,
+            Location = competition.Location,
+            DateTime = competition.DateTime,
+            CreatedDate = competition.CreatedDate,
+            Type = competition.Type,
+            ParticipantIds = competition.ParticipantIds,
+            ExerciseId = competition.ExerciseId,
+            SoloPool = null,
+            TeamPools = null
+        }).ToList();
 
-            foreach (var competition in response)
+        Console.WriteLine($"Successfully fetched {responses.Count} competitions from SQL");
+
+        // ===== HANDLE INCLUDE PARAMETER =====
+        if (!string.IsNullOrEmpty(parameters.Include))
+        {
+            var includes = parameters.Include.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(i => i.Trim().ToLower())
+                                 .ToList();
+
+            var competitionIds = responses.Select(c => c.Id).ToList();
+
+            foreach (var inc in includes)
             {
-                if (soloPool is null)
-                    continue;
-
-                if(competition.Id != soloPool.CompetitionId)
-                    continue;
-
-                competition.SoloPool = new Get.SoloPool
+                if (inc == "solopool")
                 {
-                    Id = soloPool.Id,
-                    WinnerId = soloPool.WinnerId,
-                    LoserId = soloPool.LoserId,
-                    CompetitionId = soloPool.CompetitionId,
-                    CreatedDate = soloPool.CreatedDate
-                };
+                    var soloPools = await _dbContext.SoloPools
+                        .Where(sp => competitionIds.Contains(sp.CompetitionId))
+                        .ToListAsync();
+
+                    var soloPoolDict = soloPools.ToDictionary(sp => sp.CompetitionId);
+
+                    foreach (var response in responses)
+                    {
+                        if (soloPoolDict.TryGetValue(response.Id, out var soloPool))
+                        {
+                            response.SoloPool = new Get.SoloPool
+                            {
+                                Id = soloPool.Id,
+                                WinnerId = soloPool.WinnerId,
+                                LoserId = soloPool.LoserId,
+                                CompetitionId = soloPool.CompetitionId,
+                                CreatedDate = soloPool.CreatedDate
+                            };
+                        }
+                    }
+
+                    Console.WriteLine($"Successfully fetched solo pools for {responses.Count} competitions");
+                }
+                else if (inc == "teampools")
+                {
+                    var teamPools = await _dbContext.TeamPools
+                        .Where(tp => competitionIds.Contains(tp.CompetitionId))
+                        .ToListAsync();
+
+                    var teamPoolsByCompetition = teamPools
+                        .GroupBy(tp => tp.CompetitionId)
+                        .ToDictionary(g => g.Key, g => g.ToList());
+
+                    foreach (var response in responses)
+                    {
+                        if (teamPoolsByCompetition.TryGetValue(response.Id, out var pools))
+                        {
+                            response.TeamPools = pools.Select(tp => new Get.TeamPool
+                            {
+                                Id = tp.Id,
+                                ParticipantId = tp.ParticipantId,
+                                Position = tp.Position,
+                                CompetitionId = tp.CompetitionId,
+                                CreatedDate = tp.CreatedDate
+                            }).ToList();
+                        }
+                    }
+
+                    Console.WriteLine($"Successfully fetched team pools for {responses.Count} competitions");
+                }
             }
         }
 
-        if(parameters.IsIncludeTeamPools)
-        {
-            var teamPools = await _dbContext.TeamPools
-                .Where(x => x.CompetitionId == parameters.Id)
-                .ToListAsync();
-
-            foreach (var competition in response)
-            {                 
-                if (teamPools is null || teamPools.Count == 0)
-                    continue;
-                if(competition.Id != parameters.Id)
-                    continue;
-                competition.TeamPools = teamPools.Select(tp => new Get.TeamPool
-                {
-                    Id = tp.Id,
-                    ParticipantId = tp.ParticipantId,
-                    Position = tp.Position,
-                    CompetitionId = tp.CompetitionId,
-                    CreatedDate = tp.CreatedDate
-                }).ToList();
-            }
-        }
-
+        // ===== BUILD PAGINATION RESULTS =====
         var paginationResults = new Builder<Get.Response>()
-            .WithAll(await all.CountAsync())
+            .WithAll(totalCount)
             .WithIndex(parameters.PageIndex)
             .WithSize(parameters.PageSize)
-            .WithTotal(response.Count)
-            .WithItems(response)
+            .WithTotal(responses.Count)
+            .WithItems(responses)
             .Build();
 
         return Ok(paginationResults);

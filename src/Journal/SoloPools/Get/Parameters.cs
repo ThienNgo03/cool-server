@@ -1,12 +1,8 @@
 ﻿namespace Journal.SoloPools.Get;
 
-public class Parameters
+public class Parameters: Models.PaginationParameters.Model
 {
-    public Guid? Id { get; set; }
     public Guid? WinnerId { get; set; }
     public Guid? LoserId { get; set; }
     public Guid? CompetitionId { get; set; }
-    public DateTime? CreatedDate { get; set; }
-    public int? PageIndex { get; set; }
-    public int? PageSize { get; set; }
 }

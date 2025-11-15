@@ -16,9 +16,18 @@ public class Controller:ControllerBase
     public async Task<IActionResult> Get([FromQuery] Get.Parameters parameters)
     {
         var query =_context.Gadgets.AsQueryable();
-        if(parameters.Id.HasValue)
-            query = query.Where(g => g.Id == parameters.Id.Value);
-        if(!string.IsNullOrEmpty(parameters.Name))
+        var all = query;
+
+        if (!string.IsNullOrEmpty(parameters.Ids))
+        {
+            var ids = parameters.Ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(id => Guid.TryParse(id.Trim(), out var guid) ? guid : (Guid?)null)
+            .Where(guid => guid.HasValue)
+            .Select(guid => guid.Value)
+            .ToList();
+            query = query.Where(x => ids.Contains(x.Id));
+        }
+        if (!string.IsNullOrEmpty(parameters.Name))
             query = query.Where(g => g.Name.Contains(parameters.Name, StringComparison.OrdinalIgnoreCase));
         if(!string.IsNullOrEmpty(parameters.Brand))
             query = query.Where(g => g.Brand.Contains(parameters.Brand, StringComparison.OrdinalIgnoreCase));
@@ -29,8 +38,31 @@ public class Controller:ControllerBase
         if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
             query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var sortBy = typeof(Table)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(parameters.SortBy, StringComparison.OrdinalIgnoreCase))
+                ?.Name;
+            if (sortBy != null)
+            {
+                query = parameters.SortOrder?.ToLower() == "desc"
+                    ? query.OrderByDescending(x => EF.Property<object>(x, sortBy))
+                    : query.OrderBy(x => EF.Property<object>(x, sortBy));
+            }
+        }
+
         var result = await query.AsNoTracking().ToListAsync();
-        return Ok(result);
+
+        var paginationResults = new Builder<Table>()
+          .WithAll(await all.CountAsync())
+          .WithIndex(parameters.PageIndex)
+          .WithSize(parameters.PageSize)
+          .WithTotal(result.Count)
+          .WithItems(result)
+          .Build();
+
+        return Ok(paginationResults);
     }
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Post.Payload payload)
