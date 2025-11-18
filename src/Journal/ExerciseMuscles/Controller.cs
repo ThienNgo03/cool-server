@@ -47,9 +47,6 @@ public class Controller : ControllerBase
         if (parameters.MuscleId.HasValue)
             query = query.Where(x => x.MuscleId == parameters.MuscleId);
 
-        if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
-            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
-
         if (!string.IsNullOrEmpty(parameters.SortBy))
         {
             var sortBy = typeof(Table)
@@ -63,6 +60,10 @@ public class Controller : ControllerBase
                     : query.OrderBy(x => EF.Property<object>(x, sortBy));
             }
         }
+
+        if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
+            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
+
         var result = await query.AsNoTracking().ToListAsync();
 
 

@@ -45,9 +45,6 @@ public class Controller(IMessageBus messageBus,
         if (parameters.LastUpdated.HasValue)
             query = query.Where(x => x.LastUpdated == parameters.LastUpdated);
 
-        if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
-            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
-
         if (!string.IsNullOrEmpty(parameters.SortBy))
         {
             var sortBy = typeof(Table)
@@ -61,6 +58,10 @@ public class Controller(IMessageBus messageBus,
                     : query.OrderBy(x => EF.Property<object>(x, sortBy));
             }
         }
+
+        if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
+            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
+
 
         var result = await query.AsNoTracking().ToListAsync();
 

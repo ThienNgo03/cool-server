@@ -35,9 +35,6 @@ public class Controller:ControllerBase
             query = query.Where(g => g.Description.Contains(parameters.Description, StringComparison.OrdinalIgnoreCase));
         if (parameters.Date.HasValue)
             query = query.Where(x => x.Date == parameters.Date);
-        if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
-            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
-
         if (!string.IsNullOrEmpty(parameters.SortBy))
         {
             var sortBy = typeof(Table)
@@ -51,6 +48,8 @@ public class Controller:ControllerBase
                     : query.OrderBy(x => EF.Property<object>(x, sortBy));
             }
         }
+        if (parameters.PageSize.HasValue && parameters.PageIndex.HasValue && parameters.PageSize > 0 && parameters.PageIndex >= 0)
+            query = query.Skip(parameters.PageIndex.Value * parameters.PageSize.Value).Take(parameters.PageSize.Value);
 
         var result = await query.AsNoTracking().ToListAsync();
 
