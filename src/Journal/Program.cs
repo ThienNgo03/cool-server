@@ -35,6 +35,7 @@ builder.Services.AddJourneys(builder.Configuration);
 builder.Services.AddSignalR(x => x.EnableDetailedErrors = true);
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddFile(builder.Configuration);
+builder.Services.AddMemoryCache();
 
 builder.Services.AddCors(options =>
 {
@@ -54,6 +55,7 @@ if (app.Environment.IsDevelopment())
 	app.UseCors("AllowLocalhost5173");
 }
 app.UseHttpsRedirection();
+app.UseMiddleware<HmacAuthenticationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
