@@ -16,7 +16,7 @@ public class RefitHttpClientHandler : HttpClientHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (config.IsMachineMode)
+        if (!string.IsNullOrEmpty(config.SecretKey) && !string.IsNullOrWhiteSpace(config.SecretKey))
         {
             request.Headers.Add("X-Machine-Hash", machineTokenService.ComputeHash());
             request.Headers.Add("X-Timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
