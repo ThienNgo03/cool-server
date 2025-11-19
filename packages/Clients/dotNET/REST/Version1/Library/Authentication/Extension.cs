@@ -10,6 +10,7 @@ public static class Extensions
         services.AddTransient<Implementations.Version1.RefitHttpClientHandler>();
 
         string baseUrl = config.Url;
+        string secretKey = config.SecretKey;
 
         services.AddRefitClient<Implementations.Version1.IRefitInterface>()
                 .ConfigurePrimaryHttpMessageHandler<Implementations.Version1.RefitHttpClientHandler>()
