@@ -24,7 +24,7 @@ public static class Extensions
     {
         services.AddSingleton(config);
         services.AddSingleton<Token.Service>();
-
+        services.AddTransient<MachineToken.Service>();
         services.RegisterAuthentication(config);
         services.RegisterExercises(config);
         services.RegisterExerciseMuscles(config);

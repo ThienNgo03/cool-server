@@ -24,7 +24,7 @@ public class BaseTest
             throw new InvalidOperationException("Failed to retrieve authentication token.");
 
         Library.Config locaHostConfig = new(url: "https://localhost:7011", 
-                                            secretKey: "your_secret_key");
+                                            secretKey: "secretKey");
         var services = new ServiceCollection();
         services.AddEndpoints(locaHostConfig);
 
@@ -47,7 +47,7 @@ public class BaseTest
         services.AddDbContext<JournalDbContext>(options =>
            options.UseSqlServer(local.Config.JournalConnectionString));
         services.AddDbContext<IdentityContext>(options =>
-           options.UseSqlServer(local.Config.IdentityConnectionString));
+           options.UseSqlServer(local.Config.JournalConnectionString));
 
         serviceProvider = services.BuildServiceProvider();
 

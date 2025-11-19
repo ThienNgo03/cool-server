@@ -1,4 +1,6 @@
-﻿
+﻿using System.Security.Cryptography;
+using System.Text;
+
 namespace Library.MachineToken;
 
 public class Service
@@ -10,13 +12,22 @@ public class Service
         this.secretKey = config.SecretKey;
     }
 
-    public string ComputeHash()
+    public string ComputeHash(string timestamp, string nonce)
     {
-        using (var sha256 = System.Security.Cryptography.SHA256.Create())
+        string message = secretKey + timestamp + nonce;
+        return ComputeHmacSha256(message, secretKey);
+    }
+
+    static string ComputeHmacSha256(string message, string key)
+    {
+        var keyBytes = Encoding.UTF8.GetBytes(key);
+        var messageBytes = Encoding.UTF8.GetBytes(message);
+
+        using (var hmac = new HMACSHA256(keyBytes))
         {
-            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(this.secretKey);
-            byte[] hashBytes = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hashBytes);
+            var hashBytes = hmac.ComputeHash(messageBytes);
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
         }
     }
+
 }

@@ -55,13 +55,10 @@ if (app.Environment.IsDevelopment())
 	app.UseCors("AllowLocalhost5173");
 }
 app.UseHttpsRedirection();
-app.UseMiddleware<HmacAuthenticationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-//app.MapGrpcService<Journal.Beta.Authentication.Login.Service>();
-//app.MapGrpcService<Journal.Beta.Authentication.Register.Service>();
 app.MapGrpcService<Journal.Notes.Create.Service>();
 app.MapGrpcService<Journal.Notes.Search.Service>();
 

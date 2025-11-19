@@ -18,16 +18,18 @@ public class RefitHttpClientHandler : HttpClientHandler
     {
         if (!string.IsNullOrEmpty(config.SecretKey) && !string.IsNullOrWhiteSpace(config.SecretKey))
         {
-            request.Headers.Add("X-Machine-Hash", machineTokenService.ComputeHash());
-            request.Headers.Add("X-Timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
-            request.Headers.Add("X-Nonce", Guid.NewGuid().ToString("N"));
+            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string nonce = Guid.NewGuid().ToString("N").Substring(0, 8);
+            request.Headers.Add("X-Timestamp", timestamp);
+            request.Headers.Add("X-Nonce", nonce);
+            request.Headers.Add("X-Machine-Hash", machineTokenService.ComputeHash(timestamp, nonce));
             return await base.SendAsync(request, cancellationToken);
         }
-        else
-        {
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenService.GetToken());
-            return await base.SendAsync(request, cancellationToken);
-        }
+        //else
+        //{
+        //    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenService.GetToken());
+        return await base.SendAsync(request, cancellationToken);
+        //}
 
     }
 }

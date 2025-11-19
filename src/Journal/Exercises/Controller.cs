@@ -9,8 +9,7 @@ using System.Text.Json;
 namespace Journal.Exercises;
 
 [ApiController]
-//[Authorize]
-[AllowAnonymous]
+[Authorize]
 [Route("api/exercises")]
 public class Controller(
     IMessageBus messageBus,
@@ -544,12 +543,12 @@ public class Controller(
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
-//         if (User.Identity is null)
-//             return Unauthorized();
+         if (User.Identity is null)
+            return Unauthorized();
 
-//         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-//         if (userId is null)
-//             return Unauthorized("User Id not found");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
 
         Table exercise = new()
         {
@@ -571,12 +570,12 @@ public class Controller(
 
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
-//         if (User.Identity is null)
-//             return Unauthorized();
+         if (User.Identity is null)
+            return Unauthorized();
 
-//         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-//         if (userId is null)
-//             return Unauthorized("User Id not found");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized("User Id not found");
 
         var exercise = await _context.Exercises.FindAsync(payload.Id);
         if (exercise == null)
