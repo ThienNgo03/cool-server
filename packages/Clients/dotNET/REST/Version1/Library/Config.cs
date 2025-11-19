@@ -4,8 +4,12 @@ public class Config
 {
     public string Url { get; set; }
 
-    public Config(string url)
+    public string? SecretKey { get; set; }
+
+    public Config(string url, 
+                  string? secretKey)
     {
         Url = url;
+        SecretKey = secretKey;
     }
 }

@@ -2,15 +2,32 @@
 
 public class RefitHttpClientHandler : HttpClientHandler
 {
+    private readonly Config config;
     private readonly Token.Service tokenService;
-    public RefitHttpClientHandler(Token.Service tokenService)
+    private readonly MachineToken.Service machineTokenService;
+    public RefitHttpClientHandler(Config config,
+                                  Token.Service tokenService, 
+                                  MachineToken.Service machineTokenService)
     {
+        this.config = config;
         this.tokenService = tokenService;
+        this.machineTokenService = machineTokenService;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenService.GetToken());
-        return await base.SendAsync(request, cancellationToken);
+        if (!string.IsNullOrEmpty(config.SecretKey) && !string.IsNullOrWhiteSpace(config.SecretKey))
+        {
+            request.Headers.Add("X-Machine-Hash", machineTokenService.ComputeHash());
+            request.Headers.Add("X-Timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
+            request.Headers.Add("X-Nonce", Guid.NewGuid().ToString("N"));
+            return await base.SendAsync(request, cancellationToken);
+        }
+        else
+        {
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenService.GetToken());
+            return await base.SendAsync(request, cancellationToken);
+        }
+
     }
 }
