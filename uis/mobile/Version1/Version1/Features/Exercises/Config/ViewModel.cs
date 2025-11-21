@@ -5,12 +5,12 @@ using System.Collections.Specialized;
 namespace Version1.Features.Exercises.Config;
 
 public partial class ViewModel(
-    Core.ExerciseConfigurations.Interface workoutsBiz,
+    Core.Exercises.Configurations.Interface workoutsBiz,
     IAppNavigator appNavigator) : NavigationAwareBaseViewModel(appNavigator)
 {
     #region [ Fields ]
 
-    private readonly Core.ExerciseConfigurations.Interface workoutsBiz = workoutsBiz;
+    private readonly Core.Exercises.Configurations.Interface workoutsBiz = workoutsBiz;
     #endregion
 
     #region [ UI ]
@@ -57,7 +57,7 @@ public partial class ViewModel(
         //    .SelectMany(x => x.WeekPlans ?? new List<Library.Workouts.WeekPlan>())
         //    .Select(wp => wp.DateOfWeek)
         //    .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var serverWeekDays = (response.WeekPlans ?? new List<Core.ExerciseConfigurations.Detail.WeekPlan>())
+        var serverWeekDays = (response.WeekPlans ?? new List<Core.Exercises.Configurations.Detail.WeekPlan>())
             .Select(wp => wp.DateOfWeek)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -75,7 +75,7 @@ public partial class ViewModel(
         }
 
         //Now add the WorkoutTimeItems from the server
-        var serverWorkoutTimes = (response.WeekPlans ?? new List<Core.ExerciseConfigurations.Detail.WeekPlan>())
+        var serverWorkoutTimes = (response.WeekPlans ?? new List<Core.Exercises.Configurations.Detail.WeekPlan>())
                 .Select(wp => {
                     var correspondingWeeklyItem = WeeklyItems
                         .FirstOrDefault(wi => string.Equals(wi.Content, wp.DateOfWeek, StringComparison.OrdinalIgnoreCase));
@@ -95,8 +95,8 @@ public partial class ViewModel(
         }
 
         //Now for the TotalSets 
-        var serverTotalSets = (response.WeekPlans ?? new List<Core.ExerciseConfigurations.Detail.WeekPlan>())
-            .SelectMany(wp => (wp.WeekPlanSets ?? new List<Core.ExerciseConfigurations.Detail.WeekPlanSet>()).Select(wps => new SetConfigItem
+        var serverTotalSets = (response.WeekPlans ?? new List<Core.Exercises.Configurations.Detail.WeekPlan>())
+            .SelectMany(wp => (wp.WeekPlanSets ?? new List<Core.Exercises.Configurations.Detail.WeekPlanSet>()).Select(wps => new SetConfigItem
             {
                 Id = wps.Id.ToString(),
                 Content = $"Set {wps.Value}",
@@ -161,17 +161,17 @@ public partial class ViewModel(
             return;
         }
 
-        await workoutsBiz.SaveAsync(new Core.ExerciseConfigurations.Save.Payload
+        await workoutsBiz.SaveAsync(new Core.Exercises.Configurations.Save.Payload
         {
             ExerciseId = Guid.Parse(Id),
             UserId = MyApp.CurrentUser.Id,
-            WeekPlans = WorkoutTimeItems?.Select(wti => new Core.ExerciseConfigurations.Save.WeekPlan
+            WeekPlans = WorkoutTimeItems?.Select(wti => new Core.Exercises.Configurations.Save.WeekPlan
             {
                 DateOfWeek = wti.Content,
                 Time = wti.Time,
                 WeekPlanSets = TotalSets?
                     .Where(ts => string.Equals(ts.Day, wti.Content, StringComparison.OrdinalIgnoreCase))
-                    .Select(sci => new Core.ExerciseConfigurations.Save.WeekPlanSet
+                    .Select(sci => new Core.Exercises.Configurations.Save.WeekPlanSet
                     {
                         Value = sci.Reps
                     }).ToList()

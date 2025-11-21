@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Core.ExerciseConfigurations.Save;
+namespace Core.Exercises.Configurations.Save;
 
 public class Payload
 {

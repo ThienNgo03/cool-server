@@ -1,6 +1,6 @@
 ﻿using Core.Authentication;
-using Core.ExerciseConfigurations;
 using Core.Exercises;
+using Core.Exercises.Configurations;
 using Core.User;
 using Microsoft.Extensions.DependencyInjection;
 

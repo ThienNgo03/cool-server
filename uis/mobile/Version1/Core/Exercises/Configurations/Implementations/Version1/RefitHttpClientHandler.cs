@@ -1,4 +1,4 @@
-﻿namespace Core.ExerciseConfigurations.Implementations.Version1;
+﻿namespace Core.Exercises.Configurations.Implementations.Version1;
 
 public class RefitHttpClientHandler : HttpClientHandler
 {

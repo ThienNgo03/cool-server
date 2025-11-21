@@ -574,12 +574,12 @@ public class Controller : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Post.Payload payload)
     {
-        if (User.Identity is null)
-            return Unauthorized();
+        //if (User.Identity is null)
+        //    return Unauthorized();
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //if (userId is null)
+        //    return Unauthorized("User Id not found");
 
         var existingExercise = await _context.Exercises.FindAsync(payload.ExerciseId);
         if (existingExercise == null)

@@ -75,7 +75,7 @@ namespace BFF.Exercises.Configurations
             {
                 ExerciseId = id,
                 UserId = parameters.UserId,
-                Include = parameters.Include,
+                Include = "weekplans.weekplansets",
                 PageSize = parameters.PageSize,
                 PageIndex = parameters.PageIndex,
                 SearchTerm = parameters.SearchTerm,
@@ -83,7 +83,26 @@ namespace BFF.Exercises.Configurations
                 LastUpdated = parameters.LastUpdated
             });
 
-            return Ok(list);
+            var result = list.Items.FirstOrDefault();
+
+            Response response = new Response()
+            {
+                WorkoutId = result.Id,
+                UserId = result.UserId,
+                WeekPlans = result.WeekPlans.Select(wp => new WeekPlan()
+                {
+                    Time = wp.Time,
+                    DateOfWeek = wp.DateOfWeek,
+                    WeekPlanSets = wp.WeekPlanSets.Select(wps => new WeekPlanSet()
+                    {
+                        Id = wps.Id,
+                        Value = wps.Value
+                    }).ToList()
+                }).ToList()
+            };
+
+            return Ok(response);
+
         }
     }
 }

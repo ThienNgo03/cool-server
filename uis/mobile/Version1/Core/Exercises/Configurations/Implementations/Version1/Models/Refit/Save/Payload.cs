@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Core.ExerciseConfigurations.Implementations.Version1.Models.Refit.Save;
+namespace Core.Exercises.Configurations.Implementations.Version1.Models.Refit.Save;
 
 public class Payload
 {

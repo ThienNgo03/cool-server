@@ -1,4 +1,4 @@
-﻿namespace Core.ExerciseConfigurations;
+﻿namespace Core.Exercises.Configurations;
 
 public interface Interface
 {

@@ -1,4 +1,4 @@
-﻿namespace Core.ExerciseConfigurations.Detail;
+﻿namespace Core.Exercises.Configurations.Detail;
 
 public class Response
 {

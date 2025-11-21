@@ -1,8 +1,9 @@
-﻿using Core.ExerciseConfigurations.Detail;
-using Core.ExerciseConfigurations.Save;
+﻿using Core.Exercises.Configurations;
+using Core.Exercises.Configurations.Detail;
+using Core.Exercises.Configurations.Save;
 using System.Diagnostics;
 
-namespace Core.ExerciseConfigurations.Implementations.Version1;
+namespace Core.Exercises.Configurations.Implementations.Version1;
 
 public class Implementation: Interface
 {
@@ -20,16 +21,15 @@ public class Implementation: Interface
 
     #endregion
 
-    public async Task<Detail.Response> DetailAsync(Parameters parameters)
+    public async Task<Response> DetailAsync(Parameters parameters)
     {
         var refitParameters = new Models.Refit.Detail.Parameters
         {
-            ExerciseId = parameters.ExerciseId,
             UserId = parameters.UserId
         };
         try
         {
-            var response = await this.refitInterface.Detail(refitParameters);
+            var response = await refitInterface.Detail(refitParameters, parameters.ExerciseId.Value);
 
             if (response is null || response.Content is null)
             {
@@ -41,21 +41,10 @@ public class Implementation: Interface
                 return null;
             }
 
-            return new Detail.Response
+            return new Response
             {
                 WorkoutId = response.Content.WorkoutId,
                 UserId = response.Content.UserId,
-                PercentageCompletion = response.Content.PercentageCompletion,
-                Difficulty = response.Content.Difficulty,
-                Exercise = new Detail.Exercise
-                {
-                    Id = response.Content.Exercise.Id,
-                    Name = response.Content.Exercise.Name,
-                    Muscles = response.Content.Exercise.Muscles?.Select(m => new Detail.Muscle
-                    {
-                        Name = m.Name
-                    }).ToList()
-                },
                 WeekPlans = response.Content.WeekPlans?.Select(wp => new Detail.WeekPlan
                 {
                     DateOfWeek = wp.DateOfWeek,
@@ -71,7 +60,7 @@ public class Implementation: Interface
         }
         catch (Exception ex)
         {
-            throw new NotImplementedException();
+            throw;
         }
     }
 
@@ -93,11 +82,11 @@ public class Implementation: Interface
                     }).ToList()
                 }).ToList()
             };
-            var response = await this.refitInterface.Save(refitPayload);
+            var response = await refitInterface.Save(refitPayload, payload.ExerciseId);
         }
         catch (Exception ex)
         {
-            throw new NotImplementedException();
+            throw new Exception();
         }
     }
 }

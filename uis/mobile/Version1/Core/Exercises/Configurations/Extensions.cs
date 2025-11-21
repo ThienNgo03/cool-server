@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Refit;
 
-namespace Core.ExerciseConfigurations;
+namespace Core.Exercises.Configurations;
 
 public static class Extensions
 {

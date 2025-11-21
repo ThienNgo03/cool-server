@@ -1,4 +1,4 @@
-﻿namespace Core.ExerciseConfigurations.Implementations.Version1.Models.Refit.Detail;
+﻿namespace Core.Exercises.Configurations.Implementations.Version1.Models.Refit.Detail;
 
 public class Parameters
 {
