@@ -23,10 +23,12 @@ public class BaseTest
         if (string.IsNullOrEmpty(token))
             throw new InvalidOperationException("Failed to retrieve authentication token.");
 
-        Library.Config locaHostConfig = new(url: "https://localhost:7011", 
-                                            secretKey: "secretKey");
+        var libraryConfig = new Library.Config(
+                    url: "https://cph84j5r-7011.asse.devtunnels.ms/",
+                    secretKey: "secretKey"
+                );
         var services = new ServiceCollection();
-        services.AddEndpoints(locaHostConfig);
+        services.AddEndpoints(libraryConfig);
 
         #region Cassandra
         if ((local.Config.CassandraContactPoint != string.Empty || local.Config.CassandraContactPoint != "")

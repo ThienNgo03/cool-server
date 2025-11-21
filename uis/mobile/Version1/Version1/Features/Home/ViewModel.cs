@@ -17,13 +17,13 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
         IsFuckingBusy = true;
 
         var response = await workouts
-            .AllAsync(new() 
+            .GetAsync(new() 
             {
                 UserId = MyApp?.CurrentUser?.Id,
                 Include = "exercise.muscles, weekPlans"
             });
 
-        if (response.Data?.Items == null)
+        if (response.Items == null)
         {
             IsFuckingBusy = false;
             return;
@@ -31,7 +31,7 @@ public partial class ViewModel(IAppNavigator appNavigator, Library.Workouts.Inte
 
         var serverData = new List<ContentViews.CarouselItem.Model>();
         var dateOfWeek = DateTime.Today.DayOfWeek.ToString();
-        foreach (var workout in response.Data.Items)
+        foreach (var workout in response.Items)
         {
             var weekPlans = workout.WeekPlans?.Where(wp => wp.DateOfWeek == dateOfWeek).ToList();
             if (weekPlans != null && weekPlans.Any())

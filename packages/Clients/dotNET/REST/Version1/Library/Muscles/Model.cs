@@ -8,5 +8,5 @@ public class Model
 
     public DateTime CreatedDate { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 }

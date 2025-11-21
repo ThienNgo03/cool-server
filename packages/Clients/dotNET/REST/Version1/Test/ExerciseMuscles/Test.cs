@@ -27,7 +27,7 @@ public class Test:BaseTest
         };
         await dbContext.ExerciseMuscles.Insert(exerciseMuscle).ExecuteAsync();
         var exerciseMusclesEndpoint = serviceProvider!.GetRequiredService<Library.ExerciseMuscles.Interface>();
-        var result = await exerciseMusclesEndpoint.AllAsync(new()
+        var result = await exerciseMusclesEndpoint.GetAsync(new()
         {
             PartitionKey= exerciseMuscle.MuscleId,
         });

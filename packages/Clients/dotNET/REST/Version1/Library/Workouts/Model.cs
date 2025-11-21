@@ -10,7 +10,7 @@ public class Model
 
     public DateTime CreatedDate { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     public Exercise? Exercise { get; set; }
 
@@ -40,7 +40,7 @@ public class WeekPlanSet
     public DateTime CreatedDate { get; set; }
     public Guid InsertedBy { get; set; }
     public DateTime? LastUpdated { get; set; }
-    public Guid UpdatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
     public Guid WeekPlanId { get; set; }
     public int Value { get; set; }
 }
@@ -57,7 +57,7 @@ public class Exercise
 
     public DateTime CreatedDate { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     public ICollection<Muscle>? Muscles { get; set; }
 
@@ -71,5 +71,5 @@ public class Muscle
 
     public DateTime CreatedDate { get; set; }
 
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 }

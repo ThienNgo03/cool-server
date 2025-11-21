@@ -80,7 +80,7 @@ public partial class ViewModel(
 
         var currentUserInfo = await usersBiz.AllAsync(new() { IsSelf = true });
 
-        if (currentUserInfo is null || currentUserInfo.Data is null || currentUserInfo.Data.Items is null || !currentUserInfo.Data.Items.Any())
+        if (currentUserInfo is null || currentUserInfo is null || currentUserInfo.Items is null || !currentUserInfo.Items.Any())
         {
             await AppNavigator.ShowSnackbarAsync("Failed to retrieve user information");
             IsLoading = false;
@@ -91,10 +91,10 @@ public partial class ViewModel(
             return;
 
         MyApp.SetCurrentUser(
-            id: currentUserInfo.Data.Items.First().Id,
-            name: currentUserInfo.Data.Items.First().Name,
+            id: currentUserInfo.Items.First().Id,
+            name: currentUserInfo.Items.First().Name,
             age: 0,
-            avatarUrl: currentUserInfo.Data.Items.First().ProfilePicture,
+            avatarUrl: currentUserInfo.Items.First().ProfilePicture,
             bio: string.Empty,
             token: result.Token
         );

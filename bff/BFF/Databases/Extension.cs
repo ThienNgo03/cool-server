@@ -2,6 +2,7 @@
 using BFF.Databases.Identity;
 using BFF.Databases.Messages;
 using Cassandra;
+using Cassandra.Mapping;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,23 +40,23 @@ public static class Extension
         {
             throw new ArgumentNullException(nameof(identityDbConfig), "IdentityDb configuration section is missing or invalid.");
         }
-
         var journalConnectionString = new ConnectionStringBuilder()
-           .WithHost(journalDbConfig.Host)
-           .WithPort(journalDbConfig.Port)
-           .WithDatabase(journalDbConfig.Database)
-           .WithUsername(journalDbConfig.Username)
-           .WithPassword(journalDbConfig.Password)
-           .WithTrustedConnection()
-           .WithTrustServerCertificate()
-           .Build();
+            .WithHost(journalDbConfig.Host)
+            .WithPort(journalDbConfig.Port)
+            .WithDatabase(journalDbConfig.Database)
+            .WithUsername(journalDbConfig.Username)
+            .WithPassword(journalDbConfig.Password)
+            //.WithTrustedConnection()
+            .WithTrustServerCertificate()
+            .Build();
+
         var identityConnectionString = new ConnectionStringBuilder()
             .WithHost(identityDbConfig.Host)
             .WithPort(identityDbConfig.Port)
             .WithDatabase(identityDbConfig.Database)
             .WithUsername(identityDbConfig.Username)
             .WithPassword(identityDbConfig.Password)
-            .WithTrustedConnection()
+            //.WithTrustedConnection()
             .WithTrustServerCertificate()
             .Build();
 

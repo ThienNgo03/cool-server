@@ -1,5 +1,8 @@
-﻿namespace Test.Databases.App.Tables.Workout;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Test.Databases.App.Tables.Workout;
+
+[Table("workouts", Schema = "journal")]
 public class Table
 {
     public Guid Id { get; set; }

@@ -23,12 +23,14 @@ public class RefitHttpClientHandler : HttpClientHandler
             request.Headers.Add("X-Timestamp", timestamp);
             request.Headers.Add("X-Nonce", nonce);
             request.Headers.Add("X-Machine-Hash", machineTokenService.ComputeHash(timestamp, nonce));
-            return await base.SendAsync(request, cancellationToken);
         }
-        else
+
+        var jwt = tokenService.GetToken();
+        if (!string.IsNullOrEmpty(jwt))
         {
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenService.GetToken());
-            return await base.SendAsync(request, cancellationToken);
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
         }
+
+        return await base.SendAsync(request, cancellationToken);
     }
 }

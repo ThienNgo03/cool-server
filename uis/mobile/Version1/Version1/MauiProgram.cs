@@ -50,12 +50,13 @@ public static class MauiProgram
 
 
 
-        Library.Config locaHostConfig = new("https://localhost:7011/");
-        Library.Config devTunnelEnviroment = new("https://k7ql47j3-7011.asse.devtunnels.ms/");
-        Library.Config productionEnviroment = new("https://storm-ergshka6h7a0bngn.southeastasia-01.azurewebsites.net/");
-        builder.Services.AddEndpoints(productionEnviroment);
+        var libraryConfig = new Library.Config(
+                    url: "https://cph84j5r-7011.asse.devtunnels.ms/",
+                    secretKey: "secretKey"
+                );
+        builder.Services.AddEndpoints(libraryConfig);
 
-        Core.Config config = new("https://6vxfdk7v-7245.asse.devtunnels.ms/");
+        Core.Config config = new("https://prd191q7-7245.asse.devtunnels.ms/");
         builder.Services.AddBff(config);
         return builder;
     }

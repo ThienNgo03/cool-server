@@ -10,24 +10,32 @@ public class Controller : ControllerBase
 {
     private readonly JournalDbContext _context;
     private readonly IMapper _mapper;
-    public Controller(JournalDbContext context, IMapper mapper)
+    private readonly Library.Exercises.Interface _exercises;
+    private readonly Library.Muscles.Interface _muscles;
+    public Controller(JournalDbContext context, IMapper mapper, Library.Exercises.Interface exercises, Library.Muscles.Interface muscles)
     {
         _context = context;
         _mapper = mapper;
+        _exercises = exercises;
+        _muscles = muscles;
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> All([FromQuery] All.Parameters parameters, CancellationToken cancellationToken = default!)
+    public async Task<IActionResult> All([FromQuery] Library.Exercises.GET.Parameters parameters, CancellationToken cancellationToken = default!)
     {
-        var exercises = await _context.Exercises.ToListAsync(cancellationToken);
-        var items = exercises.Select(e => new All.Item
+        var exercises = await _exercises.GetAsync(parameters);
+        var items = exercises.Items?.Select(e => new All.Item
         {
             Id = e.Id,
             Title = e.Name,
             Description = e.Description
         }).ToList();
+        if (items is null || !items.Any())
+        {
+            return Ok(new List<All.Item>());
+        }
 
-        _mapper.All.SetSubTitle(items);
+        await _mapper.All.SetSubTitle(items);
         _mapper.All.AttachImageUrls(items);
         _mapper.All.SetBadge(items);
         _mapper.All.SetPercentageCompletion(items);
@@ -41,7 +49,13 @@ public class Controller : ControllerBase
     public async Task<IActionResult> Categories()
     {
         //return a list of muscle names from the muscles table
-        var response = await _context.Muscles.Select(m => m.Name).ToListAsync();
+        var muscles = await _muscles.GetAsync(new Library.Muscles.GET.Parameters());
+        if (muscles.Items is null || !muscles.Items.Any())
+        {
+            return Ok(new List<string>());
+        }
+        var response = muscles.Items?.Select(m => m.Name).ToList();
+        //Select(m => m.Name).ToListAsync();
         //return list of muscle names as categories
         return Ok(response);
     }

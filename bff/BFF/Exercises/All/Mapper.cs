@@ -1,5 +1,6 @@
 ﻿using BFF.Databases.App;
 using Bogus;
+using System.Threading.Tasks;
 
 namespace BFF.Exercises.All;
 
@@ -7,7 +8,7 @@ public interface IMapper
 {
     void AttachImageUrls(List<Item> responses);
 
-    void SetSubTitle(List<Item> responses);
+    Task SetSubTitle(List<Item> responses);
 
     void SetBadge(List<Item> responses);
 
@@ -24,22 +25,33 @@ public class Mapper : IMapper
 {
     private readonly Faker faker;
     private readonly JournalDbContext context;
-    public Mapper(JournalDbContext context)
+    private readonly Library.Muscles.Interface _muscles;
+    private readonly Library.ExerciseMuscles.Interface _exerciseMuscles;
+    public Mapper(JournalDbContext context, Library.Muscles.Interface muscles, Library.ExerciseMuscles.Interface exerciseMuscles)
     {
         this.context = context;
         this.faker = new Faker();
+        _muscles = muscles;
+        _exerciseMuscles = exerciseMuscles;
     }
 
-    public void SetSubTitle(List<Item> responses)
+    public async Task SetSubTitle(List<Item> responses)
     {
-        var muscleGroups = context.Muscles.ToDictionary(m => m.Id, m => m.Name);
-        var exerciseMuscles = context.ExerciseMuscles
+        var muscles = await _muscles.GetAsync(new Library.Muscles.GET.Parameters());
+        var muscleGroups = muscles.Items?.ToDictionary(m => m.Id, m => m.Name);
+        var exerciseMuscles = await _exerciseMuscles.GetAsync(new Library.ExerciseMuscles.GET.Parameters());
+        var dExerciseMuscles = exerciseMuscles.Items?
             .GroupBy(em => em.ExerciseId)
             .ToDictionary(g => g.Key, g => g.Select(em => em.MuscleId).ToList());
 
         foreach (var response in responses)
         {
-            if (exerciseMuscles.TryGetValue(response.Id, out var muscleIds))
+            if (muscleGroups == null || dExerciseMuscles == null)
+            {
+                response.SubTitle = string.Empty;
+                continue;
+            }
+            if (dExerciseMuscles.TryGetValue(response.Id, out var muscleIds))
             {
                 var muscleNames = muscleIds
                     .Where(id => muscleGroups.ContainsKey(id))
