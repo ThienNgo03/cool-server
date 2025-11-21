@@ -719,19 +719,12 @@ public class Controller : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] Delete.Parameters parameters)
     {
-        if (User.Identity is null)
-            return Unauthorized();
+        //if (User.Identity is null)
+        //    return Unauthorized();
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
-        if (parameters.IsDeleteAll)
-        {
-            var workouts = await _context.Workouts.ToListAsync();
-            _context.Workouts.RemoveRange(workouts);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //if (userId is null)
+        //    return Unauthorized("User Id not found");
 
         var workout = await _context.Workouts.FindAsync(parameters.Id);
         if (workout == null)

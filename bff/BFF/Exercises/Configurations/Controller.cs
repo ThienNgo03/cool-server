@@ -42,7 +42,28 @@ namespace BFF.Exercises.Configurations
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
                 return Unauthorized("User Id not found");
-            if(id!=null)
+
+            if (id != null)
+            {
+                var list = await _workoutInterface.GetAsync(new()
+                {
+                    ExerciseId = id,
+                    UserId = payload.UserId
+                });
+                var oldWorkout = list.Items.FirstOrDefault();
+                if (oldWorkout != null)
+                {
+                    await _workoutInterface.DeleteAsync(new()
+                    {
+                        Id = oldWorkout.Id,
+                        IsWeekPlanDelete = true,
+                        IsWeekPlanSetDelete = true
+                    });
+                }
+                if (payload.WeekPlans == null)
+                {
+                    return NoContent();
+                }
                 await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
                 {
                     ExerciseId = (Guid)id,
@@ -57,6 +78,7 @@ namespace BFF.Exercises.Configurations
                         }).ToList()
                     }).ToList()
                 });
+            }
 
             return NoContent();
         }
@@ -84,6 +106,9 @@ namespace BFF.Exercises.Configurations
             });
 
             var result = list.Items.FirstOrDefault();
+            
+            if (result is null)
+                return NotFound();
 
             Response response = new Response()
             {
