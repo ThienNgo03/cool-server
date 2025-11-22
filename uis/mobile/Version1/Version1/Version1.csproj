@@ -57,12 +57,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="6.1.2" />
-		<PackageReference Include="FreakyEffects" Version="0.1.4" />
+		<PackageReference Include="FreakyEffects" Version="0.1.5" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.100" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="12.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
+		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.8" />
 		<PackageReference Include="Plugin.Maui.MauiProgressView" Version="0.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
 	</ItemGroup>
@@ -115,6 +115,9 @@
 	  <MauiXaml Update="Features\Profile\Page.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Features\Subscriptions\Page.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Features\Users\Page.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -145,6 +148,10 @@
 	  <PackageReference Include="Plugin.Maui.MauiProgressView">
 	    <Version>0.0.4</Version>
 	  </PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Features\Subscriptions\Add\" />
 	</ItemGroup>
 
 </Project>

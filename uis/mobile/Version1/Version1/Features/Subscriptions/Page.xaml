@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Version1.Features.Subscriptions.Page"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:card="clr-namespace:Version1.Features.Subscriptions.ContentViews.Card"
+    xmlns:local="clr-namespace:Version1.Features.Subscriptions"
+    xmlns:progress="clr-namespace:Plugin.Maui.MauiProgressView;assembly=Plugin.Maui.MauiProgressView"
+    xmlns:signalR="clr-namespace:Version1.Features.WebSocket.SignalR"
+    xmlns:syncfusionToolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:ui="clr-namespace:UI"
+    Title="Page"
+    x:DataType="local:ViewModel"
+    HideSoftInputOnTapped="True"
+    Loaded="ContentPage_Loaded"
+    Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <FontImageSource
+            x:Key="SearchIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_search_48_regular}"
+            Color="Cyan" />
+        <FontImageSource
+            x:Key="InfoIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_info_28_regular}"
+            Color="White" />
+        <FontImageSource
+            x:Key="CalendarAddIcon"
+            FontFamily="{x:Static ui:FontNames.FluentSystemIconsRegular}"
+            Glyph="{x:Static ui:FluentUIIcon.Ic_fluent_calendar_add_28_regular}"
+            Color="White" />
+        <DataTemplate x:Key="ItemsFooterTemplate">
+            <Grid HeightRequest="60" />
+        </DataTemplate>
+        <LinearItemsLayout
+            x:Key="ItemsLayout"
+            ItemSpacing="16"
+            Orientation="Vertical"
+            SnapPointsType="None" />
+        <DataTemplate x:Key="ChartLabelTemplate" x:DataType="local:AppUsage">
+            <HorizontalStackLayout Spacing="5">
+                <Label
+                    FontSize="8"
+                    Text="{x:Binding AppName}"
+                    TextColor="Black" />
+                <Label
+                    FontSize="8"
+                    Text=" : "
+                    TextColor="Black" />
+                <Label
+                    FontSize="8"
+                    Text="{x:Binding UsagePercent}"
+                    TextColor="Black" />
+            </HorizontalStackLayout>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+
+
+    <Grid
+        Padding="16"
+        Background="{x:StaticResource GradientBackground}"
+        RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="54" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <VerticalStackLayout
+                HorizontalOptions="Start"
+                Spacing="8"
+                VerticalOptions="Center">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="Title"
+                    Text="Subscription Manager"
+                    TextColor="White" />
+                <Label
+                    FontSize="Small"
+                    Text="Track spending on monthly services."
+                    TextColor="White" />
+            </VerticalStackLayout>
+
+            <Button
+                HorizontalOptions="End"
+                Text="Add"
+                VerticalOptions="Center" />
+        </Grid>
+
+        <Border
+            Grid.Row="1"
+            Padding="8"
+            BackgroundColor="White"
+            StrokeShape="RoundRectangle 8"
+            StrokeThickness="0">
+            <syncfusionToolkit:SfCircularChart>
+
+                <syncfusionToolkit:PieSeries
+                    IsVisibleOnLegend="True"
+                    ItemsSource="{x:Binding AppUsages,
+                                            Mode=OneWay}"
+                    Radius="0.65"
+                    ShowDataLabels="True"
+                    XBindingPath="AppName"
+                    YBindingPath="UsagePercent">
+
+                    <syncfusionToolkit:PieSeries.LabelTemplate>
+                        <DataTemplate x:DataType="local:AppUsage">
+                            <HorizontalStackLayout Spacing="5">
+                                <Label
+                                    FontSize="13"
+                                    Text="{Binding AppName, Mode=OneWay}"
+                                    TextColor="Red" />
+                                <Label
+                                    FontSize="13"
+                                    Text=" : "
+                                    TextColor="Red" />
+                                <Label
+                                    FontSize="13"
+                                    Text="{x:Binding UsagePercent,
+                                                     Mode=OneWay}"
+                                    TextColor="Red" />
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </syncfusionToolkit:PieSeries.LabelTemplate>
+
+                    <syncfusionToolkit:PieSeries.DataLabelSettings>
+                        <syncfusionToolkit:CircularDataLabelSettings LabelPosition="Outside">
+                            <syncfusionToolkit:CircularDataLabelSettings.ConnectorLineSettings>
+                                <syncfusionToolkit:ConnectorLineStyle
+                                    ConnectorType="Curve"
+                                    Stroke="Black"
+                                    StrokeWidth="3" />
+                            </syncfusionToolkit:CircularDataLabelSettings.ConnectorLineSettings>
+                        </syncfusionToolkit:CircularDataLabelSettings>
+                    </syncfusionToolkit:PieSeries.DataLabelSettings>
+                </syncfusionToolkit:PieSeries>
+
+
+                <syncfusionToolkit:SfCircularChart.Legend>
+                    <syncfusionToolkit:ChartLegend>
+                        <syncfusionToolkit:ChartLegend.ItemsLayout>
+                            <FlexLayout
+                                HorizontalOptions="Fill"
+                                WidthRequest="350"
+                                Wrap="Wrap" />
+                        </syncfusionToolkit:ChartLegend.ItemsLayout>
+                        <syncfusionToolkit:ChartLegend.LabelStyle>
+                            <syncfusionToolkit:ChartLegendLabelStyle
+                                Margin="5"
+                                FontSize="14"
+                                TextColor="Black" />
+                        </syncfusionToolkit:ChartLegend.LabelStyle>
+                    </syncfusionToolkit:ChartLegend>
+                </syncfusionToolkit:SfCircularChart.Legend>
+
+            </syncfusionToolkit:SfCircularChart>
+
+
+        </Border>
+    </Grid>
+</ContentPage>

@@ -15,6 +15,8 @@ public static class AppRoutes
     public const string ExerciseDetail = "exercise-detail";
     public const string ExerciseConfig = "exercise-config";
 
+    public const string Subscriptions = "//main/subscriptions";
+
     public const string Profile = "//main/profile";
     public const string Challenges = "//main/challenges";
     public const string Users = "//main/users";

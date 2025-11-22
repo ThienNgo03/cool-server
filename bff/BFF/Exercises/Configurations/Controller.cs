@@ -60,10 +60,6 @@ namespace BFF.Exercises.Configurations
                         IsWeekPlanSetDelete = true
                     });
                 }
-                if (payload.WeekPlans == null)
-                {
-                    return NoContent();
-                }
                 await _workoutInterface.PostAsync(new Library.Workouts.POST.Payload
                 {
                     ExerciseId = (Guid)id,

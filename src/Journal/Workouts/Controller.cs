@@ -665,12 +665,12 @@ public class Controller : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Update.Payload payload)
     {
-        if (User.Identity is null)
-            return Unauthorized();
+        //if (User.Identity is null)
+        //    return Unauthorized();
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId is null)
-            return Unauthorized("User Id not found");
+        //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //if (userId is null)
+        //    return Unauthorized("User Id not found");
 
         var workout = await _context.Workouts.FindAsync(payload.Id);
         if (workout == null)
